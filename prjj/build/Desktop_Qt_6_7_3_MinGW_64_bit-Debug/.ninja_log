@@ -1,0 +1,9 @@
+# ninja log v6
+52	186	7814493901028239	gsxg_autogen/timestamp	380e19e5e19d0ce5
+52	186	7814493901028239	gsxg_autogen/mocs_compilation.cpp	380e19e5e19d0ce5
+2321	2482	7814493923648439	gsxg.exe	bf7c5a9453eb85d
+52	186	7814493901028239	C:/Users/mimi/Desktop/gsxg/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/gsxg_autogen/timestamp	380e19e5e19d0ce5
+52	186	7814493901028239	C:/Users/mimi/Desktop/gsxg/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/gsxg_autogen/mocs_compilation.cpp	380e19e5e19d0ce5
+58	1293	7814493164001293	CMakeFiles/gsxg.dir/gsxg_autogen/mocs_compilation.cpp.obj	a69aa58ab8f6e37c
+7774	9947	7814479503373816	CMakeFiles/gsxg.dir/main.cpp.obj	7a3c77de7f761037
+187	2321	7814493902377367	CMakeFiles/gsxg.dir/mainwindow.cpp.obj	3726da8e6af77eaf
