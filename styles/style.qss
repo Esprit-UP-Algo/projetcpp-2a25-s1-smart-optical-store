@@ -1,0 +1,214 @@
+/* Global Styles */
+QWidget {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 10pt;
+}
+
+QMainWindow, QDialog {
+    background-color: #f5f5f5;
+}
+
+/* Buttons */
+QPushButton {
+    background-color: #2980b9;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    min-width: 80px;
+}
+
+QPushButton:hover {
+    background-color: #3498db;
+}
+
+QPushButton:pressed {
+    background-color: #1c6ea4;
+}
+
+QPushButton:disabled {
+    background-color: #cccccc;
+    color: #888888;
+}
+
+/* Text Inputs */
+QLineEdit, QTextEdit, QSpinBox, QDoubleSpinBox, QDateEdit, QComboBox {
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    padding: 4px;
+    background-color: white;
+}
+
+QLineEdit:focus, QTextEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QDateEdit:focus, QComboBox:focus {
+    border: 1px solid #3498db;
+}
+
+/* Table Views */
+QTableView {
+    border: 1px solid #cccccc;
+    background-color: white;
+    selection-background-color: #3498db;
+    selection-color: white;
+    alternate-background-color: #f9f9f9;
+}
+
+QTableView::item {
+    padding: 4px;
+}
+
+QHeaderView::section {
+    background-color: #e0e0e0;
+    padding: 4px;
+    border: 1px solid #cccccc;
+    font-weight: bold;
+}
+
+/* Group Boxes */
+QGroupBox {
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    margin-top: 12px;
+    padding-top: 10px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px;
+    font-weight: bold;
+}
+
+/* Tab Widget */
+QTabWidget::pane {
+    border: 1px solid #cccccc;
+    background-color: white;
+}
+
+QTabBar::tab {
+    background-color: #e0e0e0;
+    border: 1px solid #cccccc;
+    padding: 8px 16px;
+    margin-right: 2px;
+}
+
+QTabBar::tab:selected {
+    background-color: white;
+    border-bottom-color: white;
+}
+
+QTabBar::tab:hover:!selected {
+    background-color: #f0f0f0;
+}
+
+/* Sidebar Widget in Dashboard */
+#sidebarWidget {
+    background-color: #2c3e50;
+    color: white;
+}
+
+#sidebarWidget QPushButton {
+    background-color: transparent;
+    color: white;
+    border: none;
+    border-radius: 0;
+    text-align: left;
+    padding: 12px;
+}
+
+#sidebarWidget QPushButton:hover {
+    background-color: #34495e;
+}
+
+#sidebarWidget QPushButton:checked {
+    background-color: #1abc9c;
+}
+
+#storeNameLabel {
+    color: white;
+}
+
+/* Dashboard Stats Frames */
+QFrame#customersFrame, QFrame#productsFrame, QFrame#salesFrame,
+QFrame#todaySalesFrame, QFrame#todayRevenueFrame, QFrame#lowStockFrame {
+    background-color: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+/* Login Window */
+#loginButton {
+    background-color: #27ae60;
+    font-weight: bold;
+}
+
+#loginButton:hover {
+    background-color: #2ecc71;
+}
+
+/* Specific Buttons */
+QPushButton#addButton {
+    background-color: #27ae60;
+}
+
+QPushButton#addButton:hover {
+    background-color: #2ecc71;
+}
+
+QPushButton#deleteButton {
+    background-color: #e74c3c;
+}
+
+QPushButton#deleteButton:hover {
+    background-color: #c0392b;
+}
+
+QPushButton#saveSaleButton {
+    background-color: #27ae60;
+}
+
+QPushButton#saveSaleButton:hover {
+    background-color: #2ecc71;
+}
+
+/* Scrollbars */
+QScrollBar:vertical {
+    border: none;
+    background: #f0f0f0;
+    width: 10px;
+    margin: 0px;
+}
+
+QScrollBar::handle:vertical {
+    background: #c0c0c0;
+    min-height: 20px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #a0a0a0;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar:horizontal {
+    border: none;
+    background: #f0f0f0;
+    height: 10px;
+    margin: 0px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #c0c0c0;
+    min-width: 20px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background: #a0a0a0;
+}
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
