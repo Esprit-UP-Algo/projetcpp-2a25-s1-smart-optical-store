@@ -112,6 +112,7 @@ public:
 "QTabBar::tab { background: #e2e8f0; border-radius: 6px; padding: 10px 20px; margin: 4px; color: #0f172a; min-width: 140px; }\n"
 "QTabBar::tab:selected { background: #24587a; color: white; }\n"
 "QComboBox::drop-down, QDateEdit::drop-down { border: none; }\n"
+"#labelLogoTopRight { background: transparent; border: none; }\n"
 "    "));
         labelLogoTopRight = new QLabel(centralwidget);
         labelLogoTopRight->setObjectName("labelLogoTopRight");

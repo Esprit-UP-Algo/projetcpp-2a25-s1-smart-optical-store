@@ -1,6 +1,8 @@
 #include "gclient1.h"
 #include "ui_gclient1.h"
 #include <QHeaderView>
+#include <QDebug>
+#include <QTimer> // ✅ ضروري لتفادي خطأ incomplete type
 
 Gclient1::Gclient1(QWidget *parent)
     : QMainWindow(parent),
@@ -8,32 +10,43 @@ Gclient1::Gclient1(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // If ui generated centralwidget member exists, set it as central widget
-    // (uic for QMainWindow usually creates ui->centralwidget).
-    // If not present, setupUi already parented widgets correctly.
-    // Protect against missing member by checking via pointer cast would be complex;
-    // typically ui->centralwidget is present with a QMainWindow-based .ui.
-    // The centralwidget is declared in the generated ui_gclient1.h,
-    // so we can safely call setCentralWidget if it exists:
 #ifdef QT_WIDGETS_LIB
-    // setCentralWidget is safe if ui->centralwidget exists
-    // (it will exist because .ui root is QMainWindow)
     this->setCentralWidget(ui->centralwidget);
 #endif
 
-    // Make window a reasonable starting size and maximize for convenience
     this->resize(1200, 800);
     this->showMaximized();
 
-    // Ensure table resizes nicely
+    // إعداد جدول العملاء
     if (ui->tableWidgetClients) {
         ui->tableWidgetClients->horizontalHeader()->setStretchLastSection(true);
         ui->tableWidgetClients->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableWidgetClients->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     }
+
+    // 🔹 إعداد اللوغو ليكون فوق كل العناصر (حتى العنوان)
+    if (ui->labelLogoTopRight) {
+        ui->labelLogoTopRight->raise();
+        ui->labelLogoTopRight->setAttribute(Qt::WA_TransparentForMouseEvents);
+        ui->labelLogoTopRight->setStyleSheet(
+            "background: transparent;"
+            "border: none;"
+            "z-index: 9999;"
+            );
+    }
+
+    // 🔹 تأكيد أن اللوغو يبقى فوق بعد رسم كل الواجهة
+    QTimer::singleShot(0, this, [this]() {
+        if (ui->labelLogoTopRight)
+            ui->labelLogoTopRight->raise();
+    });
+
+    qDebug() << "✅ Interface GestionClients initialisée avec succès";
 }
 
 Gclient1::~Gclient1()
 {
     delete ui;
 }
+
+
