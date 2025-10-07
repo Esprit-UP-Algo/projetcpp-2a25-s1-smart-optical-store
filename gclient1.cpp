@@ -1,8 +1,9 @@
 #include "gclient1.h"
 #include "ui_gclient1.h"
 #include <QHeaderView>
+#include <QPixmap>
 #include <QDebug>
-#include <QTimer> // ✅ ضروري لتفادي خطأ incomplete type
+#include <QFile>
 
 Gclient1::Gclient1(QWidget *parent)
     : QMainWindow(parent),
@@ -10,36 +11,28 @@ Gclient1::Gclient1(QWidget *parent)
 {
     ui->setupUi(this);
 
-#ifdef QT_WIDGETS_LIB
-    this->setCentralWidget(ui->centralwidget);
-#endif
-
+    // Redimensionner la fenêtre
     this->resize(1200, 800);
     this->showMaximized();
 
-    // إعداد جدول العملاء
+    // Configuration de la table
     if (ui->tableWidgetClients) {
         ui->tableWidgetClients->horizontalHeader()->setStretchLastSection(true);
         ui->tableWidgetClients->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         ui->tableWidgetClients->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     }
 
-    // 🔹 إعداد اللوغو ليكون فوق كل العناصر (حتى العنوان)
-    if (ui->labelLogoTopRight) {
-        ui->labelLogoTopRight->raise();
-        ui->labelLogoTopRight->setAttribute(Qt::WA_TransparentForMouseEvents);
-        ui->labelLogoTopRight->setStyleSheet(
-            "background: transparent;"
-            "border: none;"
-            "z-index: 9999;"
-            );
-    }
+    // Charger le logo depuis le système de fichiers
+    QString logoPath = "./smart_logo.png";  // Chemin relatif vers l'image
+    QPixmap logo(logoPath);
 
-    // 🔹 تأكيد أن اللوغو يبقى فوق بعد رسم كل الواجهة
-    QTimer::singleShot(0, this, [this]() {
-        if (ui->labelLogoTopRight)
-            ui->labelLogoTopRight->raise();
-    });
+    if (!logo.isNull()) {
+        ui->labelLogoTopRight->setPixmap(logo);  // Applique le logo sur le QLabel
+        ui->labelLogoTopRight->setScaledContents(true);  // Ajuste la taille du logo
+        ui->labelLogoTopRight->setMaximumSize(50, 50);  // Taille maximale
+    } else {
+        qDebug() << "⚠️ Logo non trouvé à " << logoPath;  // Afficher un message d'erreur
+    }
 
     qDebug() << "✅ Interface GestionClients initialisée avec succès";
 }
@@ -48,5 +41,3 @@ Gclient1::~Gclient1()
 {
     delete ui;
 }
-
-
