@@ -5,7 +5,7 @@
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
-class Gclient1;
+class GestionClients;
 }
 QT_END_NAMESPACE
 
@@ -14,10 +14,11 @@ class Gclient1 : public QMainWindow
     Q_OBJECT
 
 public:
-    Gclient1(QWidget *parent = nullptr);
+    explicit Gclient1(QWidget *parent = nullptr);
     ~Gclient1();
 
 private:
-    Ui::Gclient1 *ui;
+    Ui::GestionClients *ui;
 };
+
 #endif // GCLIENT1_H

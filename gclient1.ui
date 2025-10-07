@@ -1,519 +1,392 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>GestionClients</class>
- <widget class="QWidget" name="GestionClients">
+ <widget class="QMainWindow" name="GestionClients">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1201</width>
-    <height>768</height>
+    <width>1200</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Gestion de Clients</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">
+  <widget class="QWidget" name="centralwidget">
+   <property name="styleSheet">
+    <string notr="true">
 QWidget { background-color: #b9e3f7; font-family: &quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif; font-size: 13px; color: #0f172a; }
-
-/* SIDEBAR - styled to match &quot;gestion de vente&quot; look */
-#sidebarFrame {
-  background-color: #24587a;
-  border-radius: 8px;
-  padding-top: 12px;
-  padding-bottom: 12px;
-  min-height: 100%;
-}
-
-/* Top header inside sidebar to mimic the rounded &quot;Tableau de board&quot; tab */
-QLabel#sidebarHeader {
-  background-color: #1b4966;
-  color: white;
-  font-weight: 700;
-  padding: 10px 16px;
-  border-radius: 12px;
-  margin: 6px;
-  min-width: 180px;
-  max-height: 42px;
-}
-
-/* Sidebar buttons */
-QPushButton#btnClients, QPushButton#btnProduit, QPushButton#btnVentes, QPushButton#btnEmployes, QPushButton#btnDashboard {
-  background-color: #24587a;
-  color: white;
-  border: 2px solid #1b4a67;
-  font-weight: bold;
-  text-align: left;
-  padding: 12px 20px;
-  border-radius: 6px;
-  min-width: 180px;
-  margin: 6px;
-  min-height: 56px;
-}
-
-/* Make Clients look selected by default (same as before) */
-QPushButton#btnClients {
-  background-color: #357fa3;
-  border: 2px solid #2d6f91;
-}
-
-QPushButton#btnProduit:hover, QPushButton#btnVentes:hover, QPushButton#btnEmployes:hover, QPushButton#btnClients:hover, QPushButton#btnDashboard:hover {
-  background-color: #357fa3;
-}
-
-/* HEADER area title at top of content, matching gestion de vente style */
-QLabel#mainTitle {
-  font-size: 20px;
-  font-weight: 800;
-  color: #0f172a;
-  background-color: #bfeafc;
-  padding: 10px 16px;
-  border-radius: 10px;
-  border: 1px solid #89c3e2;
-}
-
-/* BUTTONS */
-QPushButton {
-  background-color: #48a4d6;
-  color: white;
-  border-radius: 6px;
-  padding: 8px 14px;
-  font-weight: 600;
-  border: none;
-}
+#sidebarFrame { background-color: #24587a; border-radius: 8px; padding-top: 12px; padding-bottom: 12px; min-height: 100%; }
+QLabel#sidebarHeader { background-color: #1b4966; color: white; font-weight: 700; padding: 10px 16px; border-radius: 12px; margin: 6px; min-width: 180px; max-height: 42px; }
+QPushButton#btnClients, QPushButton#btnProduit, QPushButton#btnVentes, QPushButton#btnEmployes, QPushButton#btnDashboard { background-color: #24587a; color: white; border: 2px solid #1b4a67; font-weight: bold; text-align: left; padding: 12px 20px; border-radius: 6px; min-width: 180px; margin: 6px; min-height: 56px; }
+QPushButton#btnClients { background-color: #357fa3; border: 2px solid #2d6f91; }
+QPushButton#btnProduit:hover, QPushButton#btnVentes:hover, QPushButton#btnEmployes:hover, QPushButton#btnClients:hover, QPushButton#btnDashboard:hover { background-color: #357fa3; }
+QLabel#mainTitle { font-size: 20px; font-weight: 800; color: #0f172a; background-color: #bfeafc; padding: 10px 16px; border-radius: 10px; border: 1px solid #89c3e2; }
+QPushButton { background-color: #48a4d6; color: white; border-radius: 6px; padding: 8px 14px; font-weight: 600; border: none; }
 QPushButton:hover { background-color: #5ab5e3; }
 QPushButton#btnDelete { background-color: #d64545; }
 QPushButton#btnDelete:hover { background-color: #b53030; }
 QPushButton#btnExport { background-color: #48b36b; }
 QPushButton#btnExport:hover { background-color: #3da25f; }
-
-/* INPUTS */
-QLineEdit, QComboBox, QDateEdit {
-  background-color: white;
-  border: 1px solid #89c3e2;
-  border-radius: 6px;
-  padding: 8px;
-  color: #0f172a;
-  min-height: 30px;
-}
+QLineEdit, QComboBox, QDateEdit { background-color: white; border: 1px solid #89c3e2; border-radius: 6px; padding: 8px; color: #0f172a; min-height: 30px; }
 QLabel { font-weight: 600; color: #0f172a; }
-
-/* TABLE */
-QTableWidget {
-  background-color: white;
-  gridline-color: #90caf9;
-  selection-background-color: #48a4d6;
-  selection-color: white;
-  alternate-background-color: #e9f5fc;
-  border: 1px solid #89c3e2;
-  border-radius: 8px;
-}
-QHeaderView::section {
-  background-color: #24587a;
-  color: white;
-  font-weight: bold;
-  height: 28px;
-  border: none;
-}
-
-/* TABS */
+QTableWidget { background-color: white; gridline-color: #90caf9; selection-background-color: #48a4d6; selection-color: white; alternate-background-color: #e9f5fc; border: 1px solid #89c3e2; border-radius: 8px; }
+QHeaderView::section { background-color: #24587a; color: white; font-weight: bold; height: 28px; border: none; }
 QTabWidget::pane { border: 1px solid #89c3e2; border-radius: 6px; }
-QTabBar::tab {
-  background: #e2e8f0;
-  border-radius: 6px;
-  padding: 10px 20px;
-  margin: 4px;
-  color: #0f172a;
-  min-width: 140px;
-}
+QTabBar::tab { background: #e2e8f0; border-radius: 6px; padding: 10px 20px; margin: 4px; color: #0f172a; min-width: 140px; }
 QTabBar::tab:selected { background: #24587a; color: white; }
-
-/* COMBOBOX &amp; DATE */
 QComboBox::drop-down, QDateEdit::drop-down { border: none; }
-   </string>
-  </property>
-  <layout class="QHBoxLayout" name="mainLayoutRoot">
-   <item>
-    <widget class="QFrame" name="sidebarFrame">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <layout class="QVBoxLayout" name="sidebarLayout">
-      <item>
-       <widget class="QLabel" name="sidebarHeader">
-        <property name="minimumSize">
-         <size>
-          <width>224</width>
-          <height>40</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Tableau de board</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnClients">
-        <property name="text">
-         <string>Clients</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnProduit">
-        <property name="text">
-         <string>Produits</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnVentes">
-        <property name="text">
-         <string>Ventes</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnEmployes">
-        <property name="text">
-         <string>Employés</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnDashboard">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Dashboard</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <layout class="QVBoxLayout" name="contentAreaLayout">
-     <item>
-      <widget class="QLabel" name="mainTitle">
-       <property name="text">
-        <string>Gestion de Clients</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="topBarLayout">
-       <item alignment="Qt::AlignmentFlag::AlignRight">
-        <widget class="QLabel" name="labelLogoSmall">
-         <property name="maximumSize">
-          <size>
-           <width>70</width>
-           <height>70</height>
-          </size>
+    </string>
+   </property>
+   <layout class="QHBoxLayout" name="mainLayoutRoot">
+    <item>
+     <widget class="QFrame" name="sidebarFrame">
+      <layout class="QVBoxLayout" name="sidebarLayout">
+       <item>
+        <widget class="QLabel" name="sidebarHeader">
+         <property name="text">
+          <string>📊 Tableau de board</string>
          </property>
-         <property name="pixmap">
-          <pixmap>smart_logo.png.jpg.jpg</pixmap>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
-         <property name="scaledContents">
-          <bool>true</bool>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnClients">
+         <property name="text">
+          <string>🧍 Clients</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnProduit">
+         <property name="text">
+          <string>📦 Produits</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnVentes">
+         <property name="text">
+          <string>💸 Ventes</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnEmployes">
+         <property name="text">
+          <string>👔 Employés</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnDashboard">
+         <property name="text">
+          <string>📊 Dashboard</string>
          </property>
         </widget>
        </item>
       </layout>
-     </item>
-     <item>
-      <widget class="QTabWidget" name="tabWidgetMain">
-       <property name="currentIndex">
-        <number>0</number>
-       </property>
-       <widget class="QWidget" name="tabListeClients">
-        <attribute name="title">
-         <string>Liste Clients</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="layoutListeClients">
-         <item>
-          <layout class="QHBoxLayout" name="layoutSearch">
-           <item>
-            <widget class="QLineEdit" name="lineEditSearch">
-             <property name="placeholderText">
-              <string>🔍 Recherche par Nom, ID ou Téléphone...</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="labelFilter">
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="contentAreaLayout">
+      <item>
+       <widget class="QLabel" name="mainTitle">
+        <property name="text">
+         <string>Gestion de Clients</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTabWidget" name="tabWidgetMain">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="tabListeClients">
+         <attribute name="title">
+          <string>Liste Clients</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="layoutListeClients">
+          <item>
+           <layout class="QHBoxLayout" name="layoutSearch">
+            <item>
+             <widget class="QLineEdit" name="lineEditSearch">
+              <property name="placeholderText">
+               <string>🔍 Recherche par Nom, ID ou Téléphone...</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelFilter">
+              <property name="text">
+               <string>Filtrer :</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="comboBoxTri">
+              <item>
+               <property name="text">
+                <string>Nom A-Z</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Nom Z-A</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Date Inscription ↑</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Date Inscription ↓</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QTableWidget" name="tableWidgetClients">
+            <property name="columnCount">
+             <number>9</number>
+            </property>
+            <column>
              <property name="text">
-              <string>Filtrer :</string>
+              <string>ID</string>
              </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="comboBoxTri">
-             <item>
+            </column>
+            <column>
+             <property name="text">
+              <string>Nom</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Prénom</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Date Naissance</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Sexe</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Adresse</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Téléphone</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Email</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Date Inscription</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="layoutButtons">
+            <item>
+             <widget class="QPushButton" name="btnExport">
               <property name="text">
-               <string>Nom A-Z</string>
+               <string>📤 Exporter PDF</string>
               </property>
-             </item>
-             <item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnDelete">
               <property name="text">
-               <string>Nom Z-A</string>
+               <string>🗑️ Supprimer Client</string>
               </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Date Inscription ↑</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Date Inscription ↓</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QTableWidget" name="tableWidgetClients">
-           <property name="columnCount">
-            <number>9</number>
-           </property>
-           <column>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabAddClient">
+         <attribute name="title">
+          <string>Ajouter / Modifier</string>
+         </attribute>
+         <layout class="QGridLayout" name="layoutForm">
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelID">
             <property name="text">
-             <string>ID</string>
+             <string>ID :</string>
             </property>
-           </column>
-           <column>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="lineEditID"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelNom">
             <property name="text">
-             <string>Nom</string>
+             <string>Nom :</string>
             </property>
-           </column>
-           <column>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEditNom"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="labelPrenom">
             <property name="text">
-             <string>Prénom</string>
+             <string>Prénom :</string>
             </property>
-           </column>
-           <column>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="lineEditPrenom"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="labelDateNaissance">
             <property name="text">
-             <string>Date Naissance</string>
+             <string>Date Naissance :</string>
             </property>
-           </column>
-           <column>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QDateEdit" name="dateEditNaissance">
+            <property name="calendarPopup">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="labelSexe">
             <property name="text">
-             <string>Sexe</string>
+             <string>Sexe :</string>
             </property>
-           </column>
-           <column>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QComboBox" name="comboBoxSexe">
+            <item>
+             <property name="text">
+              <string>Homme</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Femme</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="labelAdresse">
             <property name="text">
-             <string>Adresse</string>
+             <string>Adresse :</string>
             </property>
-           </column>
-           <column>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLineEdit" name="lineEditAdresse"/>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="labelTelephone">
             <property name="text">
-             <string>Téléphone</string>
+             <string>Téléphone :</string>
             </property>
-           </column>
-           <column>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QLineEdit" name="lineEditTelephone"/>
+          </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="labelEmail">
             <property name="text">
              <string>Email</string>
             </property>
-           </column>
-           <column>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QLineEdit" name="lineEditEmail"/>
+          </item>
+          <item row="8" column="0" colspan="2">
+           <layout class="QHBoxLayout" name="layoutButtonsForm">
+            <item>
+             <widget class="QPushButton" name="btnSave">
+              <property name="text">
+               <string>💾 Enregistrer</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnCancel">
+              <property name="text">
+               <string>❌ Annuler</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabStats">
+         <attribute name="title">
+          <string>Statistiques</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="layoutStats">
+          <item>
+           <widget class="QLabel" name="labelStatsTitle">
             <property name="text">
-             <string>Date Inscription</string>
+             <string>📊 Statistiques Clients</string>
             </property>
-           </column>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="layoutButtons">
-           <item>
-            <widget class="QPushButton" name="btnExport">
-             <property name="text">
-              <string>📄 Exporter PDF</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnDelete">
-             <property name="text">
-              <string>🗑 Supprimer Client</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="tabAddClient">
-        <attribute name="title">
-         <string>Ajouter / Modifier</string>
-        </attribute>
-        <layout class="QGridLayout" name="layoutForm">
-         <item row="0" column="0">
-          <widget class="QLabel" name="labelID">
-           <property name="text">
-            <string>ID :</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="lineEditID"/>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="labelNom">
-           <property name="text">
-            <string>Nom :</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="lineEditNom"/>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="labelPrenom">
-           <property name="text">
-            <string>Prénom :</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="lineEditPrenom"/>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="labelDateNaissance">
-           <property name="text">
-            <string>Date Naissance :</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QDateEdit" name="dateEditNaissance">
-           <property name="calendarPopup">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="labelSexe">
-           <property name="text">
-            <string>Sexe :</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QComboBox" name="comboBoxSexe">
-           <item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelStatsContent">
             <property name="text">
-             <string>Homme</string>
+             <string>Graphiques et données statistiques ici...</string>
             </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Femme</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="labelAdresse">
-           <property name="text">
-            <string>Adresse :</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <widget class="QLineEdit" name="lineEditAdresse"/>
-         </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="labelTelephone">
-           <property name="text">
-            <string>Téléphone :</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="1">
-          <widget class="QLineEdit" name="lineEditTelephone"/>
-         </item>
-         <item row="7" column="0">
-          <widget class="QLabel" name="labelEmail">
-           <property name="text">
-            <string>Email :</string>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="1">
-          <widget class="QLineEdit" name="lineEditEmail"/>
-         </item>
-         <item row="8" column="0" colspan="2">
-          <layout class="QHBoxLayout" name="layoutButtonsForm">
-           <item>
-            <widget class="QPushButton" name="btnSave">
-             <property name="text">
-              <string>💾 Enregistrer</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnCancel">
-             <property name="text">
-              <string>↩ Annuler</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </widget>
-       <widget class="QWidget" name="tabStats">
-        <attribute name="title">
-         <string>Statistiques</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="layoutStats">
-         <item>
-          <widget class="QLabel" name="labelStatsTitle">
-           <property name="styleSheet">
-            <string>font-size:18px; font-weight:bold; color:#143c54;</string>
-           </property>
-           <property name="text">
-            <string>📊 Statistiques Clients</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignTop</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="labelStatsContent">
-           <property name="text">
-            <string>Graphiques et données statistiques ici...</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignmentFlag::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </widget>
-     </item>
-    </layout>
-   </item>
-  </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+   <widget class="QLabel" name="labelLogoTopRight">
+    <property name="geometry">
+     <rect>
+      <x>1120</x>
+      <y>10</y>
+      <width>70</width>
+      <height>70</height>
+     </rect>
+    </property>
+    <property name="pixmap">
+     <pixmap>smart_logo.png.jpg</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+  </widget>
  </widget>
  <resources/>
  <connections/>
