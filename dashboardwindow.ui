@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
+    <width>1312</width>
     <height>768</height>
    </rect>
   </property>
@@ -281,7 +281,7 @@ color: white;
             <string/>
            </property>
            <property name="pixmap">
-            <pixmap resource="resources.qrc">:/images/logo.jpg</pixmap>
+            <pixmap>:/images/logo.jpg</pixmap>
            </property>
            <property name="scaledContents">
             <bool>true</bool>
@@ -648,22 +648,6 @@ color: white;
         </layout>
        </item>
        <item>
-        <spacer name="verticalSpacer_4">
-         <property name="orientation">
-          <enum>Qt::Orientation::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Policy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
         <widget class="QLabel" name="recentSalesLabel">
          <property name="font">
           <font>
@@ -681,6 +665,22 @@ color: white;
           <string>📊 Recent Sales Activity</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Policy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item>
         <widget class="QTableWidget" name="recentSalesTable">
