@@ -2,10 +2,35 @@
 #include "ui_saleswindow.h"
 #include "dashboardwindow.h"
 
+
+#include "mainwindow.h"
+#include "gestionemploye00.h"
+#include "gclient1.h"
+#include "fournisseurwindow.h"
+#include <QApplication>
 #include <QMessageBox>
 #include <QDebug>
 #include <QDateTime>
 #include <QStandardItem>
+
+
+// Initialize static instance pointer
+SalesWindow* SalesWindow::instance = nullptr;
+
+SalesWindow* SalesWindow::getInstance(QWidget *parent)
+{
+    if (!instance || !QApplication::topLevelWidgets().contains(instance)) {
+        instance = new SalesWindow(parent);
+        instance->setAttribute(Qt::WA_DeleteOnClose);
+        QObject::connect(instance, &QObject::destroyed, []() {
+            instance = nullptr;
+        });
+    }
+    instance->show();
+    instance->raise();
+    instance->activateWindow();
+    return instance;
+}
 
 SalesWindow::SalesWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -41,6 +66,12 @@ SalesWindow::SalesWindow(QWidget *parent) :
     connect(ui->newSaleButton, &QPushButton::clicked, this, &SalesWindow::on_newSaleButton_clicked);
     // Only allow Ventes navigation to be functional; dashboard/logout disabled
     connect(ui->pushButton_2, &QPushButton::clicked, this, &SalesWindow::on_salesButton_clicked);
+    // Tableau de bord navigation
+    connect(ui->pushButton,   &QPushButton::clicked, this, &SalesWindow::on_pushButton_clicked);   // Stock
+    connect(ui->pushButton_2, &QPushButton::clicked, this, &SalesWindow::on_salesButton_clicked);  // Ventes (self)
+    connect(ui->pushButton_3, &QPushButton::clicked, this, &SalesWindow::on_pushButton_3_clicked); // Employes
+    connect(ui->pushButton_4, &QPushButton::clicked, this, &SalesWindow::on_pushButton_4_clicked); // Clients
+    connect(ui->pushButton_5, &QPushButton::clicked, this, &SalesWindow::on_pushButton_5_clicked); // Fournisseur
     connect(ui->sortButton, &QPushButton::clicked, this, &SalesWindow::on_sortButton_clicked);
     
     // Initialize
@@ -345,10 +376,41 @@ void SalesWindow::on_dashboardButton_clicked()
     this->hide();
 }
 
+ 
+
 void SalesWindow::on_salesButton_clicked()
 {
     // Already in sales window, do nothing or refresh
     refreshSalesTable();
+}
+
+
+void SalesWindow::on_pushButton_clicked()
+{
+    // Stock -> MainWindow
+    MainWindow::getInstance();
+    this->close();
+}
+
+void SalesWindow::on_pushButton_3_clicked()
+{
+    // Employes -> gestionemploye00
+    gestionemploye00::getInstance();
+    this->close();
+}
+
+void SalesWindow::on_pushButton_4_clicked()
+{
+    // Clients -> Gclient1
+    Gclient1::getInstance();
+    this->close();
+}
+
+void SalesWindow::on_pushButton_5_clicked()
+{
+    // Fournisseur -> FournisseurWindow
+    FournisseurWindow::getInstance();
+    this->close();
 }
 
 void SalesWindow::on_logoutButton_clicked()

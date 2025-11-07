@@ -250,6 +250,7 @@ background-color: rgb(41, 102, 148);
           <string>Dashboard</string>
          </property>
         </widget>
+        
         </widget>
        </item>
       </layout>
@@ -292,6 +293,7 @@ background-color: rgb(41, 102, 148);
            </property>
            <property name="pixmap">
             <pixmap resource="resources.qrc">:/images/logo.jpg</pixmap>
+            <pixmap resource="resources.qrc">:/images/logof.jpg</pixmap>
            </property>
            <property name="scaledContents">
             <bool>true</bool>

@@ -19,6 +19,10 @@ private slots:
     void on_dashboardButton_clicked();
     void on_salesButton_clicked();
     void on_logoutButton_clicked();
+    
+    // Singleton pattern
+    static DashboardWindow* getInstance(QWidget *parent = nullptr);
+    static DashboardWindow* instance;
 
 private:
     Ui::DashboardWindow *ui;

@@ -1,17 +1,11 @@
-<<<<<<< HEAD
-#include <iostream>
-using namespace std;
 
-int main() {
-    cout << "Hello world!!" << endl;
-    return 0;
-mimi.****
-}
-=======
 #include "dashboardwindow.h"
-
 #include <QApplication>
 #include <QFile>
+#include "gestionemploye00.h"
+#include "login.h"
+#include "tab.h"
+#include <QApplication>
 
 int main(int argc, char *argv[])
 {
@@ -34,4 +28,8 @@ int main(int argc, char *argv[])
     
     return a.exec();
 }
->>>>>>> 1e719d268151364701cb44d05fef2fe3b8b1e6a5
+
+    login l;
+    l.show();
+    return a.exec();
+}

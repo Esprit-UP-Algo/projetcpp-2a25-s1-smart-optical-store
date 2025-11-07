@@ -16,6 +16,11 @@ public:
     explicit SalesWindow(QWidget *parent = nullptr);
     ~SalesWindow();
 
+    
+    // Singleton pattern
+    static SalesWindow* getInstance(QWidget *parent = nullptr);
+    static SalesWindow* instance;
+
 private slots:
     void on_addProductButton_clicked();
     void on_removeProductButton_clicked();
@@ -31,6 +36,13 @@ private slots:
     void on_salesButton_clicked();
     void on_logoutButton_clicked();
     void on_sortButton_clicked();
+
+
+    // Tableau de bord navigation
+    void on_pushButton_clicked();      // Stock -> MainWindow
+    void on_pushButton_3_clicked();    // Employes -> gestionemploye00
+    void on_pushButton_4_clicked();    // Clients -> Gclient1
+    void on_pushButton_5_clicked();    // Fournisseur -> FournisseurWindow
 
 private:
     Ui::SalesWindow *ui;
