@@ -6,6 +6,7 @@
 #include "saleswindow.h"
 #include "gclient1.h"
 #include "gestionemploye00.h"
+#include "WindowManager.h"
 
 // Initialize static instance pointer
 FournisseurWindow* FournisseurWindow::instance = nullptr;
@@ -30,6 +31,9 @@ FournisseurWindow::FournisseurWindow(QWidget *parent)
     , ui(new Ui::FournisseurWindow)
 {
     ui->setupUi(this);
+    
+    // Use WindowManager to setup common window features
+    WindowManager::setupWindow(this, "Gestion des Fournisseurs", 1200, 800);
     
     // Wire tableau de bord buttons by their visible text to avoid object-name differences
     const auto buttons = this->findChildren<QPushButton*>();

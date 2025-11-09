@@ -2,12 +2,13 @@
 #include "ui_gclient1.h"
 #include <QHeaderView>
 #include <QDebug>
-#include <QTimer> // ✅ ضروري لتفادي خطأ incomplete type
+#include <QTimer>
 #include "mainwindow.h"
 #include "saleswindow.h"
 #include "gestionemploye00.h"
 #include "fournisseurwindow.h"
 #include <QApplication>
+#include "WindowManager.h"
 
 // Initialize static instance pointer
 Gclient1* Gclient1::instance = nullptr;
@@ -37,9 +38,9 @@ Gclient1::Gclient1(QWidget *parent)
     this->setCentralWidget(ui->centralwidget);
 #endif
 
-    this->resize(1200, 800);
-    this->showMaximized();
-
+    // Use WindowManager to setup common window features
+    WindowManager::setupWindow(this, "Gestion Clients");
+    
     // إعداد جدول العملاء
     if (ui->tableWidgetClients) {
         ui->tableWidgetClients->horizontalHeader()->setStretchLastSection(true);
@@ -62,6 +63,11 @@ Gclient1::Gclient1(QWidget *parent)
     QTimer::singleShot(0, this, [this]() {
         if (ui->labelLogoTopRight)
             ui->labelLogoTopRight->raise();
+        
+        // Ensure fullscreen button stays on top
+        QWidget* btnToggleFullscreen = this->findChild<QWidget*>("btnToggleFullscreen");
+        if (btnToggleFullscreen)
+            btnToggleFullscreen->raise();
     });
 
     qDebug() << "✅ Interface GestionClients initialisée avec succès";

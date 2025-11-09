@@ -6,6 +6,7 @@
 #include "gclient1.h"
 #include "fournisseurwindow.h"
 #include <QApplication>
+#include "WindowManager.h"
 
 // Initialize static instance pointer
 DashboardWindow* DashboardWindow::instance = nullptr;
@@ -30,8 +31,9 @@ DashboardWindow::DashboardWindow(QWidget *parent) :
     ui(new Ui::DashboardWindow)
 {
     ui->setupUi(this);
-    setWindowTitle("Smart Optical Store - Dashboard");
-    setMinimumSize(1024, 768);
+    
+    // Use WindowManager to setup common window features
+    WindowManager::setupWindow(this, "Dashboard", 1024, 768);
 
     ui->customersCountLabel->setText("0");
     ui->productsCountLabel->setText("0");

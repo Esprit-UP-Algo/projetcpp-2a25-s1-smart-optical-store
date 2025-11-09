@@ -26,7 +26,7 @@ void login::on_pushButton_2_clicked()
         DashboardWindow::getInstance();
         this->close();
     }else{
-        QMessageBox ::warning(this," mot de pass in valide","eurreur");
+        QMessageBox::warning(this, "Mot de passe invalide", "Erreur d'authentification");
     }
 }
 

@@ -9,11 +9,13 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Sql)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Sql)
 
 set(PROJECT_SOURCES
         main.cpp
+        Connection.h Connection.cpp
+        WindowManager.h
         gestionemploye00.cpp
         gestionemploye00.h
         gestionemploye00.ui
@@ -21,6 +23,12 @@ set(PROJECT_SOURCES
         saleswindow.h saleswindow.cpp saleswindow.ui
         gclient1.h gclient1.cpp gclient1.ui
         dashboardwindow.h dashboardwindow.cpp dashboardwindow.ui
+        # Model classes
+        client.h client.cpp
+        produit.h produit.cpp
+        vente.h vente.cpp
+        employe.h employe.cpp
+        fournisseur.h fournisseur.cpp
         resources.qrc
 )
 
@@ -32,6 +40,13 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         tab.h tab.cpp tab.ui
         statistique.h statistique.cpp statistique.ui
         exporter.h exporter.cpp exporter.ui
+        WindowManager.h
+        # Make sure model classes are included here too
+        client.h client.cpp
+        produit.h produit.cpp
+        vente.h vente.cpp
+        employe.h employe.cpp
+        fournisseur.h fournisseur.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET gestionemploye0 APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -51,7 +66,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(gestionemploye0 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(gestionemploye0 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Sql)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

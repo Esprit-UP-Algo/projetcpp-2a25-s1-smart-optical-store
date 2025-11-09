@@ -1,4 +1,4 @@
-QT += widgets
+QT += widgets sql
 CONFIG += c++17
 TEMPLATE = app
 
@@ -7,6 +7,7 @@ TARGET = gestionemploye0
 
 # Sources
 SOURCES += \
+    Connection.cpp \
     main.cpp \
     login.cpp \
     tab.cpp \
@@ -17,10 +18,17 @@ SOURCES += \
     saleswindow.cpp \
     gclient1.cpp \
     dashboardwindow.cpp \
-    fournisseurwindow.cpp
+    fournisseurwindow.cpp \
+    # Model classes
+    client.cpp \
+    produit.cpp \
+    vente.cpp \
+    employe.cpp \
+    fournisseur.cpp
 
 # Headers
 HEADERS += \
+    Connection.h \
     login.h \
     tab.h \
     gestionemploye00.h \
@@ -30,7 +38,13 @@ HEADERS += \
     saleswindow.h \
     gclient1.h \
     dashboardwindow.h \
-    fournisseurwindow.h
+    fournisseurwindow.h \
+    # Model classes
+    client.h \
+    produit.h \
+    vente.h \
+    employe.h \
+    fournisseur.h
 
 # Forms (UI)
 FORMS += \

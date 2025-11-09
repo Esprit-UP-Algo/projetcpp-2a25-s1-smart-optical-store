@@ -7,6 +7,7 @@
 #include "gclient1.h"
 #include "fournisseurwindow.h"
 #include <QApplication>
+#include "WindowManager.h"
 
 // Initialize static instance pointer
 gestionemploye00* gestionemploye00::instance = nullptr;
@@ -30,6 +31,9 @@ gestionemploye00::gestionemploye00(QWidget *parent)
     , ui(new Ui::gestionemploye00)
 {
     ui->setupUi(this);
+    
+    // Use WindowManager to setup common window features
+    WindowManager::setupWindow(this, "Gestion des Employés", 1200, 800);
 }
 
 gestionemploye00::~gestionemploye00()

@@ -218,7 +218,6 @@ background-color: rgb(41, 102, 148);
            <string>Fournisseur</string>
           </property>
          </widget>
-        
         </widget>
        </item>
       </layout>
@@ -375,7 +374,7 @@ color:black;</string>
                  <enum>QFrame::Shape::Box</enum>
                 </property>
                 <property name="text">
-                 <string> Description de Produit :</string>
+                 <string> ID Produit :</string>
                 </property>
                </widget>
               </item>
@@ -385,7 +384,7 @@ color:black;</string>
                  <string notr="true">background-color: #87CEEB; color: black;</string>
                 </property>
                 <property name="placeholderText">
-                 <string>Entrer les données de produit</string>
+                 <string>Entrer l'ID de produit</string>
                 </property>
                </widget>
               </item>

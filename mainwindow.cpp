@@ -9,6 +9,7 @@
 #include "gclient1.h"
 #include "fournisseurwindow.h"
 #include <QApplication>
+#include "WindowManager.h"
 
 // Initialize static instance pointer
 MainWindow* MainWindow::instance = nullptr;
@@ -32,6 +33,10 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    
+    // Use WindowManager to setup common window features
+    WindowManager::setupWindow(this, "Gestion de Stock", 1200, 800);
+    
     ui->lineEdit_5->setPlaceholderText("  Recherche par référence ou Nom ...");
     qDebug() << "Chemin courant =" << QDir::currentPath();
     ui->logoLabel->setPixmap(QPixmap(":/images/logof.jpg"));
