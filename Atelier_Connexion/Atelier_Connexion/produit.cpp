@@ -32,6 +32,7 @@ Produit::Produit(Ui::MainWindow *ui)
 }
 bool Produit::ajouter()
 {
+
     QSqlQuery query;
     query.prepare("INSERT INTO PRODUITS (REF, DESIGNATION, CATEGORIE, MARQUE, PRIX, QUANTITE, COULEUR, GENRE, DATEEXPIRATION) "
                   "VALUES (:ref, :designation, :categorie, :marque, :prix, :quantite, :couleur, :genre, :dateExpiration)");
@@ -141,9 +142,10 @@ bool Produit::rech(QString recherche, Ui::MainWindow *ui)
 
 bool Produit:: modifier()
 {
+
     QSqlQuery query;
 
-    query.prepare("UPDATE PRODUITS SET COULEUR=:couleur, GENRE=:genre, PRIX=:prix, QUANTITE=:quantite, MARQUE=:marque, CATEGORIE=:categorie, DESIGNATION=:designation, DATEEXPIRATION=:dateexpiration "
+    query.prepare("UPDATE PRODUITS SET COULEUR=:couleur, GENRE=:genre, PRIX=:prix, QUANTITE=:quantite, MARQUE=:marque, CATEGORIE=:categorie, DESIGNATION=:designation, DATEEXPIRATION=:dateExpiration "
                   "WHERE REF=:ref");
 
     query.bindValue(":ref", ref);
@@ -166,6 +168,31 @@ bool Produit:: modifier()
 
     return test;
 }
+void Produit::afficherRestock(Ui::MainWindow *ui, int seuil)
+{
+    QSqlQuery query;
+    query.prepare("SELECT * FROM PRODUITS WHERE QUANTITE < :seuil ORDER BY QUANTITE ASC");
+    query.bindValue(":seuil", seuil);
+
+    if (!query.exec()) {
+        qDebug() << "Erreur restock :" << query.lastError().text();
+        return;
+    }
+
+    ui->tableWidget_5->setRowCount(0);
+    int row = 0;
+
+    while (query.next()) {
+        ui->tableWidget_5->insertRow(row);
+        ui->tableWidget_5->setItem(row, 0, new QTableWidgetItem(query.value("REF").toString()));
+        ui->tableWidget_5->setItem(row, 1, new QTableWidgetItem(query.value("DESIGNATION").toString()));
+        ui->tableWidget_5->setItem(row, 2, new QTableWidgetItem(query.value("QUANTITE").toString()));
+        ui->tableWidget_5->setItem(row, 3, new QTableWidgetItem(query.value("MARQUE").toString()));
+        ui->tableWidget_5->setItem(row, 4, new QTableWidgetItem(query.value("CATEGORIE").toString()));
+        row++;
+    }
+}
+
 
 
 
