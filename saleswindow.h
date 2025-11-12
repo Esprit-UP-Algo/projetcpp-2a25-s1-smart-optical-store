@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QStandardItemModel>
+#include <QSqlQueryModel>
+#include <QEvent>
 #include "client.h"
 #include "produit.h"
 #include "vente.h"
@@ -28,7 +30,6 @@ private slots:
     void on_addProductButton_clicked();
     void on_removeProductButton_clicked();
     void on_customerSearchButton_clicked();
-    void on_productSearchButton_clicked();
     void on_saveSaleButton_clicked();
     void on_newSaleButton_clicked();
     void on_searchSalesLineEdit_textChanged(const QString &arg1);
@@ -40,13 +41,9 @@ private slots:
     void on_sortButton_clicked();
     void on_modifySaleButton_clicked();
     void on_deleteSaleButton_clicked();
-    
-    // New slots for enhanced sales interface - Uncomment after adding UI elements in Qt Designer
-    /*
     void on_productComboBox_currentIndexChanged(int index);
-    void on_employeeComboBox_currentIndexChanged(int index);
-    void on_discountSpinBox_valueChanged(int value);
-    */
+    void on_exportPdfButton_clicked();
+    void on_logoClicked();  // Logo click -> Dashboard
 
     // Tableau de bord navigation
     void on_pushButton_clicked();      // Stock -> MainWindow
@@ -78,6 +75,10 @@ private:
     void sortSalesTable();
     void filterSalesByDate();
     void searchSales(const QString &searchText);
+    void populateProductComboBox();
+    void exportSalesToPdf();
+    bool eventFilter(QObject *obj, QEvent *event) override;
+    void showEvent(QShowEvent *event) override;  // Refresh products when window is shown
 };
 
 #endif // SALESWINDOW_H
