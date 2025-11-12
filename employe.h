@@ -29,11 +29,6 @@ public:
     double getSalaire() const { return salaire; }
     QString getDispo() const { return dispo; }
     
-    // Alias getters for CRUD compatibility
-    QDate getDate() const { return d_naissance; }
-    int getNombreEnfants() const { return n_enfant; }
-    QString getDisponibilite() const { return dispo; }
-    
     // Setters
     void setId(int id) { id_employe = id; }
     void setNom(const QString &value) { nom = value; }
@@ -47,23 +42,12 @@ public:
     void setSalaire(double value) { salaire = value; }
     void setDispo(const QString &value) { dispo = value; }
     
-    // Alias setters for CRUD compatibility
-    void setDate(const QDate &value) { d_naissance = value; }
-    void setNombreEnfants(int value) { n_enfant = value; }
-    void setDisponibilite(const QString &value) { dispo = value; }
-    
     // CRUD Operations
     bool ajouter();
     bool supprimer(int id);
     bool modifier();
     QSqlQueryModel* afficher();
     QSqlQueryModel* rechercher(const QString &critere);
-    
-    // Additional CRUD methods for employee management
-    bool rechercherParId(int id);
-    QSqlQueryModel* rechercherParNom(const QString &nom);
-    QSqlQueryModel* trierParNom();
-    QSqlQueryModel* trierParSalaire();
     
     // Méthodes spécifiques pour les employés
     QSqlQueryModel* afficherVentesParEmploye(int idEmploye);

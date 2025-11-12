@@ -15,7 +15,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Sql)
 set(PROJECT_SOURCES
         main.cpp
         Connection.h Connection.cpp
-        WindowManager.h WindowManager.cpp
+        WindowManager.h
         gestionemploye00.cpp
         gestionemploye00.h
         gestionemploye00.ui
@@ -23,14 +23,12 @@ set(PROJECT_SOURCES
         saleswindow.h saleswindow.cpp saleswindow.ui
         gclient1.h gclient1.cpp gclient1.ui
         dashboardwindow.h dashboardwindow.cpp dashboardwindow.ui
-        fournisseurwindow.h fournisseurwindow.cpp fournisseurwindow.ui
         # Model classes
         client.h client.cpp
         produit.h produit.cpp
         vente.h vente.cpp
         employe.h employe.cpp
         fournisseur.h fournisseur.cpp
-        employeeditdialog.h employeeditdialog.cpp
         resources.qrc
 )
 
@@ -42,6 +40,13 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         tab.h tab.cpp tab.ui
         statistique.h statistique.cpp statistique.ui
         exporter.h exporter.cpp exporter.ui
+        WindowManager.h
+        # Make sure model classes are included here too
+        client.h client.cpp
+        produit.h produit.cpp
+        vente.h vente.cpp
+        employe.h employe.cpp
+        fournisseur.h fournisseur.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET gestionemploye0 APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

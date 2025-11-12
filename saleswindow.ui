@@ -218,40 +218,6 @@ background-color: rgb(41, 102, 148);
            <string>Fournisseur</string>
           </property>
          </widget>
-        <widget class="QPushButton" name="dashboardButton">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>620</y>
-           <width>201</width>
-           <height>51</height>
-          </rect>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">#dashboardButton {
-   font-family: Arial, Helvetica, sans-serif;
-   font-weight: bold;
-   color: white;
-   background-color: #171717;
-   padding: 10px 20px;
-   border: none;
-   border-radius: 10px;
-}
-
-#dashboardButton:hover {
-   background-color: #0c66ed; /* hover effect */
-}
-
-#dashboardButton:pressed {
-   background-color: #094bb0; /* pressed effect */
-}</string>
-         </property>
-         <property name="text">
-          <string>Dashboard</string>
-         </property>
-        </widget>
-        
-
         </widget>
        </item>
       </layout>
@@ -293,7 +259,6 @@ background-color: rgb(41, 102, 148);
             <string/>
            </property>
            <property name="pixmap">
-            <pixmap resource="resources.qrc">:/images/logo.jpg</pixmap>
             <pixmap resource="resources.qrc">:/images/logof.jpg</pixmap>
            </property>
            <property name="scaledContents">
@@ -409,17 +374,28 @@ color:black;</string>
                  <enum>QFrame::Shape::Box</enum>
                 </property>
                 <property name="text">
-                 <string> Sélectionner Produit :</string>
+                 <string> ID Produit :</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="1" colspan="2">
-               <widget class="QComboBox" name="productComboBox">
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="productIdLineEdit">
                 <property name="styleSheet">
                  <string notr="true">background-color: #87CEEB; color: black;</string>
                 </property>
-                <property name="editable">
-                 <bool>false</bool>
+                <property name="placeholderText">
+                 <string>Entrer l'ID de produit</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QPushButton" name="productSearchButton">
+                <property name="styleSheet">
+                 <string notr="true">background-color: #55aaff;
+color:black;</string>
+                </property>
+                <property name="text">
+                 <string>Rechercher</string>
                 </property>
                </widget>
               </item>
@@ -467,7 +443,7 @@ color:black;</string>
                  <string notr="true">background-color: #87CEEB; color: black;</string>
                 </property>
                 <property name="readOnly">
-                 <bool>true</bool>
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
@@ -491,7 +467,7 @@ color:black;</string>
                  <string notr="true">background-color: #87CEEB; color: black;</string>
                 </property>
                 <property name="readOnly">
-                 <bool>true</bool>
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
@@ -860,46 +836,6 @@ color:black;</string>
               <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
              </property>
             </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="exportButtonLayout">
-             <item>
-              <spacer name="horizontalSpacer_export">
-               <property name="orientation">
-                <enum>Qt::Orientation::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="exportPdfButton">
-               <property name="minimumSize">
-                <size>
-                 <width>200</width>
-                 <height>40</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>10</pointsize>
-                 <bold>true</bold>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background-color: #55aaff;
-color: black;</string>
-               </property>
-               <property name="text">
-                <string>Exporter Ventes en PDF</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
            </item>
           </layout>
          </widget>

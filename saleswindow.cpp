@@ -1,16 +1,9 @@
 #include "saleswindow.h"
 #include "ui_saleswindow.h"
-#include "dashboardwindow.h"
-
-
-#include <QShowEvent>
 #include "mainwindow.h"
 #include "gestionemploye00.h"
 #include "gclient1.h"
 #include "fournisseurwindow.h"
-#include "dashboardwindow.h"
-#include "WindowManager.h"
-#include <QMouseEvent>
 #include <QApplication>
 #include <QMessageBox>
 #include <QDebug>
@@ -25,22 +18,7 @@
 #include <QDateEdit>
 #include <QDialogButtonBox>
 #include <QPushButton>
-#include <QFileDialog>
-#include <QFileInfo>
-#include <QPdfWriter>
-#include <QPainter>
-#include <QFont>
-#include <QColor>
-#include <QPen>
-#include <QBrush>
-#include <QRect>
-#include <QPageSize>
-#include <QPageLayout>
-#include <QMarginsF>
-#include <QSqlQuery>
-#include <QSqlQueryModel>
-#include <QVariant>
-
+#include "WindowManager.h"
 
 // Initialize static instance pointer
 SalesWindow* SalesWindow::instance = nullptr;
@@ -91,19 +69,9 @@ SalesWindow::SalesWindow(QWidget *parent) :
     connect(ui->addProductButton, &QPushButton::clicked, this, &SalesWindow::on_addProductButton_clicked);
     connect(ui->removeProductButton, &QPushButton::clicked, this, &SalesWindow::on_removeProductButton_clicked);
     connect(ui->customerSearchButton, &QPushButton::clicked, this, &SalesWindow::on_customerSearchButton_clicked);
-    connect(ui->productComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SalesWindow::on_productComboBox_currentIndexChanged);
+    connect(ui->productSearchButton, &QPushButton::clicked, this, &SalesWindow::on_productSearchButton_clicked);
     connect(ui->saveSaleButton, &QPushButton::clicked, this, &SalesWindow::on_saveSaleButton_clicked);
     connect(ui->newSaleButton, &QPushButton::clicked, this, &SalesWindow::on_newSaleButton_clicked);
-    // Only allow Ventes navigation to be functional; dashboard/logout disabled
-    connect(ui->pushButton_2, &QPushButton::clicked, this, &SalesWindow::on_salesButton_clicked);
-    connect(ui->exportPdfButton, &QPushButton::clicked, this, &SalesWindow::on_exportPdfButton_clicked);
-    
-    // Make logo clickable
-    if (ui->topRightLogoLabel) {
-        ui->topRightLogoLabel->setCursor(Qt::PointingHandCursor);
-        ui->topRightLogoLabel->installEventFilter(this);
-        ui->topRightLogoLabel->setAttribute(Qt::WA_TransparentForMouseEvents, false);
-    }
     
     // Tableau de bord navigation
     connect(ui->pushButton,   &QPushButton::clicked, this, &SalesWindow::on_pushButton_clicked);   // Stock
@@ -125,13 +93,6 @@ SalesWindow::~SalesWindow()
     if (salesModel) {
         delete salesModel;
     }
-}
-
-void SalesWindow::showEvent(QShowEvent *event)
-{
-    QMainWindow::showEvent(event);
-    // Refresh product combo box when window is shown to get latest products
-    populateProductComboBox();
 }
 
 void SalesWindow::setupModels()
@@ -208,8 +169,52 @@ void SalesWindow::setupModels()
         connect(deleteButton, &QPushButton::clicked, this, &SalesWindow::on_deleteSaleButton_clicked);
     }
     
-    // Populate product selection combo box
-    populateProductComboBox();
+    /* 
+    // TODO: Uncomment after adding UI elements in Qt Designer
+    
+    // Populate sale status combo box
+    ui->saleStatusComboBox->clear();
+    ui->saleStatusComboBox->addItem("En cours");
+    ui->saleStatusComboBox->addItem("Complétée");
+    ui->saleStatusComboBox->addItem("Annulée");
+    ui->saleStatusComboBox->addItem("En attente");
+    
+    // Populate payment status combo box
+    ui->paymentStatusComboBox->clear();
+    ui->paymentStatusComboBox->addItem("Payé");
+    ui->paymentStatusComboBox->addItem("Non payé");
+    ui->paymentStatusComboBox->addItem("Partiellement payé");
+    ui->paymentStatusComboBox->addItem("Remboursé");
+    
+    // Set default delivery date to current date + 1 day
+    ui->deliveryDateEdit->setDate(QDate::currentDate().addDays(1));
+    
+    // Setup product selection combo box
+    QSqlQueryModel* productModel = produitObj.afficher();
+    ui->productComboBox->clear();
+    
+    for (int i = 0; i < productModel->rowCount(); ++i) {
+        int reference = productModel->data(productModel->index(i, 0)).toInt();
+        QString designation = productModel->data(productModel->index(i, 1)).toString();
+        ui->productComboBox->addItem(QString("%1 - %2").arg(reference).arg(designation), reference);
+    }
+    
+    delete productModel;
+    
+    // Setup employee selection combo box
+    QSqlQueryModel* employeeModel = employeObj.afficher();
+    ui->employeeComboBox->clear();
+    ui->employeeComboBox->addItem("Aucun", 0);
+    
+    for (int i = 0; i < employeeModel->rowCount(); ++i) {
+        int id = employeeModel->data(employeeModel->index(i, 0)).toInt();
+        QString nom = employeeModel->data(employeeModel->index(i, 1)).toString();
+        QString prenom = employeeModel->data(employeeModel->index(i, 2)).toString();
+        ui->employeeComboBox->addItem(QString("%1 - %2 %3").arg(id).arg(nom).arg(prenom), id);
+    }
+    
+    delete employeeModel;
+    */
 }
 
 void SalesWindow::refreshSalesTable()
@@ -276,14 +281,11 @@ void SalesWindow::clearSaleForm()
 {
     ui->customerIdLineEdit->clear();
     ui->customerNameLineEdit->clear();
-    ui->productComboBox->setCurrentIndex(0);
+    ui->productIdLineEdit->clear();
     ui->productNameLineEdit->clear();
     ui->priceLineEdit->clear();
     ui->quantitySpinBox->setValue(1);
     ui->paymentMethodComboBox->setCurrentIndex(0);
-    
-    // Refresh product combo box to update stock availability
-    populateProductComboBox();
     
     /* TODO: Uncomment after adding UI elements in Qt Designer
     ui->saleStatusComboBox->setCurrentIndex(0);
@@ -334,21 +336,21 @@ bool SalesWindow::validateSale()
 
 void SalesWindow::on_addProductButton_clicked()
 {
-    // Get selected product from combo box
-    int productId = ui->productComboBox->currentData().toInt();
-    
-    if (productId <= 0) {
-        QMessageBox::warning(this, "Erreur de saisie", "Veuillez sélectionner un produit!");
-        return;
-    }
-    
+    QString productIdStr = ui->productIdLineEdit->text();
     QString productName = ui->productNameLineEdit->text();
     QString priceStr = ui->priceLineEdit->text();
     
-    if (productName.isEmpty() || priceStr.isEmpty()) {
-        QMessageBox::warning(this, "Erreur de saisie", "Veuillez sélectionner un produit valide!");
+    if (productIdStr.isEmpty()) {
+        QMessageBox::warning(this, "Erreur de saisie", "Veuillez entrer une référence de produit!");
         return;
     }
+    
+    if (productName.isEmpty()) {
+        QMessageBox::warning(this, "Erreur de saisie", "Veuillez d'abord rechercher un produit par son ID!");
+        return;
+    }
+    
+    int productId = productIdStr.toInt();
     
     // Get product details from database
     QSqlQuery query;
@@ -407,8 +409,10 @@ void SalesWindow::on_addProductButton_clicked()
             
             updateTotals();
             
-            // Reset product selection
-            ui->productComboBox->setCurrentIndex(0);
+            // Clear product input fields
+            ui->productIdLineEdit->clear();
+            ui->productNameLineEdit->clear();
+            ui->priceLineEdit->clear();
             
             return;
         }
@@ -428,11 +432,10 @@ void SalesWindow::on_addProductButton_clicked()
     // Add to cart items list
     cartItems.append(qMakePair(reference, quantity));
     
-    // Reset product selection
-    ui->productComboBox->setCurrentIndex(0);
-    
-    // Refresh product combo box to update stock availability
-    populateProductComboBox();
+    // Clear product input fields
+    ui->productIdLineEdit->clear();
+    ui->productNameLineEdit->clear();
+    ui->priceLineEdit->clear();
     
     updateTotals();
 }
@@ -487,89 +490,70 @@ void SalesWindow::on_customerSearchButton_clicked()
     }
 }
 
-void SalesWindow::populateProductComboBox()
+void SalesWindow::on_productSearchButton_clicked()
 {
-    ui->productComboBox->clear();
-    ui->productComboBox->addItem("Sélectionner un produit", 0);
+    QString searchText = ui->productIdLineEdit->text();
     
-    QSqlDatabase db = QSqlDatabase::database();
-    if (!db.isValid() || !db.isOpen()) {
-        qDebug() << "⚠️ Database not connected in populateProductComboBox()";
+    if (searchText.isEmpty()) {
+        QMessageBox::warning(this, "Erreur de recherche", "Veuillez entrer une référence de produit!");
         return;
     }
     
-    // Get all products from database using direct query for better control
-    QSqlQuery query(db);
-    QString sql = "SELECT reference, designation, quantite, prix FROM produit ORDER BY reference";
-    
-    if (!query.exec(sql)) {
-        qDebug() << "❌ Error with lowercase query:" << query.lastError().text();
-        // Try uppercase table name
-        query.clear();
-        sql = "SELECT REFERENCE, DESIGNATION, QUANTITE, PRIX FROM PRODUIT ORDER BY REFERENCE";
-        if (!query.exec(sql)) {
-            qDebug() << "❌ Error with uppercase query:" << query.lastError().text();
-            return;
-        }
-    }
-    
-    int productCount = 0;
-    while (query.next()) {
-        int reference = query.value(0).toInt();
-        QString designation = query.value(1).toString();
-        int quantite = query.value(2).toInt();
-        double prix = query.value(3).toDouble();
-        
-        // Show ALL products, but indicate stock status
-        QString displayText;
-        if (quantite > 0) {
-            displayText = QString("%1 - %2 (Stock: %3, Prix: %4)").arg(reference).arg(designation).arg(quantite).arg(prix, 0, 'f', 2);
-        } else {
-            displayText = QString("%1 - %2 (Rupture de stock, Prix: %3)").arg(reference).arg(designation).arg(prix, 0, 'f', 2);
-        }
-        
-        ui->productComboBox->addItem(displayText, reference);
-        productCount++;
-    }
-    
-    qDebug() << "✅ Loaded" << productCount << "products into combo box";
-}
-
-void SalesWindow::on_productComboBox_currentIndexChanged(int index)
-{
-    if (index <= 0) {
-        // First item is "Sélectionner un produit" or no selection
-        ui->productNameLineEdit->clear();
-        ui->priceLineEdit->clear();
-        ui->quantitySpinBox->setMaximum(999);
-        return;
-    }
-    
-    int reference = ui->productComboBox->currentData().toInt();
-    if (reference <= 0) return;
-    
-    // Get product details from database
+    // Search product in database by ID and get name and price
     QSqlQuery query;
-    query.prepare("SELECT reference, designation, prix, quantite FROM produit WHERE reference = :reference");
-    query.bindValue(":reference", reference);
+    query.prepare("SELECT reference, designation, prix FROM produit WHERE reference = :reference");
+    query.bindValue(":reference", searchText.toInt());
     
     if (query.exec() && query.next()) {
+        // Display product name and price
         QString designation = query.value(1).toString();
         double prix = query.value(2).toDouble();
-        int stockDisponible = query.value(3).toInt();
         
         ui->productNameLineEdit->setText(designation);
         ui->priceLineEdit->setText(QString::number(prix, 'f', 2));
         
-        // Set maximum quantity based on stock
-        ui->quantitySpinBox->setMaximum(stockDisponible);
-        ui->quantitySpinBox->setValue(1);
+        // No need for a success message - just update the fields
     } else {
+        QMessageBox::warning(this, "Produit non trouvé", "Aucun produit trouvé avec cette référence.");
         ui->productNameLineEdit->clear();
         ui->priceLineEdit->clear();
     }
 }
 
+/* TODO: Uncomment after adding UI elements in Qt Designer
+void SalesWindow::on_productComboBox_currentIndexChanged(int index)
+{
+    if (index < 0) return;
+    
+    int productId = ui->productComboBox->currentData().toInt();
+    if (productId <= 0) return;
+    
+    // Get product details from database
+    QSqlQuery query;
+    query.prepare("SELECT reference, designation, prix, quantite FROM produit WHERE reference = :reference");
+    query.bindValue(":reference", productId);
+    
+    if (query.exec() && query.next()) {
+        ui->productIdLineEdit->setText(query.value(0).toString());
+        ui->productNameLineEdit->setText(query.value(1).toString());
+        ui->priceLineEdit->setText(QString::number(query.value(2).toDouble(), 'f', 2));
+        
+        // Set maximum quantity based on stock
+        int stockQuantity = query.value(3).toInt();
+        ui->quantitySpinBox->setMaximum(stockQuantity);
+        
+        // Update stock information
+        ui->stockInfoLabel->setText(QString("Stock disponible: %1").arg(stockQuantity));
+    }
+}
+
+void SalesWindow::on_employeeComboBox_currentIndexChanged(int index)
+{
+    if (index < 0) return;
+    
+    currentEmployeId = ui->employeeComboBox->currentData().toInt();
+}
+*/
 
 void SalesWindow::on_saveSaleButton_clicked()
 {
@@ -695,10 +679,6 @@ void SalesWindow::on_saveSaleButton_clicked()
     
     // Clear form and refresh table
     clearSaleForm();
-    
-    // Refresh product combo box to update stock after sale
-    populateProductComboBox();
-    
     refreshSalesTable();
 }
 
@@ -776,37 +756,11 @@ void SalesWindow::on_endDateEdit_dateChanged(const QDate &date)
     }
 }
 
-void SalesWindow::on_dashboardButton_clicked()
-{
-    // Find existing dashboard window or create new one
-    DashboardWindow *dashboardWindow = nullptr;
-    QWidgetList topLevelWidgets = QApplication::topLevelWidgets();
-    
-    for (QWidget *widget : topLevelWidgets) {
-        if (DashboardWindow *dashboard = qobject_cast<DashboardWindow*>(widget)) {
-            dashboardWindow = dashboard;
-            break;
-        }
-    }
-    
-    if (!dashboardWindow) {
-        dashboardWindow = new DashboardWindow();
-    }
-    
-    dashboardWindow->show();
-    dashboardWindow->raise();
-    dashboardWindow->activateWindow();
-    this->hide();
-}
-
- 
-
 void SalesWindow::on_salesButton_clicked()
 {
     // Already in sales window, refresh
     refreshSalesTable();
 }
-
 
 void SalesWindow::on_pushButton_clicked()
 {
@@ -1054,435 +1008,4 @@ void SalesWindow::on_deleteSaleButton_clicked()
             QMessageBox::critical(this, "Erreur", "Impossible de supprimer la vente.");
         }
     }
-}
-
-void SalesWindow::on_exportPdfButton_clicked()
-{
-    exportSalesToPdf();
-}
-
-void SalesWindow::exportSalesToPdf()
-{
-    // Check if there are any sales to export
-    if (!salesModel || salesModel->rowCount() == 0) {
-        QMessageBox::warning(this, "Avertissement", "Aucune vente à exporter.");
-        return;
-    }
-    
-    // Get file path for saving PDF
-    QString fileName = QFileDialog::getSaveFileName(this, 
-        "Exporter les ventes en PDF", 
-        QString("factures_%1.pdf").arg(QDate::currentDate().toString("yyyy-MM-dd")),
-        "PDF Files (*.pdf)");
-    
-    if (fileName.isEmpty()) {
-        return;
-    }
-    
-    // Ensure .pdf extension
-    if (!fileName.endsWith(".pdf", Qt::CaseInsensitive)) {
-        fileName += ".pdf";
-    }
-    
-    // Check if file exists and can be written
-    QFileInfo fileInfo(fileName);
-    if (fileInfo.exists() && !fileInfo.isWritable()) {
-        QMessageBox::critical(this, "Erreur", "Le fichier existe déjà et ne peut pas être modifié.\nVeuillez choisir un autre nom ou fermer le fichier s'il est ouvert.");
-        return;
-    }
-    
-    // Create PDF writer
-    QPdfWriter pdfWriter(fileName);
-    pdfWriter.setPageSize(QPageSize::A4);
-    pdfWriter.setPageMargins(QMarginsF(15, 15, 15, 15), QPageLayout::Millimeter);
-    
-    // Create painter
-    QPainter painter(&pdfWriter);
-    painter.setRenderHint(QPainter::Antialiasing);
-    
-    // Check if PDF writer is valid
-    if (!painter.isActive()) {
-        QMessageBox::critical(this, "Erreur", "Impossible de créer le fichier PDF.\nVérifiez que le fichier n'est pas ouvert dans une autre application.");
-        return;
-    }
-    
-    // Company information (you can customize these)
-    QString companyName = "Smart Optical Store";
-    QString companyAddress = "123 Rue Principale, Tunis, Tunisie";
-    QString companyPhone = "+216 12 345 678";
-    QString companyEmail = "contact@smartopticalstore.com";
-    
-    // Page dimensions (in pixels)
-    int pageWidth = pdfWriter.width();
-    int pageHeight = pdfWriter.height();
-    int margin = 60;
-    int yPos = margin;
-    
-    // Setup fonts
-    QFont titleFont("Arial", 24, QFont::Bold);
-    QFont headerFont("Arial", 11, QFont::Bold);
-    QFont normalFont("Arial", 9);
-    QFont smallFont("Arial", 8);
-    QFont tableHeaderFont("Arial", 9, QFont::Bold);
-    QFont tableFont("Arial", 9);
-    
-    // Process each sale
-    for (int row = 0; row < salesModel->rowCount(); ++row) {
-        if (row > 0) {
-            pdfWriter.newPage();
-            yPos = margin;
-        }
-        
-        // Get sale data with error checking
-        QModelIndex idx;
-        int saleId = 0;
-        QString clientName = "";
-        QDate saleDateObj;
-        double prixTTCval = 0.0;
-        double prixHTval = 0.0;
-        double tvaVal = 0.0;
-        double remiseVal = 0.0;
-        QString statutPaiement = "";
-        QString modePaiement = "";
-        QDate dateLivraisonObj;
-        
-        // Safely get data from model
-        if (row >= 0 && row < salesModel->rowCount()) {
-            idx = salesModel->index(row, 0);
-            if (idx.isValid()) saleId = salesModel->data(idx).toInt();
-            
-            idx = salesModel->index(row, 1);
-            if (idx.isValid()) clientName = salesModel->data(idx).toString();
-            
-            idx = salesModel->index(row, 3);
-            if (idx.isValid()) {
-                QVariant dateVar = salesModel->data(idx);
-                if (dateVar.type() == QVariant::Date) {
-                    saleDateObj = dateVar.toDate();
-                } else {
-                    QString dateStr = dateVar.toString();
-                    saleDateObj = QDate::fromString(dateStr, "yyyy-MM-dd");
-                    if (!saleDateObj.isValid()) {
-                        saleDateObj = QDate::fromString(dateStr, Qt::ISODate);
-                    }
-                }
-            }
-            
-            idx = salesModel->index(row, 4);
-            if (idx.isValid()) {
-                QVariant priceVar = salesModel->data(idx);
-                QString priceStr = priceVar.toString();
-                priceStr.remove(" DT");
-                prixTTCval = priceVar.toDouble();
-                if (prixTTCval == 0.0) prixTTCval = priceStr.toDouble();
-            }
-            
-            idx = salesModel->index(row, 5);
-            if (idx.isValid()) {
-                QVariant priceVar = salesModel->data(idx);
-                QString priceStr = priceVar.toString();
-                priceStr.remove(" DT");
-                prixHTval = priceVar.toDouble();
-                if (prixHTval == 0.0) prixHTval = priceStr.toDouble();
-            }
-            
-            idx = salesModel->index(row, 6);
-            if (idx.isValid()) {
-                QVariant priceVar = salesModel->data(idx);
-                QString priceStr = priceVar.toString();
-                priceStr.remove(" DT");
-                remiseVal = priceVar.toDouble();
-                if (remiseVal == 0.0) remiseVal = priceStr.toDouble();
-            }
-            
-            idx = salesModel->index(row, 7);
-            if (idx.isValid()) {
-                QVariant priceVar = salesModel->data(idx);
-                QString priceStr = priceVar.toString();
-                priceStr.remove(" DT");
-                tvaVal = priceVar.toDouble();
-                if (tvaVal == 0.0) tvaVal = priceStr.toDouble();
-            }
-            
-            idx = salesModel->index(row, 9);
-            if (idx.isValid()) statutPaiement = salesModel->data(idx).toString();
-            
-            idx = salesModel->index(row, 10);
-            if (idx.isValid()) modePaiement = salesModel->data(idx).toString();
-            
-            idx = salesModel->index(row, 11);
-            if (idx.isValid()) {
-                QVariant dateVar = salesModel->data(idx);
-                if (dateVar.type() == QVariant::Date) {
-                    dateLivraisonObj = dateVar.toDate();
-                } else {
-                    QString dateStr = dateVar.toString();
-                    if (!dateStr.isEmpty() && dateStr != "Invalid") {
-                        dateLivraisonObj = QDate::fromString(dateStr, "yyyy-MM-dd");
-                        if (!dateLivraisonObj.isValid()) {
-                            dateLivraisonObj = QDate::fromString(dateStr, Qt::ISODate);
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Skip if invalid sale ID
-        if (saleId <= 0) {
-            qDebug() << "Skipping invalid sale at row" << row;
-            continue;
-        }
-        
-        // Get client details
-        QSqlQuery clientQuery;
-        clientQuery.prepare("SELECT c.nom, c.prenom, c.email, c.adresse, c.telephone "
-                           "FROM clients c "
-                           "JOIN vente v ON c.id_client = v.id_client "
-                           "WHERE v.id_vente = :id_vente");
-        clientQuery.bindValue(":id_vente", saleId);
-        QString clientFullName = clientName.isEmpty() ? "Client inconnu" : clientName;
-        QString clientEmail = "";
-        QString clientAddress = "";
-        QString clientPhone = "";
-        if (clientQuery.exec() && clientQuery.next()) {
-            QString nom = clientQuery.value(0).toString();
-            QString prenom = clientQuery.value(1).toString();
-            if (!nom.isEmpty() || !prenom.isEmpty()) {
-                clientFullName = "M. " + nom + " " + prenom; // Format: M. NOM PRENOM
-            }
-            clientEmail = clientQuery.value(2).toString();
-            clientAddress = clientQuery.value(3).toString();
-            clientPhone = clientQuery.value(4).toString();
-        }
-        
-        // ===== HEADER SECTION =====
-        // Top bar
-        painter.setPen(QPen(QColor(50, 50, 50), 2));
-        painter.setBrush(QColor(240, 240, 240));
-        painter.drawRect(0, 0, pageWidth, 80);
-        
-        // Company name and logo area (left)
-        painter.setPen(Qt::black);
-        painter.setFont(headerFont);
-        painter.drawText(margin, 20, pageWidth / 2 - margin, 30, Qt::AlignLeft | Qt::AlignVCenter, companyName);
-        painter.setFont(smallFont);
-        painter.drawText(margin, 45, pageWidth / 2 - margin, 30, Qt::AlignLeft | Qt::AlignVCenter, companyAddress);
-        
-        // Invoice title and details (right)
-        painter.setFont(titleFont);
-        painter.drawText(pageWidth / 2, 15, pageWidth / 2 - margin, 35, Qt::AlignRight | Qt::AlignTop, "FACTURE");
-        
-        painter.setFont(normalFont);
-        // Format sale date
-        QString formattedSaleDate = saleDateObj.isValid() ? saleDateObj.toString("dd/MM/yyyy") : QDate::currentDate().toString("dd/MM/yyyy");
-        painter.drawText(pageWidth / 2, 45, pageWidth / 2 - margin, 15, Qt::AlignRight | Qt::AlignTop, 
-                        "DATE: " + formattedSaleDate);
-        // Format delivery date (échéance)
-        if (dateLivraisonObj.isValid()) {
-            painter.drawText(pageWidth / 2, 60, pageWidth / 2 - margin, 15, Qt::AlignRight | Qt::AlignTop, 
-                            "ÉCHÉANCE: " + dateLivraisonObj.toString("dd/MM/yyyy"));
-        }
-        painter.drawText(pageWidth / 2, 75, pageWidth / 2 - margin, 15, Qt::AlignRight | Qt::AlignTop, 
-                        "FACTURE N°: " + QString::number(saleId));
-        
-        yPos = 100;
-        
-        // ===== SENDER AND RECIPIENT SECTION =====
-        // Sender (Company) - Left side
-        painter.setFont(headerFont);
-        painter.drawText(margin, yPos, pageWidth / 2 - margin - 20, 20, Qt::AlignLeft, "ÉMETTEUR:");
-        painter.setFont(normalFont);
-        painter.drawText(margin, yPos + 20, pageWidth / 2 - margin - 20, 15, Qt::AlignLeft, companyPhone);
-        painter.drawText(margin, yPos + 35, pageWidth / 2 - margin - 20, 15, Qt::AlignLeft, companyEmail);
-        painter.drawText(margin, yPos + 50, pageWidth / 2 - margin - 20, 15, Qt::AlignLeft, companyAddress);
-        
-        // Recipient (Client) - Right side
-        painter.setFont(headerFont);
-        painter.drawText(pageWidth / 2 + 20, yPos, pageWidth / 2 - margin - 20, 20, Qt::AlignLeft, "DESTINATAIRE:");
-        painter.setFont(normalFont);
-        painter.drawText(pageWidth / 2 + 20, yPos + 20, pageWidth / 2 - margin - 20, 15, Qt::AlignLeft, clientFullName);
-        if (!clientEmail.isEmpty()) {
-            painter.drawText(pageWidth / 2 + 20, yPos + 35, pageWidth / 2 - margin - 20, 15, Qt::AlignLeft, clientEmail);
-        }
-        if (!clientAddress.isEmpty()) {
-            painter.drawText(pageWidth / 2 + 20, yPos + 50, pageWidth / 2 - margin - 20, 15, Qt::AlignLeft, clientAddress);
-        }
-        if (!clientPhone.isEmpty()) {
-            painter.drawText(pageWidth / 2 + 20, yPos + 65, pageWidth / 2 - margin - 20, 15, Qt::AlignLeft, clientPhone);
-        }
-        
-        yPos += 100;
-        
-        // ===== PRODUCTS TABLE =====
-        // Table header background
-        painter.setPen(Qt::NoPen);
-        painter.setBrush(QColor(230, 230, 230));
-        painter.drawRect(margin, yPos, pageWidth - 2 * margin, 30);
-        
-        // Table headers
-        painter.setPen(Qt::black);
-        painter.setFont(tableHeaderFont);
-        int colWidth1 = (pageWidth - 2 * margin) * 0.40; // Description
-        int colWidth2 = (pageWidth - 2 * margin) * 0.20; // Prix Unitaire
-        int colWidth3 = (pageWidth - 2 * margin) * 0.15; // Quantité
-        int colWidth4 = (pageWidth - 2 * margin) * 0.25; // Total
-        
-        painter.drawText(margin + 10, yPos, colWidth1 - 10, 30, Qt::AlignLeft | Qt::AlignVCenter, "Description:");
-        painter.drawText(margin + colWidth1 + 10, yPos, colWidth2 - 10, 30, Qt::AlignRight | Qt::AlignVCenter, "Prix Unitaire:");
-        painter.drawText(margin + colWidth1 + colWidth2 + 10, yPos, colWidth3 - 10, 30, Qt::AlignCenter | Qt::AlignVCenter, "Quantité:");
-        painter.drawText(margin + colWidth1 + colWidth2 + colWidth3 + 10, yPos, colWidth4 - 10, 30, Qt::AlignRight | Qt::AlignVCenter, "Total:");
-        
-        yPos += 30;
-        
-        // Get products for this sale
-        QSqlQueryModel* productsModel = venteObj.afficherProduitsVente(saleId);
-        
-        // Draw table rows
-        painter.setFont(tableFont);
-        if (productsModel && productsModel->rowCount() > 0) {
-            for (int pRow = 0; pRow < productsModel->rowCount(); ++pRow) {
-                QModelIndex pIdx;
-                QString designation = "";
-                double prixUnitaire = 0.0;
-                int quantite = 0;
-                double total = 0.0;
-                
-                pIdx = productsModel->index(pRow, 1);
-                if (pIdx.isValid()) designation = productsModel->data(pIdx).toString();
-                
-                pIdx = productsModel->index(pRow, 2);
-                if (pIdx.isValid()) prixUnitaire = productsModel->data(pIdx).toDouble();
-                
-                pIdx = productsModel->index(pRow, 3);
-                if (pIdx.isValid()) quantite = productsModel->data(pIdx).toInt();
-                
-                pIdx = productsModel->index(pRow, 4);
-                if (pIdx.isValid()) {
-                    total = productsModel->data(pIdx).toDouble();
-                    // If total is 0, calculate it
-                    if (total == 0.0 && prixUnitaire > 0 && quantite > 0) {
-                        total = prixUnitaire * quantite;
-                    }
-                }
-                
-                if (designation.isEmpty()) designation = "Produit inconnu";
-                
-                // Draw row border
-                painter.setPen(QPen(QColor(200, 200, 200), 1));
-                painter.drawLine(margin, yPos, pageWidth - margin, yPos);
-                
-                // Draw product data
-                painter.setPen(Qt::black);
-                painter.drawText(margin + 10, yPos, colWidth1 - 10, 25, Qt::AlignLeft | Qt::AlignVCenter, designation);
-                painter.drawText(margin + colWidth1 + 10, yPos, colWidth2 - 10, 25, Qt::AlignRight | Qt::AlignVCenter, 
-                                QString::number(prixUnitaire, 'f', 2) + " DT");
-                painter.drawText(margin + colWidth1 + colWidth2 + 10, yPos, colWidth3 - 10, 25, Qt::AlignCenter | Qt::AlignVCenter, 
-                                QString::number(quantite));
-                painter.drawText(margin + colWidth1 + colWidth2 + colWidth3 + 10, yPos, colWidth4 - 10, 25, Qt::AlignRight | Qt::AlignVCenter, 
-                                QString::number(total, 'f', 2) + " DT");
-                
-                yPos += 25;
-            }
-        } else {
-            // No products found - draw a message
-            painter.setPen(QPen(QColor(200, 200, 200), 1));
-            painter.drawLine(margin, yPos, pageWidth - margin, yPos);
-            painter.setPen(Qt::black);
-            painter.drawText(margin + 10, yPos, pageWidth - 2 * margin - 10, 25, Qt::AlignLeft | Qt::AlignVCenter, 
-                            "Aucun produit trouvé pour cette vente");
-            yPos += 25;
-        }
-        
-        if (productsModel) {
-            delete productsModel;
-            productsModel = nullptr;
-        }
-        
-        // Draw bottom border of table
-        painter.setPen(QPen(QColor(200, 200, 200), 1));
-        painter.drawLine(margin, yPos, pageWidth - margin, yPos);
-        
-        yPos += 20;
-        
-        // ===== SUMMARY SECTION =====
-        // Summary on the right
-        int summaryX = pageWidth - margin - colWidth4;
-        int summaryWidth = colWidth4;
-        
-        painter.setFont(tableHeaderFont);
-        painter.setPen(Qt::black);
-        
-        // TOTAL HT
-        painter.drawText(summaryX, yPos, summaryWidth - 10, 20, Qt::AlignLeft, "TOTAL HT:");
-        painter.drawText(summaryX, yPos, summaryWidth - 10, 20, Qt::AlignRight, QString::number(prixHTval, 'f', 2) + " DT");
-        yPos += 20;
-        
-        // TVA
-        painter.drawText(summaryX, yPos, summaryWidth - 10, 20, Qt::AlignLeft, "TVA 19%:");
-        painter.drawText(summaryX, yPos, summaryWidth - 10, 20, Qt::AlignRight, QString::number(tvaVal, 'f', 2) + " DT");
-        yPos += 20;
-        
-        // REMISE
-        if (remiseVal > 0) {
-            painter.drawText(summaryX, yPos, summaryWidth - 10, 20, Qt::AlignLeft, "REMISE:");
-            painter.drawText(summaryX, yPos, summaryWidth - 10, 20, Qt::AlignRight, "-" + QString::number(remiseVal, 'f', 2) + " DT");
-            yPos += 20;
-        }
-        
-        // TOTAL TTC (bold and larger)
-        painter.setFont(headerFont);
-        painter.drawText(summaryX, yPos, summaryWidth - 10, 25, Qt::AlignLeft, "TOTAL TTC:");
-        painter.drawText(summaryX, yPos, summaryWidth - 10, 25, Qt::AlignRight, QString::number(prixTTCval, 'f', 2) + " DT");
-        yPos += 30;
-        
-        // ===== PAYMENT INFORMATION =====
-        painter.setFont(headerFont);
-        painter.drawText(margin, yPos, pageWidth / 2 - margin, 20, Qt::AlignLeft, "RÈGLEMENT:");
-        painter.setFont(normalFont);
-        if (!modePaiement.isEmpty()) {
-            painter.drawText(margin, yPos + 20, pageWidth / 2 - margin, 15, Qt::AlignLeft, "Par " + modePaiement + ":");
-        }
-        if (!statutPaiement.isEmpty()) {
-            painter.drawText(margin, yPos + 35, pageWidth / 2 - margin, 15, Qt::AlignLeft, "Statut: " + statutPaiement);
-        }
-        
-        yPos += 60;
-        
-        // ===== FOOTER =====
-        painter.setPen(QPen(QColor(200, 200, 200), 1));
-        painter.drawLine(margin, yPos, pageWidth - margin, yPos);
-        yPos += 10;
-        
-        painter.setFont(smallFont);
-        painter.setPen(QColor(100, 100, 100));
-        QString footerText = "En cas de retard de paiement, et conformément au code de commerce, "
-                            "une indemnité calculée à trois fois le taux d'intérêt légal ainsi qu'un "
-                            "frais de recouvrement de 40 dinars sont exigibles. "
-                            "Conditions générales de vente consultables sur le site: www.smartopticalstore.com";
-        QRect footerRect(margin, yPos, pageWidth - 2 * margin, 40);
-        painter.drawText(footerRect, Qt::TextWordWrap, footerText);
-    }
-    
-    painter.end();
-    
-    QMessageBox::information(this, "Succès", 
-        QString("Les factures ont été exportées avec succès vers:\n%1").arg(fileName));
-}
-
-bool SalesWindow::eventFilter(QObject *obj, QEvent *event)
-{
-    if (obj == ui->topRightLogoLabel && event->type() == QEvent::MouseButtonPress) {
-        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-        if (mouseEvent->button() == Qt::LeftButton) {
-            on_logoClicked();
-            return true;
-        }
-    }
-    return QMainWindow::eventFilter(obj, event);
-}
-
-void SalesWindow::on_logoClicked()
-{
-    DashboardWindow::getInstance();
-    this->close();
 }

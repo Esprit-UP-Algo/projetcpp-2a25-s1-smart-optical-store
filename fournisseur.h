@@ -3,58 +3,53 @@
 
 #include <QString>
 #include <QSqlQuery>
-#include <QSqlError>
 #include <QSqlQueryModel>
+#include <QSqlError>
 #include <QDebug>
+#include <QDate>
 
 class Fournisseur
 {
 public:
+    // Constructeurs
     Fournisseur();
-    Fournisseur(int id, const QString &nomEntreprise, const QString &nomContact, 
-                const QString &email, const QString &telephone, const QString &typeProduit, 
-                const QString &conditionPaiement, const QString &historiqueCommande);
-    
+    Fournisseur(int, QString, QString, QString, QString, QString, int, QDate);
+
     // Getters
-    int getId() const { return id_fournisseur; }
-    QString getNomEntreprise() const { return nom_entreprise; }
-    QString getNomContact() const { return nom_contact; }
-    QString getEmail() const { return email; }
-    QString getTelephone() const { return telephone; }
-    QString getTypeProduit() const { return type_produit_fournis; }
-    QString getConditionPaiement() const { return condition_paiement; }
-    QString getHistoriqueCommande() const { return historique_commande_passee; }
-    
+    int get_id_fournisseur();
+    QString get_nom_entreprise();
+    QString get_nom_contact();
+    QString get_email();
+    QString get_telephone();
+    QString get_type_produit_fournis();
+    int get_condition_paiement();
+    QDate get_historique();
+
     // Setters
-    void setId(int id) { id_fournisseur = id; }
-    void setNomEntreprise(const QString &nom) { nom_entreprise = nom; }
-    void setNomContact(const QString &nom) { nom_contact = nom; }
-    void setEmail(const QString &value) { email = value; }
-    void setTelephone(const QString &value) { telephone = value; }
-    void setTypeProduit(const QString &type) { type_produit_fournis = type; }
-    void setConditionPaiement(const QString &condition) { condition_paiement = condition; }
-    void setHistoriqueCommande(const QString &historique) { historique_commande_passee = historique; }
-    
-    // CRUD Operations
+    void set_id_fournisseur(int);
+    void set_nom_entreprise(QString);
+    void set_nom_contact(QString);
+    void set_email(QString);
+    void set_telephone(QString);
+    void set_type_produit_fournis(QString);
+    void set_condition_paiement(int);
+    void set_historique(QDate);
+
+    // Méthodes CRUD
     bool ajouter();
-    bool supprimer(int id);
-    bool modifier();
+    bool supprimer(int);
+    bool modifier(int);
     QSqlQueryModel* afficher();
-    QSqlQueryModel* rechercher(const QString &critere);
-    
-    // Méthodes spécifiques pour les fournisseurs
-    bool associerProduit(int idFournisseur, int refProduit);
-    QSqlQueryModel* afficherProduitsFournis(int idFournisseur);
-    
+
 private:
     int id_fournisseur;
     QString nom_entreprise;
     QString nom_contact;
     QString email;
-    QString telephone;
+    QString telephone;  // String pour vérifier 8 chiffres
     QString type_produit_fournis;
-    QString condition_paiement;
-    QString historique_commande_passee;
+    int condition_paiement;  // 0 ou 1 seulement
+    QDate historique;  // Date
 };
 
 #endif // FOURNISSEUR_H

@@ -1,7 +1,3 @@
-
-#include "dashboardwindow.h"
-#include <QApplication>
-#include <QFile>
 #include "gestionemploye00.h"
 #include "login.h"
 #include "tab.h"
@@ -10,33 +6,10 @@
 #include "Connection.h"
 #include <QApplication>
 #include <QMessageBox>
-#include <QObject>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    
-    // Set application style
-    a.setStyle("Fusion");
-    
-    // Load and apply stylesheet
-    QFile styleFile(":/styles/style.qss");
-    if (styleFile.open(QFile::ReadOnly)) {
-        QString style = styleFile.readAll();
-        a.setStyleSheet(style);
-        styleFile.close();
-    }
-    
-    // Start with dashboard window
-    DashboardWindow dashboardWindow;
-    dashboardWindow.show();
-    
-    return a.exec();
-}
-
-    login l;
-    l.show();
-    return a.exec();
     Connection c;
     bool test = c.createconnect();
     
