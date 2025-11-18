@@ -382,6 +382,7 @@ Makefile: ../../Atelier_Connexion.pro C:/Users/mimi/Desktop/mimi/6.7.3/mingw_64/
 		C:/Users/mimi/Desktop/mimi/6.7.3/mingw_64/lib/Qt6Gui.prl \
 		C:/Users/mimi/Desktop/mimi/6.7.3/mingw_64/lib/Qt6Sql.prl \
 		C:/Users/mimi/Desktop/mimi/6.7.3/mingw_64/lib/Qt6Network.prl \
+		C:/Users/mimi/Desktop/mimi/6.7.3/mingw_64/lib/Qt6SerialPort.prl \
 		C:/Users/mimi/Desktop/mimi/6.7.3/mingw_64/lib/Qt6Core.prl \
 		C:/Users/mimi/Desktop/mimi/6.7.3/mingw_64/lib/Qt6EntryPoint.prl \
 		C:/Users/mimi/Desktop/mimi/6.7.3/mingw_64/mkspecs/features/build_pass.prf
@@ -698,6 +699,7 @@ C:/Users/mimi/Desktop/mimi/6.7.3/mingw_64/lib/Qt6Widgets.prl:
 C:/Users/mimi/Desktop/mimi/6.7.3/mingw_64/lib/Qt6Gui.prl:
 C:/Users/mimi/Desktop/mimi/6.7.3/mingw_64/lib/Qt6Sql.prl:
 C:/Users/mimi/Desktop/mimi/6.7.3/mingw_64/lib/Qt6Network.prl:
+C:/Users/mimi/Desktop/mimi/6.7.3/mingw_64/lib/Qt6SerialPort.prl:
 C:/Users/mimi/Desktop/mimi/6.7.3/mingw_64/lib/Qt6Core.prl:
 C:/Users/mimi/Desktop/mimi/6.7.3/mingw_64/lib/Qt6EntryPoint.prl:
 C:/Users/mimi/Desktop/mimi/6.7.3/mingw_64/mkspecs/features/build_pass.prf:

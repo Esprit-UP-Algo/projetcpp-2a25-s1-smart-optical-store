@@ -74,9 +74,11 @@ public:
     QPushButton *pushButton;
     QPushButton *pushButton_9;
     QLabel *image;
+    QPushButton *on;
+    QPushButton *off;
     QWidget *page_4;
     QLabel *image2;
-    QTableWidget *tableWidget_5;
+    QLabel *label;
     QPushButton *pushButton_4;
     QPushButton *pushButton_3;
     QWidget *page_8;
@@ -302,7 +304,6 @@ public:
         comboBox = new QComboBox(page_3);
         comboBox->addItem(QString());
         comboBox->addItem(QString());
-        comboBox->addItem(QString());
         comboBox->setObjectName("comboBox");
         comboBox->setGeometry(QRect(770, 60, 151, 41));
         QFont font1;
@@ -509,6 +510,18 @@ public:
         image->setObjectName("image");
         image->setGeometry(QRect(950, 10, 41, 41));
         image->setPixmap(QPixmap(QString::fromUtf8("../../../Desktop/gsxg/images/1223.jpg")));
+        on = new QPushButton(page_3);
+        on->setObjectName("on");
+        on->setGeometry(QRect(380, 90, 61, 21));
+        on->setFont(font2);
+        on->setStyleSheet(QString::fromUtf8("background-color: rgb(0, 0, 127);\n"
+""));
+        off = new QPushButton(page_3);
+        off->setObjectName("off");
+        off->setGeometry(QRect(470, 90, 61, 21));
+        off->setFont(font2);
+        off->setStyleSheet(QString::fromUtf8("background-color: rgb(0, 0, 127);\n"
+""));
         travaille->addWidget(page_3);
         lineEdit_6->raise();
         tableWidget->raise();
@@ -520,46 +533,17 @@ public:
         pushButton_9->raise();
         image->raise();
         pushButton->raise();
+        on->raise();
+        off->raise();
         page_4 = new QWidget();
         page_4->setObjectName("page_4");
         image2 = new QLabel(page_4);
         image2->setObjectName("image2");
         image2->setGeometry(QRect(930, 20, 51, 61));
         image2->setPixmap(QPixmap(QString::fromUtf8("../../../Desktop/gsxg/images/1223.jpg")));
-        tableWidget_5 = new QTableWidget(page_4);
-        if (tableWidget_5->columnCount() < 5)
-            tableWidget_5->setColumnCount(5);
-        QTableWidgetItem *__qtablewidgetitem9 = new QTableWidgetItem();
-        __qtablewidgetitem9->setFont(font);
-        tableWidget_5->setHorizontalHeaderItem(0, __qtablewidgetitem9);
-        QTableWidgetItem *__qtablewidgetitem10 = new QTableWidgetItem();
-        tableWidget_5->setHorizontalHeaderItem(1, __qtablewidgetitem10);
-        QTableWidgetItem *__qtablewidgetitem11 = new QTableWidgetItem();
-        tableWidget_5->setHorizontalHeaderItem(2, __qtablewidgetitem11);
-        QTableWidgetItem *__qtablewidgetitem12 = new QTableWidgetItem();
-        tableWidget_5->setHorizontalHeaderItem(3, __qtablewidgetitem12);
-        QTableWidgetItem *__qtablewidgetitem13 = new QTableWidgetItem();
-        tableWidget_5->setHorizontalHeaderItem(4, __qtablewidgetitem13);
-        tableWidget_5->setObjectName("tableWidget_5");
-        tableWidget_5->setGeometry(QRect(170, 80, 621, 321));
-        tableWidget_5->setMinimumSize(QSize(621, 0));
-        tableWidget_5->setMaximumSize(QSize(621, 16777215));
-        tableWidget_5->setStyleSheet(QString::fromUtf8("QTableWidget {\n"
-"    border: 3px solid #1E3A8A;   /* outer border */\n"
-"    gridline-color: #1E3A8A;     /* inner cell lines */\n"
-"    color: black;                /* text color inside cells */\n"
-"    background-color: white;     /* cell background */\n"
-"}\n"
-"\n"
-"QHeaderView::section {\n"
-"    border: 1px solid #1E3A8A;\n"
-"    color: black;                /* header text color */\n"
-"    background-color: #E0F2FE;   /* light blue header background */\n"
-"    font-weight: bold;\n"
-"}\n"
-"\n"
-"\n"
-""));
+        label = new QLabel(page_4);
+        label->setObjectName("label");
+        label->setGeometry(QRect(80, 60, 541, 391));
         travaille->addWidget(page_4);
         pushButton_4 = new QPushButton(page);
         pushButton_4->setObjectName("pushButton_4");
@@ -634,22 +618,22 @@ public:
         tableWidgetClients = new QTableWidget(tabListeClients);
         if (tableWidgetClients->columnCount() < 8)
             tableWidgetClients->setColumnCount(8);
+        QTableWidgetItem *__qtablewidgetitem9 = new QTableWidgetItem();
+        tableWidgetClients->setHorizontalHeaderItem(0, __qtablewidgetitem9);
+        QTableWidgetItem *__qtablewidgetitem10 = new QTableWidgetItem();
+        tableWidgetClients->setHorizontalHeaderItem(1, __qtablewidgetitem10);
+        QTableWidgetItem *__qtablewidgetitem11 = new QTableWidgetItem();
+        tableWidgetClients->setHorizontalHeaderItem(2, __qtablewidgetitem11);
+        QTableWidgetItem *__qtablewidgetitem12 = new QTableWidgetItem();
+        tableWidgetClients->setHorizontalHeaderItem(3, __qtablewidgetitem12);
+        QTableWidgetItem *__qtablewidgetitem13 = new QTableWidgetItem();
+        tableWidgetClients->setHorizontalHeaderItem(4, __qtablewidgetitem13);
         QTableWidgetItem *__qtablewidgetitem14 = new QTableWidgetItem();
-        tableWidgetClients->setHorizontalHeaderItem(0, __qtablewidgetitem14);
+        tableWidgetClients->setHorizontalHeaderItem(5, __qtablewidgetitem14);
         QTableWidgetItem *__qtablewidgetitem15 = new QTableWidgetItem();
-        tableWidgetClients->setHorizontalHeaderItem(1, __qtablewidgetitem15);
+        tableWidgetClients->setHorizontalHeaderItem(6, __qtablewidgetitem15);
         QTableWidgetItem *__qtablewidgetitem16 = new QTableWidgetItem();
-        tableWidgetClients->setHorizontalHeaderItem(2, __qtablewidgetitem16);
-        QTableWidgetItem *__qtablewidgetitem17 = new QTableWidgetItem();
-        tableWidgetClients->setHorizontalHeaderItem(3, __qtablewidgetitem17);
-        QTableWidgetItem *__qtablewidgetitem18 = new QTableWidgetItem();
-        tableWidgetClients->setHorizontalHeaderItem(4, __qtablewidgetitem18);
-        QTableWidgetItem *__qtablewidgetitem19 = new QTableWidgetItem();
-        tableWidgetClients->setHorizontalHeaderItem(5, __qtablewidgetitem19);
-        QTableWidgetItem *__qtablewidgetitem20 = new QTableWidgetItem();
-        tableWidgetClients->setHorizontalHeaderItem(6, __qtablewidgetitem20);
-        QTableWidgetItem *__qtablewidgetitem21 = new QTableWidgetItem();
-        tableWidgetClients->setHorizontalHeaderItem(7, __qtablewidgetitem21);
+        tableWidgetClients->setHorizontalHeaderItem(7, __qtablewidgetitem16);
         tableWidgetClients->setObjectName("tableWidgetClients");
         tableWidgetClients->setColumnCount(8);
 
@@ -826,30 +810,30 @@ public:
             tableWidget_2->setColumnCount(8);
         QFont font4;
         font4.setPointSize(7);
+        QTableWidgetItem *__qtablewidgetitem17 = new QTableWidgetItem();
+        __qtablewidgetitem17->setFont(font4);
+        tableWidget_2->setHorizontalHeaderItem(0, __qtablewidgetitem17);
+        QTableWidgetItem *__qtablewidgetitem18 = new QTableWidgetItem();
+        __qtablewidgetitem18->setFont(font4);
+        tableWidget_2->setHorizontalHeaderItem(1, __qtablewidgetitem18);
+        QTableWidgetItem *__qtablewidgetitem19 = new QTableWidgetItem();
+        __qtablewidgetitem19->setFont(font4);
+        tableWidget_2->setHorizontalHeaderItem(2, __qtablewidgetitem19);
+        QTableWidgetItem *__qtablewidgetitem20 = new QTableWidgetItem();
+        __qtablewidgetitem20->setFont(font4);
+        tableWidget_2->setHorizontalHeaderItem(3, __qtablewidgetitem20);
+        QTableWidgetItem *__qtablewidgetitem21 = new QTableWidgetItem();
+        __qtablewidgetitem21->setFont(font4);
+        tableWidget_2->setHorizontalHeaderItem(4, __qtablewidgetitem21);
         QTableWidgetItem *__qtablewidgetitem22 = new QTableWidgetItem();
         __qtablewidgetitem22->setFont(font4);
-        tableWidget_2->setHorizontalHeaderItem(0, __qtablewidgetitem22);
+        tableWidget_2->setHorizontalHeaderItem(5, __qtablewidgetitem22);
         QTableWidgetItem *__qtablewidgetitem23 = new QTableWidgetItem();
         __qtablewidgetitem23->setFont(font4);
-        tableWidget_2->setHorizontalHeaderItem(1, __qtablewidgetitem23);
+        tableWidget_2->setHorizontalHeaderItem(6, __qtablewidgetitem23);
         QTableWidgetItem *__qtablewidgetitem24 = new QTableWidgetItem();
         __qtablewidgetitem24->setFont(font4);
-        tableWidget_2->setHorizontalHeaderItem(2, __qtablewidgetitem24);
-        QTableWidgetItem *__qtablewidgetitem25 = new QTableWidgetItem();
-        __qtablewidgetitem25->setFont(font4);
-        tableWidget_2->setHorizontalHeaderItem(3, __qtablewidgetitem25);
-        QTableWidgetItem *__qtablewidgetitem26 = new QTableWidgetItem();
-        __qtablewidgetitem26->setFont(font4);
-        tableWidget_2->setHorizontalHeaderItem(4, __qtablewidgetitem26);
-        QTableWidgetItem *__qtablewidgetitem27 = new QTableWidgetItem();
-        __qtablewidgetitem27->setFont(font4);
-        tableWidget_2->setHorizontalHeaderItem(5, __qtablewidgetitem27);
-        QTableWidgetItem *__qtablewidgetitem28 = new QTableWidgetItem();
-        __qtablewidgetitem28->setFont(font4);
-        tableWidget_2->setHorizontalHeaderItem(6, __qtablewidgetitem28);
-        QTableWidgetItem *__qtablewidgetitem29 = new QTableWidgetItem();
-        __qtablewidgetitem29->setFont(font4);
-        tableWidget_2->setHorizontalHeaderItem(7, __qtablewidgetitem29);
+        tableWidget_2->setHorizontalHeaderItem(7, __qtablewidgetitem24);
         tableWidget_2->setObjectName("tableWidget_2");
         tableWidget_2->setGeometry(QRect(270, 60, 791, 291));
         tableWidget_2->setStyleSheet(QString::fromUtf8(" background-color: rgb(41, 102, 148);\n"
@@ -1012,28 +996,28 @@ public:
         tableWidget_4 = new QTableWidget(page_5);
         if (tableWidget_4->columnCount() < 11)
             tableWidget_4->setColumnCount(11);
+        QTableWidgetItem *__qtablewidgetitem25 = new QTableWidgetItem();
+        tableWidget_4->setHorizontalHeaderItem(0, __qtablewidgetitem25);
+        QTableWidgetItem *__qtablewidgetitem26 = new QTableWidgetItem();
+        tableWidget_4->setHorizontalHeaderItem(1, __qtablewidgetitem26);
+        QTableWidgetItem *__qtablewidgetitem27 = new QTableWidgetItem();
+        tableWidget_4->setHorizontalHeaderItem(2, __qtablewidgetitem27);
+        QTableWidgetItem *__qtablewidgetitem28 = new QTableWidgetItem();
+        tableWidget_4->setHorizontalHeaderItem(3, __qtablewidgetitem28);
+        QTableWidgetItem *__qtablewidgetitem29 = new QTableWidgetItem();
+        tableWidget_4->setHorizontalHeaderItem(4, __qtablewidgetitem29);
         QTableWidgetItem *__qtablewidgetitem30 = new QTableWidgetItem();
-        tableWidget_4->setHorizontalHeaderItem(0, __qtablewidgetitem30);
+        tableWidget_4->setHorizontalHeaderItem(5, __qtablewidgetitem30);
         QTableWidgetItem *__qtablewidgetitem31 = new QTableWidgetItem();
-        tableWidget_4->setHorizontalHeaderItem(1, __qtablewidgetitem31);
+        tableWidget_4->setHorizontalHeaderItem(6, __qtablewidgetitem31);
         QTableWidgetItem *__qtablewidgetitem32 = new QTableWidgetItem();
-        tableWidget_4->setHorizontalHeaderItem(2, __qtablewidgetitem32);
+        tableWidget_4->setHorizontalHeaderItem(7, __qtablewidgetitem32);
         QTableWidgetItem *__qtablewidgetitem33 = new QTableWidgetItem();
-        tableWidget_4->setHorizontalHeaderItem(3, __qtablewidgetitem33);
+        tableWidget_4->setHorizontalHeaderItem(8, __qtablewidgetitem33);
         QTableWidgetItem *__qtablewidgetitem34 = new QTableWidgetItem();
-        tableWidget_4->setHorizontalHeaderItem(4, __qtablewidgetitem34);
+        tableWidget_4->setHorizontalHeaderItem(9, __qtablewidgetitem34);
         QTableWidgetItem *__qtablewidgetitem35 = new QTableWidgetItem();
-        tableWidget_4->setHorizontalHeaderItem(5, __qtablewidgetitem35);
-        QTableWidgetItem *__qtablewidgetitem36 = new QTableWidgetItem();
-        tableWidget_4->setHorizontalHeaderItem(6, __qtablewidgetitem36);
-        QTableWidgetItem *__qtablewidgetitem37 = new QTableWidgetItem();
-        tableWidget_4->setHorizontalHeaderItem(7, __qtablewidgetitem37);
-        QTableWidgetItem *__qtablewidgetitem38 = new QTableWidgetItem();
-        tableWidget_4->setHorizontalHeaderItem(8, __qtablewidgetitem38);
-        QTableWidgetItem *__qtablewidgetitem39 = new QTableWidgetItem();
-        tableWidget_4->setHorizontalHeaderItem(9, __qtablewidgetitem39);
-        QTableWidgetItem *__qtablewidgetitem40 = new QTableWidgetItem();
-        tableWidget_4->setHorizontalHeaderItem(10, __qtablewidgetitem40);
+        tableWidget_4->setHorizontalHeaderItem(10, __qtablewidgetitem35);
         if (tableWidget_4->rowCount() < 9)
             tableWidget_4->setRowCount(9);
         tableWidget_4->setObjectName("tableWidget_4");
@@ -1377,8 +1361,7 @@ public:
         QTableWidgetItem *___qtablewidgetitem8 = tableWidget->horizontalHeaderItem(8);
         ___qtablewidgetitem8->setText(QCoreApplication::translate("MainWindow", "Date d'expiration", nullptr));
         comboBox->setItemText(0, QCoreApplication::translate("MainWindow", "categories", nullptr));
-        comboBox->setItemText(1, QCoreApplication::translate("MainWindow", "prix", nullptr));
-        comboBox->setItemText(2, QCoreApplication::translate("MainWindow", "genre", nullptr));
+        comboBox->setItemText(1, QCoreApplication::translate("MainWindow", "genre", nullptr));
 
 #if QT_CONFIG(whatsthis)
         comboBox->setWhatsThis(QCoreApplication::translate("MainWindow", "<html><head/><body><p><br/></p></body></html>", nullptr));
@@ -1417,17 +1400,10 @@ public:
         pushButton->setText(QString());
         pushButton_9->setText(QCoreApplication::translate("MainWindow", "Filter", nullptr));
         image->setText(QString());
+        on->setText(QCoreApplication::translate("MainWindow", "ON", nullptr));
+        off->setText(QCoreApplication::translate("MainWindow", "OFF", nullptr));
         image2->setText(QString());
-        QTableWidgetItem *___qtablewidgetitem9 = tableWidget_5->horizontalHeaderItem(0);
-        ___qtablewidgetitem9->setText(QCoreApplication::translate("MainWindow", "reference", nullptr));
-        QTableWidgetItem *___qtablewidgetitem10 = tableWidget_5->horizontalHeaderItem(1);
-        ___qtablewidgetitem10->setText(QCoreApplication::translate("MainWindow", "designation", nullptr));
-        QTableWidgetItem *___qtablewidgetitem11 = tableWidget_5->horizontalHeaderItem(2);
-        ___qtablewidgetitem11->setText(QCoreApplication::translate("MainWindow", "Quantit\303\251", nullptr));
-        QTableWidgetItem *___qtablewidgetitem12 = tableWidget_5->horizontalHeaderItem(3);
-        ___qtablewidgetitem12->setText(QCoreApplication::translate("MainWindow", "marque", nullptr));
-        QTableWidgetItem *___qtablewidgetitem13 = tableWidget_5->horizontalHeaderItem(4);
-        ___qtablewidgetitem13->setText(QCoreApplication::translate("MainWindow", "cat\303\251gorie", nullptr));
+        label->setText(QString());
         pushButton_4->setText(QCoreApplication::translate("MainWindow", "Statistique", nullptr));
         pushButton_3->setText(QCoreApplication::translate("MainWindow", "Gestion de Stock", nullptr));
         mainTitle->setText(QCoreApplication::translate("MainWindow", "Gestion de Clients", nullptr));
@@ -1438,22 +1414,22 @@ public:
         comboBoxTri->setItemText(2, QCoreApplication::translate("MainWindow", "ID \342\206\221", nullptr));
         comboBoxTri->setItemText(3, QCoreApplication::translate("MainWindow", "ID \342\206\223", nullptr));
 
-        QTableWidgetItem *___qtablewidgetitem14 = tableWidgetClients->horizontalHeaderItem(0);
-        ___qtablewidgetitem14->setText(QCoreApplication::translate("MainWindow", "ID", nullptr));
-        QTableWidgetItem *___qtablewidgetitem15 = tableWidgetClients->horizontalHeaderItem(1);
-        ___qtablewidgetitem15->setText(QCoreApplication::translate("MainWindow", "Nom", nullptr));
-        QTableWidgetItem *___qtablewidgetitem16 = tableWidgetClients->horizontalHeaderItem(2);
-        ___qtablewidgetitem16->setText(QCoreApplication::translate("MainWindow", "Pr\303\251nom", nullptr));
-        QTableWidgetItem *___qtablewidgetitem17 = tableWidgetClients->horizontalHeaderItem(3);
-        ___qtablewidgetitem17->setText(QCoreApplication::translate("MainWindow", "Date Naissance", nullptr));
-        QTableWidgetItem *___qtablewidgetitem18 = tableWidgetClients->horizontalHeaderItem(4);
-        ___qtablewidgetitem18->setText(QCoreApplication::translate("MainWindow", "Sexe", nullptr));
-        QTableWidgetItem *___qtablewidgetitem19 = tableWidgetClients->horizontalHeaderItem(5);
-        ___qtablewidgetitem19->setText(QCoreApplication::translate("MainWindow", "Adresse", nullptr));
-        QTableWidgetItem *___qtablewidgetitem20 = tableWidgetClients->horizontalHeaderItem(6);
-        ___qtablewidgetitem20->setText(QCoreApplication::translate("MainWindow", "T\303\251l\303\251phone", nullptr));
-        QTableWidgetItem *___qtablewidgetitem21 = tableWidgetClients->horizontalHeaderItem(7);
-        ___qtablewidgetitem21->setText(QCoreApplication::translate("MainWindow", "Email", nullptr));
+        QTableWidgetItem *___qtablewidgetitem9 = tableWidgetClients->horizontalHeaderItem(0);
+        ___qtablewidgetitem9->setText(QCoreApplication::translate("MainWindow", "ID", nullptr));
+        QTableWidgetItem *___qtablewidgetitem10 = tableWidgetClients->horizontalHeaderItem(1);
+        ___qtablewidgetitem10->setText(QCoreApplication::translate("MainWindow", "Nom", nullptr));
+        QTableWidgetItem *___qtablewidgetitem11 = tableWidgetClients->horizontalHeaderItem(2);
+        ___qtablewidgetitem11->setText(QCoreApplication::translate("MainWindow", "Pr\303\251nom", nullptr));
+        QTableWidgetItem *___qtablewidgetitem12 = tableWidgetClients->horizontalHeaderItem(3);
+        ___qtablewidgetitem12->setText(QCoreApplication::translate("MainWindow", "Date Naissance", nullptr));
+        QTableWidgetItem *___qtablewidgetitem13 = tableWidgetClients->horizontalHeaderItem(4);
+        ___qtablewidgetitem13->setText(QCoreApplication::translate("MainWindow", "Sexe", nullptr));
+        QTableWidgetItem *___qtablewidgetitem14 = tableWidgetClients->horizontalHeaderItem(5);
+        ___qtablewidgetitem14->setText(QCoreApplication::translate("MainWindow", "Adresse", nullptr));
+        QTableWidgetItem *___qtablewidgetitem15 = tableWidgetClients->horizontalHeaderItem(6);
+        ___qtablewidgetitem15->setText(QCoreApplication::translate("MainWindow", "T\303\251l\303\251phone", nullptr));
+        QTableWidgetItem *___qtablewidgetitem16 = tableWidgetClients->horizontalHeaderItem(7);
+        ___qtablewidgetitem16->setText(QCoreApplication::translate("MainWindow", "Email", nullptr));
         btnExport->setText(QCoreApplication::translate("MainWindow", "\360\237\223\244 Exporter PDF", nullptr));
         btnDelete->setText(QCoreApplication::translate("MainWindow", "\360\237\227\221\357\270\217 Supprimer Client", nullptr));
         tabWidgetMain->setTabText(tabWidgetMain->indexOf(tabListeClients), QCoreApplication::translate("MainWindow", "Liste Clients", nullptr));
@@ -1477,22 +1453,22 @@ public:
         pushButton_ajouter->setText(QCoreApplication::translate("MainWindow", "Ajouter", nullptr));
         pushButton_modifier->setText(QCoreApplication::translate("MainWindow", "modifier", nullptr));
         pushButton_delete->setText(QCoreApplication::translate("MainWindow", "delete", nullptr));
-        QTableWidgetItem *___qtablewidgetitem22 = tableWidget_2->horizontalHeaderItem(0);
-        ___qtablewidgetitem22->setText(QCoreApplication::translate("MainWindow", "id_fournisseur", nullptr));
-        QTableWidgetItem *___qtablewidgetitem23 = tableWidget_2->horizontalHeaderItem(1);
-        ___qtablewidgetitem23->setText(QCoreApplication::translate("MainWindow", "nom_entreprise", nullptr));
-        QTableWidgetItem *___qtablewidgetitem24 = tableWidget_2->horizontalHeaderItem(2);
-        ___qtablewidgetitem24->setText(QCoreApplication::translate("MainWindow", "nom_contact", nullptr));
-        QTableWidgetItem *___qtablewidgetitem25 = tableWidget_2->horizontalHeaderItem(3);
-        ___qtablewidgetitem25->setText(QCoreApplication::translate("MainWindow", "email", nullptr));
-        QTableWidgetItem *___qtablewidgetitem26 = tableWidget_2->horizontalHeaderItem(4);
-        ___qtablewidgetitem26->setText(QCoreApplication::translate("MainWindow", "telephone", nullptr));
-        QTableWidgetItem *___qtablewidgetitem27 = tableWidget_2->horizontalHeaderItem(5);
-        ___qtablewidgetitem27->setText(QCoreApplication::translate("MainWindow", "type_produit_fournis", nullptr));
-        QTableWidgetItem *___qtablewidgetitem28 = tableWidget_2->horizontalHeaderItem(6);
-        ___qtablewidgetitem28->setText(QCoreApplication::translate("MainWindow", "condition_paeiment", nullptr));
-        QTableWidgetItem *___qtablewidgetitem29 = tableWidget_2->horizontalHeaderItem(7);
-        ___qtablewidgetitem29->setText(QCoreApplication::translate("MainWindow", "historique", nullptr));
+        QTableWidgetItem *___qtablewidgetitem17 = tableWidget_2->horizontalHeaderItem(0);
+        ___qtablewidgetitem17->setText(QCoreApplication::translate("MainWindow", "id_fournisseur", nullptr));
+        QTableWidgetItem *___qtablewidgetitem18 = tableWidget_2->horizontalHeaderItem(1);
+        ___qtablewidgetitem18->setText(QCoreApplication::translate("MainWindow", "nom_entreprise", nullptr));
+        QTableWidgetItem *___qtablewidgetitem19 = tableWidget_2->horizontalHeaderItem(2);
+        ___qtablewidgetitem19->setText(QCoreApplication::translate("MainWindow", "nom_contact", nullptr));
+        QTableWidgetItem *___qtablewidgetitem20 = tableWidget_2->horizontalHeaderItem(3);
+        ___qtablewidgetitem20->setText(QCoreApplication::translate("MainWindow", "email", nullptr));
+        QTableWidgetItem *___qtablewidgetitem21 = tableWidget_2->horizontalHeaderItem(4);
+        ___qtablewidgetitem21->setText(QCoreApplication::translate("MainWindow", "telephone", nullptr));
+        QTableWidgetItem *___qtablewidgetitem22 = tableWidget_2->horizontalHeaderItem(5);
+        ___qtablewidgetitem22->setText(QCoreApplication::translate("MainWindow", "type_produit_fournis", nullptr));
+        QTableWidgetItem *___qtablewidgetitem23 = tableWidget_2->horizontalHeaderItem(6);
+        ___qtablewidgetitem23->setText(QCoreApplication::translate("MainWindow", "condition_paeiment", nullptr));
+        QTableWidgetItem *___qtablewidgetitem24 = tableWidget_2->horizontalHeaderItem(7);
+        ___qtablewidgetitem24->setText(QCoreApplication::translate("MainWindow", "historique", nullptr));
         groupBox_5->setTitle(QCoreApplication::translate("MainWindow", "ajouter /modifier", nullptr));
         label_3->setText(QCoreApplication::translate("MainWindow", "id_fournisseur", nullptr));
         label_10->setText(QCoreApplication::translate("MainWindow", "nom_entreprise", nullptr));
@@ -1517,28 +1493,28 @@ public:
         logoLabel->setText(QString());
         pushButton_6->setText(QCoreApplication::translate("MainWindow", "trie", nullptr));
         lineEdit_14->setText(QCoreApplication::translate("MainWindow", "rechercher ar nom ou prenom ou email", nullptr));
-        QTableWidgetItem *___qtablewidgetitem30 = tableWidget_4->horizontalHeaderItem(0);
-        ___qtablewidgetitem30->setText(QCoreApplication::translate("MainWindow", "ID", nullptr));
-        QTableWidgetItem *___qtablewidgetitem31 = tableWidget_4->horizontalHeaderItem(1);
-        ___qtablewidgetitem31->setText(QCoreApplication::translate("MainWindow", "Nom", nullptr));
-        QTableWidgetItem *___qtablewidgetitem32 = tableWidget_4->horizontalHeaderItem(2);
-        ___qtablewidgetitem32->setText(QCoreApplication::translate("MainWindow", "Prenom", nullptr));
-        QTableWidgetItem *___qtablewidgetitem33 = tableWidget_4->horizontalHeaderItem(3);
-        ___qtablewidgetitem33->setText(QCoreApplication::translate("MainWindow", "Telephone", nullptr));
-        QTableWidgetItem *___qtablewidgetitem34 = tableWidget_4->horizontalHeaderItem(4);
-        ___qtablewidgetitem34->setText(QCoreApplication::translate("MainWindow", "Date", nullptr));
-        QTableWidgetItem *___qtablewidgetitem35 = tableWidget_4->horizontalHeaderItem(5);
-        ___qtablewidgetitem35->setText(QCoreApplication::translate("MainWindow", "Adresse", nullptr));
-        QTableWidgetItem *___qtablewidgetitem36 = tableWidget_4->horizontalHeaderItem(6);
-        ___qtablewidgetitem36->setText(QCoreApplication::translate("MainWindow", "Email", nullptr));
-        QTableWidgetItem *___qtablewidgetitem37 = tableWidget_4->horizontalHeaderItem(7);
-        ___qtablewidgetitem37->setText(QCoreApplication::translate("MainWindow", "Nouvelle colonne", nullptr));
-        QTableWidgetItem *___qtablewidgetitem38 = tableWidget_4->horizontalHeaderItem(8);
-        ___qtablewidgetitem38->setText(QCoreApplication::translate("MainWindow", "Poste", nullptr));
-        QTableWidgetItem *___qtablewidgetitem39 = tableWidget_4->horizontalHeaderItem(9);
-        ___qtablewidgetitem39->setText(QCoreApplication::translate("MainWindow", "Nouvelle colonne", nullptr));
-        QTableWidgetItem *___qtablewidgetitem40 = tableWidget_4->horizontalHeaderItem(10);
-        ___qtablewidgetitem40->setText(QCoreApplication::translate("MainWindow", "Disponibilite", nullptr));
+        QTableWidgetItem *___qtablewidgetitem25 = tableWidget_4->horizontalHeaderItem(0);
+        ___qtablewidgetitem25->setText(QCoreApplication::translate("MainWindow", "ID", nullptr));
+        QTableWidgetItem *___qtablewidgetitem26 = tableWidget_4->horizontalHeaderItem(1);
+        ___qtablewidgetitem26->setText(QCoreApplication::translate("MainWindow", "Nom", nullptr));
+        QTableWidgetItem *___qtablewidgetitem27 = tableWidget_4->horizontalHeaderItem(2);
+        ___qtablewidgetitem27->setText(QCoreApplication::translate("MainWindow", "Prenom", nullptr));
+        QTableWidgetItem *___qtablewidgetitem28 = tableWidget_4->horizontalHeaderItem(3);
+        ___qtablewidgetitem28->setText(QCoreApplication::translate("MainWindow", "Telephone", nullptr));
+        QTableWidgetItem *___qtablewidgetitem29 = tableWidget_4->horizontalHeaderItem(4);
+        ___qtablewidgetitem29->setText(QCoreApplication::translate("MainWindow", "Date", nullptr));
+        QTableWidgetItem *___qtablewidgetitem30 = tableWidget_4->horizontalHeaderItem(5);
+        ___qtablewidgetitem30->setText(QCoreApplication::translate("MainWindow", "Adresse", nullptr));
+        QTableWidgetItem *___qtablewidgetitem31 = tableWidget_4->horizontalHeaderItem(6);
+        ___qtablewidgetitem31->setText(QCoreApplication::translate("MainWindow", "Email", nullptr));
+        QTableWidgetItem *___qtablewidgetitem32 = tableWidget_4->horizontalHeaderItem(7);
+        ___qtablewidgetitem32->setText(QCoreApplication::translate("MainWindow", "Nouvelle colonne", nullptr));
+        QTableWidgetItem *___qtablewidgetitem33 = tableWidget_4->horizontalHeaderItem(8);
+        ___qtablewidgetitem33->setText(QCoreApplication::translate("MainWindow", "Poste", nullptr));
+        QTableWidgetItem *___qtablewidgetitem34 = tableWidget_4->horizontalHeaderItem(9);
+        ___qtablewidgetitem34->setText(QCoreApplication::translate("MainWindow", "Nouvelle colonne", nullptr));
+        QTableWidgetItem *___qtablewidgetitem35 = tableWidget_4->horizontalHeaderItem(10);
+        ___qtablewidgetitem35->setText(QCoreApplication::translate("MainWindow", "Disponibilite", nullptr));
         pushButton_10->setText(QCoreApplication::translate("MainWindow", "Afficher", nullptr));
         groupBox_4->setTitle(QCoreApplication::translate("MainWindow", "Ajouter un employe", nullptr));
         label_19->setText(QCoreApplication::translate("MainWindow", "ID:", nullptr));

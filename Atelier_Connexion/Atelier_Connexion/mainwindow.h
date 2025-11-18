@@ -3,6 +3,7 @@
 #include <produit.h>
 #include <fournisseur.h>
 #include <QMainWindow>
+#include "arduino.h"
 
 namespace Ui {
 class MainWindow;
@@ -34,6 +35,7 @@ private slots:
     void on_pushButton_14_clicked();
 
     void on_lineEdit_6_cursorPositionChanged(int arg1, int arg2);
+    void on_pushButton_4_clicked();
 
     void on_pushButton_5_clicked();
 
@@ -47,6 +49,8 @@ private slots:
     void on_pushButton_ajouter_clicked();
     void on_pushButton_modifier_clicked();
     void on_pushButton_delete_clicked();
+    void on_btn_on_clicked();
+    void on_btn_off_clicked();
 
 
 
@@ -61,7 +65,7 @@ private:
     int selectedId;
 
     void afficherFournisseurs();
-
+    Arduino A;
 };
 
 #endif // MAINWINDOW_H

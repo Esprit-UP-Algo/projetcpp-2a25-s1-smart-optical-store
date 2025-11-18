@@ -57,7 +57,6 @@ public:
     bool supprimer(QString ref);
     bool existe(QString ref);
     bool rech(QString recherche, Ui::MainWindow *ui);
-    void afficherRestock(Ui::MainWindow *ui, int seuil = 10);
 
 };
 
