@@ -26,6 +26,8 @@
 #include <QEvent>
 #include <QTimer>
 #include "WindowManager.h"
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 
 // Initialize static instance pointer
 gestionemploye00* gestionemploye00::instance = nullptr;
@@ -57,6 +59,18 @@ gestionemploye00::gestionemploye00(QWidget *parent)
     // ID field is auto-generated (read-only)
     ui->lineEdit->setReadOnly(true);
     ui->lineEdit->setPlaceholderText(tr("Auto"));
+    
+    // Setup input validators
+    // Email validator - must contain "@"
+    // (No placeholder text)
+    
+    // Telephone validator - exactly 8 digits
+    if (ui->lineEdit_6) {
+        QRegularExpressionValidator *telValidator = new QRegularExpressionValidator(
+            QRegularExpression("^\\d{8}$"), this);
+        ui->lineEdit_6->setValidator(telValidator);
+        ui->lineEdit_6->setMaxLength(8);
+    }
     
     // Initialize database connection
     Connection c;
@@ -138,7 +152,9 @@ gestionemploye00::~gestionemploye00()
 
 void gestionemploye00::on_pushButton_6_clicked()
 {
-    Statistique *h = new Statistique();
+    Statistique *h = new Statistique(this);
+    h->setAttribute(Qt::WA_DeleteOnClose);
+    h->loadEmployeeStatistics();
     h->show();
 }
 
@@ -244,6 +260,29 @@ void gestionemploye00::on_pushButton_13_clicked()
     if (nom.isEmpty() || prenom.isEmpty() || email.isEmpty()) {
         QMessageBox::warning(this, "Erreur", "Veuillez remplir tous les champs obligatoires (Nom, Prénom, Email)!");
         return;
+    }
+    
+    // Validation email - must contain "@"
+    if (!email.isEmpty() && !email.contains('@')) {
+        QMessageBox::warning(this, "Validation", "L'adresse e-mail doit contenir le caractère '@'.");
+        if (ui->lineEdit_4) {
+            ui->lineEdit_4->setFocus();
+            ui->lineEdit_4->selectAll();
+        }
+        return;
+    }
+    
+    // Validation telephone - must be exactly 8 digits
+    if (!telephone.isEmpty()) {
+        QRegularExpression regexTel("^\\d{8}$");
+        if (!regexTel.match(telephone).hasMatch()) {
+            QMessageBox::warning(this, "Validation", "Le numéro de téléphone doit contenir exactement 8 chiffres.");
+            if (ui->lineEdit_6) {
+                ui->lineEdit_6->setFocus();
+                ui->lineEdit_6->selectAll();
+            }
+            return;
+        }
     }
     
     // Validate disponibilite

@@ -14,6 +14,12 @@ class Statistique : public QDialog
 public:
     explicit Statistique(QWidget *parent = nullptr);
     ~Statistique();
+    
+    void loadEmployeeStatistics();
+
+private slots:
+    void on_refreshButton_clicked();
+    void on_exportButton_clicked();
 
 private:
     Ui::Statistique *ui;
