@@ -56,7 +56,9 @@
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true"> background-color: rgb(41, 102, 148);</string>
+       <string notr="true"> background-color: rgb(41, 102, 148);
+ QHeaderView::section { color: black; background-color: rgb(41, 102, 148); }
+ QTableWidget::item { color: white; }</string>
       </property>
       <column>
        <property name="text">
@@ -70,7 +72,7 @@
       </column>
       <column>
        <property name="text">
-        <string>nom_entreprise</string>
+        <string>Entreprise</string>
        </property>
        <property name="font">
         <font>
@@ -80,7 +82,7 @@
       </column>
       <column>
        <property name="text">
-        <string>nom_contact</string>
+        <string>Contact</string>
        </property>
        <property name="font">
         <font>
@@ -90,7 +92,7 @@
       </column>
       <column>
        <property name="text">
-        <string>email</string>
+        <string>Email</string>
        </property>
        <property name="font">
         <font>
@@ -100,7 +102,7 @@
       </column>
       <column>
        <property name="text">
-        <string>telephone</string>
+        <string>Telephone</string>
        </property>
        <property name="font">
         <font>
@@ -110,7 +112,7 @@
       </column>
       <column>
        <property name="text">
-        <string>type_produit_fournis</string>
+        <string>Type</string>
        </property>
        <property name="font">
         <font>
@@ -120,7 +122,7 @@
       </column>
       <column>
        <property name="text">
-        <string>condition_paeiment</string>
+        <string>Paiement</string>
        </property>
        <property name="font">
         <font>
@@ -130,7 +132,7 @@
       </column>
       <column>
        <property name="text">
-        <string>historique</string>
+        <string>Date</string>
        </property>
        <property name="font">
         <font>
@@ -374,7 +376,7 @@ background-color: rgb(41, 102, 148);
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>500</y>
+         <y>370</y>
          <width>113</width>
          <height>28</height>
         </rect>
@@ -396,17 +398,24 @@ background-color: rgb(41, 102, 148);
         <string/>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEdit_13">
+      <widget class="QDateEdit" name="dateEdit">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>370</y>
+         <y>500</y>
          <width>113</width>
          <height>28</height>
         </rect>
        </property>
-       <property name="text">
-        <string/>
+       <property name="calendarPopup">
+        <bool>true</bool>
+       </property>
+       <property name="date">
+        <date>
+         <year>2024</year>
+         <month>1</month>
+         <day>1</day>
+        </date>
        </property>
       </widget>
       <widget class="QLabel" name="label_11">
@@ -423,7 +432,7 @@ background-color: rgb(41, 102, 148);
 </string>
        </property>
        <property name="text">
-        <string>type_produit_fournis</string>
+        <string>Type</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_12">

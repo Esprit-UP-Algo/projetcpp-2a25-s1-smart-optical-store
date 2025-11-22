@@ -16,24 +16,6 @@
   <property name="styleSheet">
    <string notr="true">background-color: rgb(184, 226, 242);</string>
   </property>
-  <widget class="QLabel" name="label_11">
-   <property name="geometry">
-    <rect>
-     <x>610</x>
-     <y>40</y>
-     <width>371</width>
-     <height>81</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: rgb(41, 102, 148);
-font: 28pt &quot;Segoe MDL2 Assets&quot;;
-</string>
-   </property>
-   <property name="text">
-    <string>Gestion Employes</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="logoLabel">
    <property name="geometry">
     <rect>
@@ -214,26 +196,6 @@ color:white;</string>
    <property name="text">
     <string>trier</string>
    </property>
-  </widget>
-  <widget class="QComboBox" name="comboBox_tri">
-   <property name="geometry">
-    <rect>
-     <x>820</x>
-     <y>730</y>
-     <width>160</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <item>
-    <property name="text">
-     <string>Nom (A-Z)</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Salaire (desc)</string>
-    </property>
-   </item>
   </widget>
   <widget class="QPushButton" name="pushButton_6">
    <property name="geometry">

@@ -31,7 +31,7 @@ private slots:
     void on_removeProductButton_clicked();
     void on_customerSearchButton_clicked();
     void on_saveSaleButton_clicked();
-    void on_newSaleButton_clicked();
+    void on_registerSaleButton_clicked();
     void on_searchSalesLineEdit_textChanged(const QString &arg1);
     void on_dateFilterCheckBox_toggled(bool checked);
     void on_startDateEdit_dateChanged(const QDate &date);
@@ -41,6 +41,7 @@ private slots:
     void on_sortButton_clicked();
     void on_modifySaleButton_clicked();
     void on_deleteSaleButton_clicked();
+    void on_statisticsButton_clicked();
     void on_productComboBox_currentIndexChanged(int index);
     void on_exportPdfButton_clicked();
     void on_logoClicked();  // Logo click -> Dashboard
@@ -66,6 +67,7 @@ private:
     int currentClientId;
     int currentEmployeId;
     QList<QPair<int, int>> cartItems; // Pairs of product reference and quantity
+    bool savingAsDraft;
     
     void setupModels();
     void refreshSalesTable();
@@ -77,6 +79,7 @@ private:
     void searchSales(const QString &searchText);
     void populateProductComboBox();
     void exportSalesToPdf();
+    void loadSaleIntoNewSaleForm(int saleId);  // Load sale data into new sale form
     bool eventFilter(QObject *obj, QEvent *event) override;
     void showEvent(QShowEvent *event) override;  // Refresh products when window is shown
 };

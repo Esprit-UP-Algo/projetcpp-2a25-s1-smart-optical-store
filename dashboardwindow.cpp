@@ -5,6 +5,7 @@
 #include "gestionemploye00.h"
 #include "gclient1.h"
 #include "fournisseurwindow.h"
+#include "arduino.h"
 #include <QApplication>
 #include "WindowManager.h"
 #include <QMouseEvent>
@@ -12,8 +13,16 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QDate>
+#include <QDateTime>
 #include <QDebug>
 #include <QTableWidgetItem>
+#include <QPushButton>
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QGroupBox>
+#include <QMessageBox>
+#include <QTimer>
 
 // Initialize static instance pointer
 DashboardWindow* DashboardWindow::instance = nullptr;
@@ -45,9 +54,9 @@ DashboardWindow::DashboardWindow(QWidget *parent) :
     ui->customersCountLabel->setText("0");
     ui->productsCountLabel->setText("0");
     ui->salesCountLabel->setText("0");
-    ui->todaySalesLabel->setText("$0.00");
-    ui->todayRevenueLabel->setText("$0.00");
-    ui->lowStockLabel->setText("$0.00");
+    ui->todaySalesLabel->setText("0.00 DT");
+    ui->todayRevenueLabel->setText("0.00 DT");
+    ui->lowStockLabel->setText("0.00 DT");
     
     // Make logo clickable (refresh/raise dashboard)
     if (ui->topRightLogoLabel) {
@@ -90,10 +99,32 @@ DashboardWindow::DashboardWindow(QWidget *parent) :
     
     // Load dashboard data on startup
     loadDashboardData();
+    
+    // Initialize Arduino (background only, no UI)
+    arduino = new Arduino(this);
+    
+    // Try to auto-connect to Arduino on startup
+    qDebug() << "========================================";
+    qDebug() << "[DASHBOARD] Auto-connecting to Arduino on startup...";
+    qDebug() << "========================================";
+    int result = arduino->connect_arduino();
+    if (result == 0) {
+        qDebug() << "[DASHBOARD] ✓ Arduino auto-connected successfully on port:" << arduino->getarduino_port_name();
+        qDebug() << "[DASHBOARD] Status:" << arduino->get_connection_status();
+        qDebug() << "========================================";
+    } else {
+        qDebug() << "[DASHBOARD] ✗ Arduino auto-connection failed";
+        qDebug() << "[DASHBOARD] Status:" << arduino->get_connection_status();
+        qDebug() << "========================================";
+    }
 }
 
 DashboardWindow::~DashboardWindow()
 {
+    if (arduino) {
+        qDebug() << "[DASHBOARD] Closing Arduino connection...";
+        arduino->close_arduino();
+    }
     delete ui;
 }
 
@@ -162,7 +193,7 @@ void DashboardWindow::loadDashboardData()
     query.bindValue(":today", today);
     if (query.exec() && query.next()) {
         double revenue = query.value(0).toDouble();
-        ui->todaySalesLabel->setText(QString("$%1").arg(revenue, 0, 'f', 2));
+        ui->todaySalesLabel->setText(QString("%1 DT").arg(revenue, 0, 'f', 2));
     }
     
     // This Week Revenue
@@ -172,7 +203,7 @@ void DashboardWindow::loadDashboardData()
     query.bindValue(":today", today);
     if (query.exec() && query.next()) {
         double revenue = query.value(0).toDouble();
-        ui->todayRevenueLabel->setText(QString("$%1").arg(revenue, 0, 'f', 2));
+        ui->todayRevenueLabel->setText(QString("%1 DT").arg(revenue, 0, 'f', 2));
     }
     
     // This Month Revenue
@@ -182,11 +213,12 @@ void DashboardWindow::loadDashboardData()
     query.bindValue(":today", today);
     if (query.exec() && query.next()) {
         double revenue = query.value(0).toDouble();
-        ui->lowStockLabel->setText(QString("$%1").arg(revenue, 0, 'f', 2));
+        ui->lowStockLabel->setText(QString("%1 DT").arg(revenue, 0, 'f', 2));
     }
     
-    // Update date/time label
-    ui->dateTimeLabel->setText(QString("Today: %1").arg(today.toString("dddd, MMMM dd, yyyy")));
+    // Update date/time label with time (without seconds)
+    QDateTime now = QDateTime::currentDateTime();
+    ui->dateTimeLabel->setText(QString("Today: %1 - %2").arg(now.toString("dddd, MMMM dd, yyyy")).arg(now.toString("hh:mm")));
     
     // Load recent sales
     loadRecentSales();
@@ -255,12 +287,17 @@ void DashboardWindow::loadRecentSales()
         // Sale ID
         ui->recentSalesTable->setItem(row, 0, new QTableWidgetItem(query.value(0).toString()));
         
-        // Date
-        QDate date = query.value(1).toDate();
-        if (date.isValid()) {
-            ui->recentSalesTable->setItem(row, 1, new QTableWidgetItem(date.toString("yyyy-MM-dd")));
+        // Date with time (without seconds)
+        QDateTime dateTime = query.value(1).toDateTime();
+        if (dateTime.isValid()) {
+            ui->recentSalesTable->setItem(row, 1, new QTableWidgetItem(dateTime.toString("yyyy-MM-dd hh:mm")));
         } else {
-            ui->recentSalesTable->setItem(row, 1, new QTableWidgetItem(query.value(1).toString()));
+            QDate date = query.value(1).toDate();
+            if (date.isValid()) {
+                ui->recentSalesTable->setItem(row, 1, new QTableWidgetItem(date.toString("yyyy-MM-dd")));
+            } else {
+                ui->recentSalesTable->setItem(row, 1, new QTableWidgetItem(query.value(1).toString()));
+            }
         }
         
         // Customer name (handle NULL)
@@ -272,7 +309,7 @@ void DashboardWindow::loadRecentSales()
         
         // Amount
         double amount = query.value(3).toDouble();
-        ui->recentSalesTable->setItem(row, 3, new QTableWidgetItem(QString("$%1").arg(amount, 0, 'f', 2)));
+        ui->recentSalesTable->setItem(row, 3, new QTableWidgetItem(QString("%1 DT").arg(amount, 0, 'f', 2)));
         
         // Payment Method (handle NULL)
         QString paymentMethod = query.value(4).toString();
