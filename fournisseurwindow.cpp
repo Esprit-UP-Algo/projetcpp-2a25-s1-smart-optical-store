@@ -27,6 +27,10 @@
 #include <QTableWidgetItem>
 #include <QHeaderView>
 #include <QAbstractItemView>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
+#include <QDateEdit>
+#include <QDate>
 
 // Initialize static instance pointer
 FournisseurWindow* FournisseurWindow::instance = nullptr;
@@ -87,6 +91,25 @@ FournisseurWindow::FournisseurWindow(QWidget *parent)
     if (ui->lineEdit) {
         ui->lineEdit->setReadOnly(true);
         ui->lineEdit->setPlaceholderText("Auto");
+    }
+    
+    // Setup input validators
+    // Email validator - must contain "@"
+    // (No placeholder text)
+    
+    // Telephone validator - exactly 8 digits
+    if (ui->lineEdit_6) {
+        QRegularExpressionValidator *telValidator = new QRegularExpressionValidator(
+            QRegularExpression("^\\d{8}$"), this);
+        ui->lineEdit_6->setValidator(telValidator);
+        ui->lineEdit_6->setMaxLength(8);
+    }
+    
+    // Setup date picker
+    if (ui->dateEdit) {
+        ui->dateEdit->setDate(QDate::currentDate());
+        ui->dateEdit->setDisplayFormat("dd/MM/yyyy");
+        ui->dateEdit->setCalendarPopup(true);
     }
     
     // Make logo clickable
@@ -376,7 +399,7 @@ void FournisseurWindow::clearForm()
     if (ui->lineEdit_6) ui->lineEdit_6->clear();
     if (ui->lineEdit_11) ui->lineEdit_11->clear();
     if (ui->lineEdit_12) ui->lineEdit_12->clear();
-    if (ui->lineEdit_13) ui->lineEdit_13->clear();
+    if (ui->dateEdit) ui->dateEdit->setDate(QDate::currentDate());
     if (ui->tableWidget_2) ui->tableWidget_2->clearSelection();
 }
 
@@ -411,7 +434,22 @@ void FournisseurWindow::fillForm(int row)
     if (item && ui->lineEdit_12) ui->lineEdit_12->setText(item->text());
     
     item = ui->tableWidget_2->item(row, 7);
-    if (item && ui->lineEdit_13) ui->lineEdit_13->setText(item->text());
+    if (item && ui->dateEdit) {
+        // Try to parse the date from various formats
+        QString dateStr = item->text();
+        QDate date = QDate::fromString(dateStr, "dd/MM/yyyy");
+        if (!date.isValid()) {
+            date = QDate::fromString(dateStr, "yyyy-MM-dd");
+        }
+        if (!date.isValid()) {
+            date = QDate::fromString(dateStr, "MM/dd/yyyy");
+        }
+        if (date.isValid()) {
+            ui->dateEdit->setDate(date);
+        } else {
+            ui->dateEdit->setDate(QDate::currentDate());
+        }
+    }
 }
 
 void FournisseurWindow::on_pushButton_ajouter_clicked()
@@ -422,11 +460,35 @@ void FournisseurWindow::on_pushButton_ajouter_clicked()
     QString telephone = ui->lineEdit_6 ? ui->lineEdit_6->text().trimmed() : "";
     QString typeProduit = ui->lineEdit_11 ? ui->lineEdit_11->text().trimmed() : "";
     QString conditionPaiement = ui->lineEdit_12 ? ui->lineEdit_12->text().trimmed() : "";
-    QString historique = ui->lineEdit_13 ? ui->lineEdit_13->text().trimmed() : "";
+    QString historique = ui->dateEdit ? ui->dateEdit->date().toString("dd/MM/yyyy") : "";
     
     if (nomEntreprise.isEmpty()) {
         QMessageBox::warning(this, "Validation", "Le nom de l'entreprise est obligatoire!");
+        if (ui->lineEdit_3) ui->lineEdit_3->setFocus();
         return;
+    }
+    
+    // Validation email - must contain "@"
+    if (!email.isEmpty() && !email.contains('@')) {
+        QMessageBox::warning(this, "Validation", "L'adresse e-mail doit contenir le caractère '@'.");
+        if (ui->lineEdit_5) {
+            ui->lineEdit_5->setFocus();
+            ui->lineEdit_5->selectAll();
+        }
+        return;
+    }
+    
+    // Validation telephone - must be exactly 8 digits
+    if (!telephone.isEmpty()) {
+        QRegularExpression regexTel("^\\d{8}$");
+        if (!regexTel.match(telephone).hasMatch()) {
+            QMessageBox::warning(this, "Validation", "Le numéro de téléphone doit contenir exactement 8 chiffres.");
+            if (ui->lineEdit_6) {
+                ui->lineEdit_6->setFocus();
+                ui->lineEdit_6->selectAll();
+            }
+            return;
+        }
     }
     
     Fournisseur f;

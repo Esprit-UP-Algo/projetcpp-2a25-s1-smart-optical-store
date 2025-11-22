@@ -51,6 +51,7 @@ public:
     bool ajouter();
     bool supprimer(int id);
     bool modifier();
+    QString getLastError() const { return lastError; }
     QSqlQueryModel* afficher();
     QSqlQueryModel* rechercher(const QString &critere);
     QSqlQueryModel* filtrerParDate(const QDate &debut, const QDate &fin);
@@ -75,6 +76,7 @@ private:
     QString statut_paiement;
     QString mode_paiement;
     QDate date_livraison;
+    mutable QString lastError;  // Store last error message
 };
 
 #endif // VENTE_H

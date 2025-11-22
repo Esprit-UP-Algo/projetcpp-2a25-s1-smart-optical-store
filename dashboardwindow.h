@@ -8,6 +8,8 @@ namespace Ui {
 class DashboardWindow;
 }
 
+class Arduino;
+
 class DashboardWindow : public QMainWindow
 {
     Q_OBJECT
@@ -28,6 +30,7 @@ private:
     bool eventFilter(QObject *obj, QEvent *event) override;
     void loadDashboardData();  // Load all dashboard statistics
     void loadRecentSales();     // Load recent sales table
+    Arduino *arduino;           // Arduino connection object (background only)
 };
 
 #endif // DASHBOARDWINDOW_H

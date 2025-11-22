@@ -1,4 +1,4 @@
-QT += widgets sql
+QT += widgets sql charts serialport
 CONFIG += c++17
 TEMPLATE = app
 
@@ -9,11 +9,12 @@ TARGET = gestionemploye0
 SOURCES += \
     Connection.cpp \
     WindowManager.cpp \
+    arduino.cpp \
     main.cpp \
     login.cpp \
-    tab.cpp \
     gestionemploye00.cpp \
     statistique.cpp \
+    salesstatistique.cpp \
     exporter.cpp \
     mainwindow.cpp \
     saleswindow.cpp \
@@ -32,10 +33,11 @@ SOURCES += \
 HEADERS += \
     Connection.h \
     WindowManager.h \
+    arduino.h \
     login.h \
-    tab.h \
     gestionemploye00.h \
     statistique.h \
+    salesstatistique.h \
     exporter.h \
     mainwindow.h \
     saleswindow.h \
@@ -53,9 +55,9 @@ HEADERS += \
 # Forms (UI)
 FORMS += \
     login.ui \
-    tab.ui \
     gestionemploye00.ui \
     statistique.ui \
+    salesstatistique.ui \
     exporter.ui \
     mainwindow.ui \
     saleswindow.ui \

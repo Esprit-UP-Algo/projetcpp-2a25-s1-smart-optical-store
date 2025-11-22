@@ -7,6 +7,7 @@
 #include "fournisseurwindow.h"
 #include "dashboardwindow.h"
 #include "WindowManager.h"
+#include "salesstatistique.h"
 #include <QMouseEvent>
 #include <QApplication>
 #include <QMessageBox>
@@ -14,16 +15,22 @@
 #include <QDateTime>
 #include <QStandardItem>
 #include <QSqlError>
+#include <QSqlDatabase>
+#include <QSqlDriver>
 #include <QDialog>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QFormLayout>
 #include <QLabel>
 #include <QComboBox>
 #include <QDateEdit>
 #include <QDialogButtonBox>
 #include <QPushButton>
+#include <QDoubleSpinBox>
+#include <QLineEdit>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QMetaType>
 #include <QPdfWriter>
 #include <QPainter>
 #include <QFont>
@@ -62,7 +69,8 @@ SalesWindow::SalesWindow(QWidget *parent) :
     cartModel(nullptr),
     salesModel(nullptr),
     currentClientId(0),
-    currentEmployeId(0)
+    currentEmployeId(0),
+    savingAsDraft(false)
 {
     ui->setupUi(this);
     
@@ -76,12 +84,10 @@ SalesWindow::SalesWindow(QWidget *parent) :
     ui->startDateEdit->setDate(QDate::currentDate().addDays(-30));
     ui->endDateEdit->setDate(QDate::currentDate());
     
-    // Populate payment method combo box
-    ui->paymentMethodComboBox->addItem("Espèces");
-    ui->paymentMethodComboBox->addItem("Carte de crédit");
-    ui->paymentMethodComboBox->addItem("Carte de débit");
-    ui->paymentMethodComboBox->addItem("Assurance");
-    ui->paymentMethodComboBox->addItem("Chèque");
+    // Payment method combo box is populated in setupModels()
+    
+    // Update button labels
+    ui->newSaleButton->setText("Enregistrer");
     
     // Connect signals and slots
     connect(ui->addProductButton, &QPushButton::clicked, this, &SalesWindow::on_addProductButton_clicked);
@@ -89,7 +95,7 @@ SalesWindow::SalesWindow(QWidget *parent) :
     connect(ui->customerSearchButton, &QPushButton::clicked, this, &SalesWindow::on_customerSearchButton_clicked);
     connect(ui->productComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SalesWindow::on_productComboBox_currentIndexChanged);
     connect(ui->saveSaleButton, &QPushButton::clicked, this, &SalesWindow::on_saveSaleButton_clicked);
-    connect(ui->newSaleButton, &QPushButton::clicked, this, &SalesWindow::on_newSaleButton_clicked);
+    connect(ui->newSaleButton, &QPushButton::clicked, this, &SalesWindow::on_registerSaleButton_clicked);
     connect(ui->exportPdfButton, &QPushButton::clicked, this, &SalesWindow::on_exportPdfButton_clicked);
     
     // Make logo clickable
@@ -169,12 +175,9 @@ void SalesWindow::setupModels()
     ui->paymentMethodComboBox->clear();
     ui->paymentMethodComboBox->addItem("Espèces");
     ui->paymentMethodComboBox->addItem("Carte de crédit");
-    ui->paymentMethodComboBox->addItem("Carte de débit");
     ui->paymentMethodComboBox->addItem("Chèque");
-    ui->paymentMethodComboBox->addItem("Virement bancaire");
-    ui->paymentMethodComboBox->addItem("Assurance");
     
-    // Add modify and delete buttons to the sales history tab
+    // Add modify, delete, and statistics buttons to the sales history tab
     QWidget *salesTabContent = ui->tabWidget->widget(1); // Get the sales history tab
     QVBoxLayout *salesTabLayout = qobject_cast<QVBoxLayout*>(salesTabContent->layout());
     
@@ -194,12 +197,19 @@ void SalesWindow::setupModels()
         deleteButton->setStyleSheet("background-color: #ff5555; color: white;");
         buttonsLayout->addWidget(deleteButton);
         
+        // Create statistics button
+        QPushButton *statisticsButton = new QPushButton("Statistiques", salesTabContent);
+        statisticsButton->setObjectName("statisticsButton");
+        statisticsButton->setStyleSheet("background-color: rgb(41, 102, 148); color: white; font-weight: bold;");
+        buttonsLayout->addWidget(statisticsButton);
+        
         // Add the buttons layout after the table view
         salesTabLayout->insertLayout(salesTabLayout->count() - 1, buttonsLayout);
         
         // Connect the buttons to their slots
         connect(modifyButton, &QPushButton::clicked, this, &SalesWindow::on_modifySaleButton_clicked);
         connect(deleteButton, &QPushButton::clicked, this, &SalesWindow::on_deleteSaleButton_clicked);
+        connect(statisticsButton, &QPushButton::clicked, this, &SalesWindow::on_statisticsButton_clicked);
     }
     
     // Populate product selection combo box
@@ -401,6 +411,9 @@ void SalesWindow::on_addProductButton_clicked()
             
             updateTotals();
             
+            // Refresh product combo box to update stock availability
+            populateProductComboBox();
+            
             // Reset product selection
             ui->productComboBox->setCurrentIndex(0);
             
@@ -428,6 +441,9 @@ void SalesWindow::on_addProductButton_clicked()
     // Refresh product combo box to update stock availability
     populateProductComboBox();
     
+    // Note: Quantity spinbox maximum will be updated when product is selected again
+    // The maximum is set in on_productComboBox_currentIndexChanged() which considers cart items
+    
     updateTotals();
 }
 
@@ -450,6 +466,16 @@ void SalesWindow::on_removeProductButton_clicked()
     }
     
     cartModel->removeRow(row);
+    
+    // Refresh product combo box to update stock availability
+    populateProductComboBox();
+    
+    // Update quantity spinbox if the removed product is currently selected
+    int currentProductId = ui->productComboBox->currentData().toInt();
+    if (currentProductId == reference) {
+        // Trigger the product selection change to update the quantity maximum
+        on_productComboBox_currentIndexChanged(ui->productComboBox->currentIndex());
+    }
     
     updateTotals();
 }
@@ -514,16 +540,13 @@ void SalesWindow::populateProductComboBox()
         int quantite = query.value(2).toInt();
         double prix = query.value(3).toDouble();
         
-        // Show ALL products, but indicate stock status
-        QString displayText;
+        // Only show products that are available (quantite > 0)
+        // Products with rupture de stock (quantite <= 0) are excluded
         if (quantite > 0) {
-            displayText = QString("%1 - %2 (Stock: %3, Prix: %4)").arg(reference).arg(designation).arg(quantite).arg(prix, 0, 'f', 2);
-        } else {
-            displayText = QString("%1 - %2 (Rupture de stock, Prix: %3)").arg(reference).arg(designation).arg(prix, 0, 'f', 2);
+            QString displayText = QString("%1 - %2 (Stock: %3, Prix: %4)").arg(reference).arg(designation).arg(quantite).arg(prix, 0, 'f', 2);
+            ui->productComboBox->addItem(displayText, reference);
+            productCount++;
         }
-        
-        ui->productComboBox->addItem(displayText, reference);
-        productCount++;
     }
     
     qDebug() << "✅ Loaded" << productCount << "products into combo box";
@@ -536,6 +559,7 @@ void SalesWindow::on_productComboBox_currentIndexChanged(int index)
         ui->productNameLineEdit->clear();
         ui->priceLineEdit->clear();
         ui->quantitySpinBox->setMaximum(999);
+        ui->quantitySpinBox->setValue(1);
         return;
     }
     
@@ -555,12 +579,34 @@ void SalesWindow::on_productComboBox_currentIndexChanged(int index)
         ui->productNameLineEdit->setText(designation);
         ui->priceLineEdit->setText(QString::number(prix, 'f', 2));
         
-        // Set maximum quantity based on stock
-        ui->quantitySpinBox->setMaximum(stockDisponible);
-        ui->quantitySpinBox->setValue(1);
+        // Calculate how much of this product is already in the cart
+        int alreadyInCart = 0;
+        for (int i = 0; i < cartItems.size(); ++i) {
+            if (cartItems[i].first == reference) {
+                alreadyInCart = cartItems[i].second;
+                break;
+            }
+        }
+        
+        // Available stock = total stock - what's already in cart
+        int availableStock = stockDisponible - alreadyInCart;
+        
+        // Set maximum quantity based on available stock (considering what's already in cart)
+        if (availableStock > 0) {
+            ui->quantitySpinBox->setMaximum(availableStock);
+            ui->quantitySpinBox->setValue(1);
+        } else {
+            ui->quantitySpinBox->setMaximum(0);
+            ui->quantitySpinBox->setValue(0);
+            QMessageBox::information(this, "Information", 
+                QString("Ce produit est déjà dans le panier avec la quantité maximale disponible.\nStock total: %1\nDéjà dans le panier: %2")
+                .arg(stockDisponible).arg(alreadyInCart));
+        }
     } else {
         ui->productNameLineEdit->clear();
         ui->priceLineEdit->clear();
+        ui->quantitySpinBox->setMaximum(999);
+        ui->quantitySpinBox->setValue(1);
     }
 }
 
@@ -605,20 +651,43 @@ void SalesWindow::on_saveSaleButton_clicked()
     QDate deliveryDate = ui->deliveryDateEdit->date();
     */
     
+    // Start a transaction for the entire sale operation (VENTE + products)
+    QSqlDatabase db = QSqlDatabase::database();
+    bool inTransaction = false;
+    if (db.driver()->hasFeature(QSqlDriver::Transactions)) {
+        if (db.transaction()) {
+            inTransaction = true;
+            qDebug() << "Transaction démarrée pour la création complète de la vente (VENTE + produits)";
+        } else {
+            qDebug() << "⚠️ Impossible de démarrer une transaction, continuation sans transaction";
+        }
+    }
+    
     // Use default values for now
     double discount = 0;
-    QString saleStatus = "Complétée";
-    QString paymentStatus = "Payé";
+    QString saleStatus = savingAsDraft ? "En attente" : "Complétée";
+    QString paymentStatus = savingAsDraft ? "Non payé" : "Payé";
     QDate deliveryDate = QDate::currentDate().addDays(1);
     
     // Check if there's a valid employee in the database
     QSqlQuery empQuery;
-    empQuery.exec("SELECT id_employe FROM employe");
+    QString empSql = "SELECT id_employe FROM employe";
+    if (!empQuery.exec(empSql)) {
+        qDebug() << "Erreur avec employe en minuscules:" << empQuery.lastError().text();
+        empQuery.clear();
+        empSql = "SELECT ID_EMPLOYE FROM EMPLOYE";
+        if (!empQuery.exec(empSql)) {
+            qDebug() << "Erreur avec EMPLOYE en majuscules:" << empQuery.lastError().text();
+        }
+    }
     int employeeId = 0; // Default to NULL (0)
     
     // Use the first employee found if any exist
     if (empQuery.next()) {
         employeeId = empQuery.value(0).toInt();
+        qDebug() << "Employé trouvé, ID:" << employeeId;
+    } else {
+        qDebug() << "Aucun employé trouvé dans la base de données, la vente sera enregistrée sans employé";
     }
     
     // Create sale in database
@@ -638,54 +707,240 @@ void SalesWindow::on_saveSaleButton_clicked()
     if (!newVente.ajouter()) {
         // Check if there are any clients in the database
         QSqlQuery clientQuery;
-        clientQuery.exec("SELECT COUNT(*) FROM clients");
+        QString clientCheckSql = "SELECT COUNT(*) FROM clients";
+        if (!clientQuery.exec(clientCheckSql)) {
+            clientQuery.clear();
+            clientCheckSql = "SELECT COUNT(*) FROM CLIENTS";
+            clientQuery.exec(clientCheckSql);
+        }
         int clientCount = 0;
         if (clientQuery.next()) {
             clientCount = clientQuery.value(0).toInt();
         }
         
-        if (clientCount == 0) {
-            QMessageBox::critical(this, "Erreur", "Aucun client n'existe dans la base de données. Veuillez d'abord ajouter un client.");
-        } else if (currentClientId <= 0) {
-            QMessageBox::critical(this, "Erreur", "Veuillez sélectionner un client valide avant de créer une vente.");
-        } else {
-            QMessageBox::critical(this, "Erreur", "Erreur lors de l'enregistrement de la vente. Vérifiez que les employés et clients existent dans la base de données.");
+        // Check if the specific client exists
+        bool clientExists = false;
+        if (currentClientId > 0) {
+            QSqlQuery specificClientQuery;
+            QString specificClientSql = "SELECT id_client FROM clients WHERE id_client = :id_client";
+            specificClientQuery.prepare(specificClientSql);
+            specificClientQuery.bindValue(":id_client", currentClientId);
+            if (!specificClientQuery.exec()) {
+                specificClientQuery.clear();
+                specificClientSql = "SELECT ID_CLIENT FROM CLIENTS WHERE ID_CLIENT = :id_client";
+                specificClientQuery.prepare(specificClientSql);
+                specificClientQuery.bindValue(":id_client", currentClientId);
+                specificClientQuery.exec();
+            }
+            clientExists = specificClientQuery.next();
         }
-        return;
+        
+        // Provide specific error messages
+        if (currentClientId <= 0) {
+            QMessageBox::critical(this, "Erreur", "Veuillez sélectionner un client valide avant de créer une vente.");
+        } else if (!clientExists) {
+            QMessageBox::critical(this, "Erreur", 
+                QString("Le client avec l'ID %1 n'existe pas dans la base de données.\nVeuillez vérifier l'ID du client.").arg(currentClientId));
+        } else if (clientCount == 0) {
+            QMessageBox::critical(this, "Erreur", "Aucun client n'existe dans la base de données. Veuillez d'abord ajouter un client.");
+        } else if (employeeId > 0) {
+            // Check if employee exists
+            QSqlQuery empCheckQuery;
+            QString empCheckSql = "SELECT id_employe FROM employe WHERE id_employe = :id_employe";
+            empCheckQuery.prepare(empCheckSql);
+            empCheckQuery.bindValue(":id_employe", employeeId);
+            if (!empCheckQuery.exec()) {
+                empCheckQuery.clear();
+                empCheckSql = "SELECT ID_EMPLOYE FROM EMPLOYE WHERE ID_EMPLOYE = :id_employe";
+                empCheckQuery.prepare(empCheckSql);
+                empCheckQuery.bindValue(":id_employe", employeeId);
+                empCheckQuery.exec();
+            }
+            if (!empCheckQuery.next()) {
+                QMessageBox::critical(this, "Erreur", 
+                    QString("L'employé avec l'ID %1 n'existe pas dans la base de données.\nLa vente sera enregistrée sans employé.").arg(employeeId));
+                // Retry without employee
+                newVente.setIdEmploye(0);
+                if (!newVente.ajouter()) {
+                    QString errorMsg = newVente.getLastError();
+                    if (errorMsg.isEmpty()) {
+                        errorMsg = "Erreur lors de l'enregistrement de la vente.\nVérifiez les logs pour plus de détails.";
+                    }
+                    QMessageBox::critical(this, "Erreur", errorMsg);
+                    qDebug() << "❌ Échec de la création de la vente (sans employé) - Erreur:" << errorMsg;
+                    return;
+                }
+            } else {
+                QString errorMsg = newVente.getLastError();
+                if (errorMsg.isEmpty()) {
+                    errorMsg = "Erreur lors de l'enregistrement de la vente.\nVérifiez les logs pour plus de détails.";
+                }
+                QMessageBox::critical(this, "Erreur", errorMsg);
+                qDebug() << "❌ Échec de la création de la vente - Erreur:" << errorMsg;
+                return;
+            }
+        } else {
+            // Try to add the sale and capture the error
+            if (!newVente.ajouter()) {
+                QString errorMsg = newVente.getLastError();
+                if (errorMsg.isEmpty()) {
+                    errorMsg = "Erreur lors de l'enregistrement de la vente.\nVérifiez les logs pour plus de détails.";
+                }
+                if (inTransaction) {
+                    db.rollback();
+                    qDebug() << "Transaction annulée - Échec de la création de la vente";
+                }
+                QMessageBox::critical(this, "Erreur", errorMsg);
+                qDebug() << "❌ Échec de la création de la vente - Erreur:" << errorMsg;
+                return;
+            }
+        }
     }
     
     int idVente = newVente.getId();
     
-    // Add products to sale
+    if (idVente <= 0) {
+        if (inTransaction) {
+            db.rollback();
+            qDebug() << "Transaction annulée - ID de vente invalide";
+        }
+        QMessageBox::critical(this, "Erreur", "Impossible de récupérer l'ID de la vente créée. La vente n'a peut-être pas été enregistrée correctement.");
+        qDebug() << "❌ ID de vente invalide après création:" << idVente;
+        return;
+    }
+    
+    qDebug() << "✅ Vente créée avec succès, ID:" << idVente;
+    
+    // Add products to sale - CRITICAL: This ensures all products are saved to contenir table
+    // IMPORTANT: Re-validate stock availability before saving (stock may have changed since adding to cart)
     bool allProductsAdded = true;
+    int productsAddedCount = 0;
+    int productsFailedCount = 0;
+    QStringList failedProducts;
+    QStringList stockIssues;
     
     for (int i = 0; i < cartItems.size(); ++i) {
         int reference = cartItems[i].first;
         int quantity = cartItems[i].second;
         
-        // Get product price
+        // Get product details: price, designation, and CURRENT stock availability
         QSqlQuery query;
-        query.prepare("SELECT prix FROM produit WHERE reference = :reference");
+        QString priceSql = "SELECT prix, designation, quantite FROM produit WHERE reference = :reference";
+        query.prepare(priceSql);
         query.bindValue(":reference", reference);
         
-        if (!query.exec() || !query.next()) {
+        if (!query.exec()) {
+            qDebug() << "Erreur avec produit en minuscules:" << query.lastError().text();
+            query.clear();
+            priceSql = "SELECT PRIX, DESIGNATION, QUANTITE FROM PRODUIT WHERE REFERENCE = :reference";
+            query.prepare(priceSql);
+            query.bindValue(":reference", reference);
+            if (!query.exec()) {
+                qDebug() << "Erreur avec PRODUIT en majuscules:" << query.lastError().text();
+                allProductsAdded = false;
+                productsFailedCount++;
+                failedProducts << QString("Réf: %1 (Erreur de base de données)").arg(reference);
+                continue;
+            }
+        }
+        
+        if (!query.next()) {
+            qDebug() << "Produit avec référence" << reference << "non trouvé dans la base de données";
             allProductsAdded = false;
+            productsFailedCount++;
+            failedProducts << QString("Réf: %1 (Produit supprimé)").arg(reference);
             continue;
         }
         
         double prix = query.value(0).toDouble();
+        QString designation = query.value(1).toString();
+        int stockDisponible = query.value(2).toInt();
         
-        // Add product to sale
-        if (!newVente.ajouterProduitVente(idVente, reference, quantity, prix)) {
+        qDebug() << "Vérification du produit - Réf:" << reference << "Désignation:" << designation 
+                 << "Prix:" << prix << "Quantité demandée:" << quantity << "Stock disponible:" << stockDisponible;
+        
+        // CRITICAL: Re-validate stock availability before saving
+        if (stockDisponible <= 0) {
+            qDebug() << "❌ Produit" << reference << "est en rupture de stock (stock:" << stockDisponible << ")";
             allProductsAdded = false;
+            productsFailedCount++;
+            stockIssues << QString("%1 (Réf: %2) - Rupture de stock (Stock: %3)").arg(designation.isEmpty() ? "Produit inconnu" : designation).arg(reference).arg(stockDisponible);
+            continue;
+        }
+        
+        if (quantity > stockDisponible) {
+            qDebug() << "❌ Stock insuffisant pour le produit" << reference << "- Demandé:" << quantity << "Disponible:" << stockDisponible;
+            allProductsAdded = false;
+            productsFailedCount++;
+            stockIssues << QString("%1 (Réf: %2) - Stock insuffisant (Demandé: %3, Disponible: %4)").arg(designation.isEmpty() ? "Produit inconnu" : designation).arg(reference).arg(quantity).arg(stockDisponible);
+            continue;
+        }
+        
+        qDebug() << "✅ Stock validé - Ajout du produit - Réf:" << reference << "Désignation:" << designation << "Prix:" << prix << "Quantité:" << quantity;
+        
+        // Add product to sale in contenir table
+        if (!newVente.ajouterProduitVente(idVente, reference, quantity, prix)) {
+            qDebug() << "❌ Échec de l'ajout du produit" << reference << "à la vente" << idVente;
+            allProductsAdded = false;
+            productsFailedCount++;
+            failedProducts << QString("%1 (Réf: %2) - Erreur lors de l'ajout").arg(designation.isEmpty() ? "Produit inconnu" : designation).arg(reference);
+        } else {
+            qDebug() << "✅ Produit" << reference << "ajouté avec succès à la vente" << idVente << "dans la table contenir";
+            productsAddedCount++;
         }
     }
     
-    if (!allProductsAdded) {
-        QMessageBox::warning(this, "Avertissement", "Certains produits n'ont pas pu être ajoutés à la vente!");
+    // Commit or rollback transaction (this includes both VENTE and products)
+    if (inTransaction) {
+        if (allProductsAdded) {
+            if (db.commit()) {
+                qDebug() << "✅ Transaction validée - Vente et tous les produits ont été ajoutés";
+            } else {
+                qDebug() << "❌ Erreur lors du commit de la transaction:" << db.lastError().text();
+                db.rollback();
+                QMessageBox::critical(this, "Erreur", 
+                    QString("Erreur lors de la validation de la transaction.\n%1\n\nLa vente et les produits n'ont pas été enregistrés.").arg(db.lastError().text()));
+                return;
+            }
+        } else {
+            qDebug() << "❌ Annulation de la transaction - Certains produits n'ont pas pu être ajoutés";
+            db.rollback();
+            qDebug() << "Transaction annulée - La vente et les produits n'ont pas été enregistrés";
+            // Don't return here - we want to show the warning message below
+        }
     }
     
-    QMessageBox::information(this, "Succès", "Vente enregistrée avec succès!");
+    // Provide detailed feedback
+    if (!allProductsAdded) {
+        QString warningMsg = QString("Attention: %1 produit(s) n'ont pas pu être ajoutés à la vente #%2.\n\n").arg(productsFailedCount).arg(idVente);
+        if (productsAddedCount > 0) {
+            warningMsg += QString("%1 produit(s) ont été ajoutés avec succès.\n\n").arg(productsAddedCount);
+        }
+        
+        // Separate stock issues from other errors for better clarity
+        if (!stockIssues.isEmpty()) {
+            warningMsg += "Problèmes de stock:\n" + stockIssues.join("\n") + "\n\n";
+        }
+        if (!failedProducts.isEmpty()) {
+            warningMsg += "Autres erreurs:\n" + failedProducts.join("\n");
+        }
+        
+        QMessageBox::warning(this, "Avertissement", warningMsg);
+    } else {
+        qDebug() << "✅ Tous les produits ont été ajoutés avec succès à la vente #" << idVente << "dans la table contenir";
+    }
+    
+    if (productsAddedCount > 0) {
+        QMessageBox::information(this, "Succès", 
+            QString("Vente #%1 enregistrée avec succès!\n\n%2 produit(s) ajouté(s) à la vente.").arg(idVente).arg(productsAddedCount));
+    } else {
+        QString errorMsg = QString("La vente #%1 a été créée mais aucun produit n'a pu être ajouté.\n\n").arg(idVente);
+        if (!stockIssues.isEmpty()) {
+            errorMsg += "Raisons principales:\n" + stockIssues.join("\n") + "\n\n";
+        }
+        errorMsg += "Veuillez vérifier les produits dans le panier et leur disponibilité en stock.";
+        QMessageBox::warning(this, "Avertissement", errorMsg);
+    }
     
     // Clear form and refresh table
     clearSaleForm();
@@ -694,11 +949,16 @@ void SalesWindow::on_saveSaleButton_clicked()
     populateProductComboBox();
     
     refreshSalesTable();
+    
+    // Refresh statistics window if it's open
+    SalesStatistique::refreshIfOpen();
 }
 
-void SalesWindow::on_newSaleButton_clicked()
+void SalesWindow::on_registerSaleButton_clicked()
 {
-    clearSaleForm();
+    savingAsDraft = true;
+    on_saveSaleButton_clicked();
+    savingAsDraft = false;
 }
 
 void SalesWindow::on_searchSalesLineEdit_textChanged(const QString &arg1)
@@ -886,70 +1146,171 @@ void SalesWindow::on_modifySaleButton_clicked()
     int row = ui->salesTableView->selectionModel()->selectedRows().first().row();
     int saleId = salesModel->data(salesModel->index(row, 0)).toInt();
     
-    // Get the sale details
+    // Get the sale details - use explicit column names to avoid Oracle case sensitivity issues
     QSqlQuery query;
-    query.prepare("SELECT * FROM vente WHERE id_vente = :id_vente");
+    query.prepare("SELECT id_vente, id_client, id_employe, date_vente, prix_ttc, prix_ht, "
+                  "remise, tva, statut_vente, statut_paiement, mode_paiement, date_livraison "
+                  "FROM vente WHERE id_vente = :id_vente");
     query.bindValue(":id_vente", saleId);
     
-    if (!query.exec() || !query.next()) {
-        QMessageBox::critical(this, "Erreur", "Impossible de récupérer les détails de la vente.");
+    if (!query.exec()) {
+        QString errorMsg = query.lastError().text();
+        qDebug() << "Error retrieving sale #" << saleId << ":" << errorMsg;
+        QMessageBox::critical(this, "Erreur", 
+            QString("Impossible de récupérer les détails de la vente #%1:\n%2").arg(saleId).arg(errorMsg));
         return;
     }
     
-    // Get the current values
-    int idClient = query.value("id_client").toInt();
-    int idEmploye = query.value("id_employe").toInt();
-    QString statutVente = query.value("statut_vente").toString();
-    QString statutPaiement = query.value("statut_paiement").toString();
-    QString modePaiement = query.value("mode_paiement").toString();
-    QDate dateLivraison = query.value("date_livraison").toDate();
+    if (!query.next()) {
+        QMessageBox::critical(this, "Erreur", 
+            QString("La vente #%1 n'existe pas dans la base de données.").arg(saleId));
+        return;
+    }
+    
+    // Get the current values using column indices (more reliable with Oracle)
+    // Column order: id_vente(0), id_client(1), id_employe(2), date_vente(3), prix_ttc(4), 
+    // prix_ht(5), remise(6), tva(7), statut_vente(8), statut_paiement(9), 
+    // mode_paiement(10), date_livraison(11)
+    int idClient = query.value(1).toInt();
+    int idEmploye = query.value(2).toInt();
+    QDate dateVente = query.value(3).toDate();
+    double prixTtc = query.value(4).toDouble();
+    double prixHt = query.value(5).toDouble();
+    double remise = query.value(6).toDouble();
+    double tva = query.value(7).toDouble();
+    QString statutVente = query.value(8).toString();
+    QString statutPaiement = query.value(9).toString();
+    QString modePaiement = query.value(10).toString();
+    QDate dateLivraison = query.value(11).toDate();
+    
+    qDebug() << "Sale #" << saleId << "loaded - Client:" << idClient << "Employee:" << idEmploye 
+             << "Date:" << dateVente << "PrixTTC:" << prixTtc;
     
     // Create a dialog for editing the sale
     QDialog dialog(this);
     dialog.setWindowTitle("Modifier la vente #" + QString::number(saleId));
-    dialog.setMinimumWidth(400);
+    dialog.setMinimumWidth(420);
     
     QVBoxLayout *layout = new QVBoxLayout(&dialog);
+    QFormLayout *formLayout = new QFormLayout();
     
-    // Status combo box
-    QHBoxLayout *statusLayout = new QHBoxLayout();
-    QLabel *statusLabel = new QLabel("Statut de vente:", &dialog);
+    // Client selection
+    QComboBox *clientCombo = new QComboBox(&dialog);
+    int clientIndex = -1;
+    QSqlQuery clientsQuery;
+    clientsQuery.prepare("SELECT id_client, nom, prenom FROM clients ORDER BY nom, prenom");
+    if (clientsQuery.exec()) {
+        while (clientsQuery.next()) {
+            int clientId = clientsQuery.value(0).toInt();
+            QString clientName = QString("%1 - %2 %3")
+                .arg(clientId)
+                .arg(clientsQuery.value(1).toString())
+                .arg(clientsQuery.value(2).toString());
+            clientCombo->addItem(clientName, clientId);
+            if (clientId == idClient) {
+                clientIndex = clientCombo->count() - 1;
+            }
+        }
+    }
+    if (clientCombo->count() == 0) {
+        clientCombo->addItem("Aucun client disponible", idClient);
+    }
+    if (clientIndex >= 0) {
+        clientCombo->setCurrentIndex(clientIndex);
+    }
+    formLayout->addRow("Client:", clientCombo);
+    
+    // Employee selection
+    QComboBox *employeeCombo = new QComboBox(&dialog);
+    employeeCombo->addItem("Aucun employé", 0);
+    int employeeIndex = (idEmploye == 0) ? 0 : -1;
+    QSqlQuery employeeQuery;
+    employeeQuery.prepare("SELECT id_employe, nom, prenom FROM employe ORDER BY nom, prenom");
+    if (employeeQuery.exec()) {
+        while (employeeQuery.next()) {
+            int employeeId = employeeQuery.value(0).toInt();
+            QString employeeName = QString("%1 - %2 %3")
+                .arg(employeeId)
+                .arg(employeeQuery.value(1).toString())
+                .arg(employeeQuery.value(2).toString());
+            employeeCombo->addItem(employeeName, employeeId);
+            if (employeeId == idEmploye) {
+                employeeIndex = employeeCombo->count() - 1;
+            }
+        }
+    }
+    if (employeeIndex >= 0) {
+        employeeCombo->setCurrentIndex(employeeIndex);
+    }
+    formLayout->addRow("Employé:", employeeCombo);
+    
+    // Sale and delivery dates
+    QDateEdit *saleDateEdit = new QDateEdit(&dialog);
+    saleDateEdit->setCalendarPopup(true);
+    saleDateEdit->setDate(dateVente.isValid() ? dateVente : QDate::currentDate());
+    formLayout->addRow("Date de vente:", saleDateEdit);
+    
+    QDateEdit *deliveryDateEdit = new QDateEdit(&dialog);
+    deliveryDateEdit->setCalendarPopup(true);
+    deliveryDateEdit->setDate(dateLivraison.isValid() ? dateLivraison : QDate::currentDate().addDays(1));
+    formLayout->addRow("Date de livraison:", deliveryDateEdit);
+    
+    // Financial fields
+    auto setupSpinBox = [](QDoubleSpinBox *spin, double value) {
+        spin->setDecimals(2);
+        spin->setMaximum(999999999.0);
+        spin->setMinimum(0.0);
+        spin->setValue(value);
+    };
+    
+    QDoubleSpinBox *prixHtSpin = new QDoubleSpinBox(&dialog);
+    setupSpinBox(prixHtSpin, prixHt);
+    formLayout->addRow("Prix HT:", prixHtSpin);
+    
+    QDoubleSpinBox *tvaSpin = new QDoubleSpinBox(&dialog);
+    setupSpinBox(tvaSpin, tva);
+    formLayout->addRow("TVA:", tvaSpin);
+    
+    QDoubleSpinBox *remiseSpin = new QDoubleSpinBox(&dialog);
+    setupSpinBox(remiseSpin, remise);
+    formLayout->addRow("Remise:", remiseSpin);
+    
+    QDoubleSpinBox *prixTtcSpin = new QDoubleSpinBox(&dialog);
+    setupSpinBox(prixTtcSpin, prixTtc);
+    formLayout->addRow("Prix TTC:", prixTtcSpin);
+    
+    // Sale status
     QComboBox *statusCombo = new QComboBox(&dialog);
     statusCombo->addItems(QStringList() << "En cours" << "Complétée" << "Annulée" << "En attente");
-    statusCombo->setCurrentText(statutVente);
-    statusLayout->addWidget(statusLabel);
-    statusLayout->addWidget(statusCombo);
-    layout->addLayout(statusLayout);
+    int statusIndex = statusCombo->findText(statutVente);
+    if (statusIndex >= 0) statusCombo->setCurrentIndex(statusIndex);
+    formLayout->addRow("Statut de vente:", statusCombo);
     
-    // Payment status combo box
-    QHBoxLayout *paymentStatusLayout = new QHBoxLayout();
-    QLabel *paymentStatusLabel = new QLabel("Statut de paiement:", &dialog);
+    // Payment status
     QComboBox *paymentStatusCombo = new QComboBox(&dialog);
     paymentStatusCombo->addItems(QStringList() << "Payé" << "Non payé" << "Partiellement payé" << "Remboursé");
-    paymentStatusCombo->setCurrentText(statutPaiement);
-    paymentStatusLayout->addWidget(paymentStatusLabel);
-    paymentStatusLayout->addWidget(paymentStatusCombo);
-    layout->addLayout(paymentStatusLayout);
+    int paymentStatusIndex = paymentStatusCombo->findText(statutPaiement);
+    if (paymentStatusIndex >= 0) paymentStatusCombo->setCurrentIndex(paymentStatusIndex);
+    formLayout->addRow("Statut de paiement:", paymentStatusCombo);
     
-    // Payment method combo box
-    QHBoxLayout *paymentMethodLayout = new QHBoxLayout();
-    QLabel *paymentMethodLabel = new QLabel("Mode de paiement:", &dialog);
+    // Payment method
     QComboBox *paymentMethodCombo = new QComboBox(&dialog);
-    paymentMethodCombo->addItems(QStringList() << "Espèces" << "Carte de crédit" << "Carte de débit" << "Chèque" << "Virement bancaire" << "Assurance");
-    paymentMethodCombo->setCurrentText(modePaiement);
-    paymentMethodLayout->addWidget(paymentMethodLabel);
-    paymentMethodLayout->addWidget(paymentMethodCombo);
-    layout->addLayout(paymentMethodLayout);
+    paymentMethodCombo->addItems(QStringList()
+                                 << "Espèces"
+                                 << "Carte de crédit"
+                                 << "Chèque");
+    int paymentMethodIndex = paymentMethodCombo->findText(modePaiement);
+    if (paymentMethodIndex >= 0) {
+        paymentMethodCombo->setCurrentIndex(paymentMethodIndex);
+    }
+    formLayout->addRow("Mode de paiement:", paymentMethodCombo);
     
-    // Delivery date
-    QHBoxLayout *deliveryDateLayout = new QHBoxLayout();
-    QLabel *deliveryDateLabel = new QLabel("Date de livraison:", &dialog);
-    QDateEdit *deliveryDateEdit = new QDateEdit(&dialog);
-    deliveryDateEdit->setDate(dateLivraison);
-    deliveryDateEdit->setCalendarPopup(true);
-    deliveryDateLayout->addWidget(deliveryDateLabel);
-    deliveryDateLayout->addWidget(deliveryDateEdit);
-    layout->addLayout(deliveryDateLayout);
+    layout->addLayout(formLayout);
+    
+    // Add button to reload sale into new sale form
+    QPushButton *reloadButton = new QPushButton("Recharger dans Panier", &dialog);
+    reloadButton->setStyleSheet("background-color: #55aaff; color: black; padding: 8px; font-weight: bold;");
+    layout->addWidget(reloadButton);
     
     // Buttons
     QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
@@ -958,40 +1319,60 @@ void SalesWindow::on_modifySaleButton_clicked()
     connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
     connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
     
+    // Connect reload button - use a custom return code to distinguish from OK
+    bool reloadRequested = false;
+    connect(reloadButton, &QPushButton::clicked, [&dialog, &reloadRequested]() {
+        reloadRequested = true;
+        dialog.done(QDialog::Accepted + 1);  // Use custom return code
+    });
+    
     // Show the dialog
-    if (dialog.exec() == QDialog::Accepted) {
-        // Get the full sale details to preserve other fields
-        QSqlQuery fullSaleQuery;
-        fullSaleQuery.prepare("SELECT * FROM vente WHERE id_vente = :id_vente");
-        fullSaleQuery.bindValue(":id_vente", saleId);
-        
-        if (!fullSaleQuery.exec() || !fullSaleQuery.next()) {
-            QMessageBox::critical(this, "Erreur", "Impossible de récupérer les détails complets de la vente.");
-            return;
-        }
-        
+    int result = dialog.exec();
+    
+    // If reload was requested, load sale into new sale form and return
+    if (reloadRequested) {
+        loadSaleIntoNewSaleForm(saleId);
+        return;
+    }
+    
+    if (result == QDialog::Accepted) {
         // Update the sale with new values
         Vente vente;
         vente.setId(saleId);
-        vente.setIdClient(idClient);
-        vente.setIdEmploye(idEmploye);
-        vente.setDateVente(fullSaleQuery.value("date_vente").toDate());
-        vente.setPrixTtc(fullSaleQuery.value("prix_ttc").toDouble());
-        vente.setPrixHt(fullSaleQuery.value("prix_ht").toDouble());
-        vente.setRemise(fullSaleQuery.value("remise").toDouble());
-        vente.setTva(fullSaleQuery.value("tva").toDouble());
+        vente.setIdClient(clientCombo->currentData().toInt());
+        vente.setIdEmploye(employeeCombo->currentData().toInt());
+        vente.setDateVente(saleDateEdit->date());
+        vente.setPrixTtc(prixTtcSpin->value());
+        vente.setPrixHt(prixHtSpin->value());
+        vente.setRemise(remiseSpin->value());
+        vente.setTva(tvaSpin->value());
         vente.setStatutVente(statusCombo->currentText());
         vente.setStatutPaiement(paymentStatusCombo->currentText());
         vente.setModePaiement(paymentMethodCombo->currentText());
         vente.setDateLivraison(deliveryDateEdit->date());
         
+        qDebug() << "Updating sale #" << saleId << "with values:";
+        qDebug() << "  Client:" << vente.getIdClient() << "Employee:" << vente.getIdEmploye();
+        qDebug() << "  Date:" << vente.getDateVente() << "PrixTTC:" << vente.getPrixTtc();
+        qDebug() << "  Statut:" << vente.getStatutVente() << "Paiement:" << vente.getStatutPaiement();
+        
         if (vente.modifier()) {
-            QMessageBox::information(this, "Succès", "La vente a été modifiée avec succès.");
+            QMessageBox::information(this, "Succès", 
+                QString("La vente #%1 a été modifiée avec succès.").arg(saleId));
             refreshSalesTable();
+            // Refresh statistics window if it's open
+            SalesStatistique::refreshIfOpen();
         } else {
-            QMessageBox::critical(this, "Erreur", "Impossible de modifier la vente.");
+            QMessageBox::critical(this, "Erreur", 
+                QString("Impossible de modifier la vente #%1.\nVérifiez les logs pour plus de détails.").arg(saleId));
         }
     }
+}
+
+void SalesWindow::on_statisticsButton_clicked()
+{
+    // Use singleton pattern to reuse existing window or create new one
+    SalesStatistique::getInstance(this);
 }
 
 void SalesWindow::on_deleteSaleButton_clicked()
@@ -1018,6 +1399,8 @@ void SalesWindow::on_deleteSaleButton_clicked()
         if (vente.supprimer(saleId)) {
             QMessageBox::information(this, "Succès", "La vente a été supprimée avec succès.");
             refreshSalesTable();
+            // Refresh statistics window if it's open
+            SalesStatistique::refreshIfOpen();
         } else {
             QMessageBox::critical(this, "Erreur", "Impossible de supprimer la vente.");
         }
@@ -1082,7 +1465,6 @@ void SalesWindow::exportSalesToPdf()
     
     // Page dimensions (in pixels)
     int pageWidth = pdfWriter.width();
-    int pageHeight = pdfWriter.height();
     int margin = 60;
     int yPos = margin;
     
@@ -1125,7 +1507,7 @@ void SalesWindow::exportSalesToPdf()
             idx = salesModel->index(row, 3);
             if (idx.isValid()) {
                 QVariant dateVar = salesModel->data(idx);
-                if (dateVar.type() == QVariant::Date) {
+                if (dateVar.typeId() == QMetaType::QDate) {
                     saleDateObj = dateVar.toDate();
                 } else {
                     QString dateStr = dateVar.toString();
@@ -1181,7 +1563,7 @@ void SalesWindow::exportSalesToPdf()
             idx = salesModel->index(row, 11);
             if (idx.isValid()) {
                 QVariant dateVar = salesModel->data(idx);
-                if (dateVar.type() == QVariant::Date) {
+                if (dateVar.typeId() == QMetaType::QDate) {
                     dateLivraisonObj = dateVar.toDate();
                 } else {
                     QString dateStr = dateVar.toString();
@@ -1453,4 +1835,157 @@ void SalesWindow::on_logoClicked()
 {
     DashboardWindow::getInstance();
     this->close();
+}
+
+void SalesWindow::loadSaleIntoNewSaleForm(int saleId)
+{
+    // Switch to the "Nouvelle Vente" tab (index 0)
+    ui->tabWidget->setCurrentIndex(0);
+    
+    // Clear the current form
+    clearSaleForm();
+    
+    // Get sale details from database
+    QSqlQuery saleQuery;
+    saleQuery.prepare("SELECT * FROM vente WHERE id_vente = :id_vente");
+    saleQuery.bindValue(":id_vente", saleId);
+    
+    if (!saleQuery.exec() || !saleQuery.next()) {
+        QMessageBox::critical(this, "Erreur", "Impossible de récupérer les détails de la vente.");
+        return;
+    }
+    
+    // Get sale data
+    int idClient = saleQuery.value("id_client").toInt();
+    QString modePaiement = saleQuery.value("mode_paiement").toString();
+    
+    // Set customer information
+    if (idClient > 0) {
+        QSqlQuery clientQuery;
+        clientQuery.prepare("SELECT id_client, nom, prenom FROM clients WHERE id_client = :id_client");
+        clientQuery.bindValue(":id_client", idClient);
+        
+        if (clientQuery.exec() && clientQuery.next()) {
+            currentClientId = idClient;
+            QString nom = clientQuery.value(1).toString();
+            QString prenom = clientQuery.value(2).toString();
+            
+            ui->customerIdLineEdit->setText(QString::number(idClient));
+            ui->customerNameLineEdit->setText(nom + " " + prenom);
+        }
+    }
+    
+    // Set payment method
+    if (!modePaiement.isEmpty()) {
+        int paymentIndex = ui->paymentMethodComboBox->findText(modePaiement);
+        if (paymentIndex >= 0) {
+            ui->paymentMethodComboBox->setCurrentIndex(paymentIndex);
+        }
+    }
+    
+    // Load products from the sale into the cart using direct query
+    qDebug() << "Loading sale #" << saleId << "into cart...";
+    
+    // Use direct query instead of QSqlQueryModel for better reliability
+    QSqlQuery query;
+    query.prepare("SELECT c.reference, p.designation, c.prix_unitaire, c.quantite, "
+                  "(c.prix_unitaire * c.quantite) AS total "
+                  "FROM contenir c "
+                  "LEFT JOIN produit p ON c.reference = p.reference "
+                  "WHERE c.id_vente = :id_vente");
+    query.bindValue(":id_vente", saleId);
+    
+    if (!query.exec()) {
+        QString errorMsg = query.lastError().text();
+        qDebug() << "Query error for sale #" << saleId << ":" << errorMsg;
+        QMessageBox::critical(this, "Erreur", 
+            QString("Erreur lors de la récupération des produits pour la vente #%1:\n%2").arg(saleId).arg(errorMsg));
+        return;
+    }
+    
+    // Clear cart first
+    cartModel->removeRows(0, cartModel->rowCount());
+    cartItems.clear();
+    
+    int productsAdded = 0;
+    int rowCount = 0;
+    
+    // Process each product from the query
+    while (query.next()) {
+        rowCount++;
+        
+        int reference = query.value(0).toInt();
+        QString designation = query.value(1).toString();
+        double prix = query.value(2).toDouble();
+        int quantite = query.value(3).toInt();
+        double total = query.value(4).toDouble();
+        
+        // Handle deleted products
+        if (designation.isEmpty() || designation.isNull()) {
+            designation = QString("Produit supprimé (Ref: %1)").arg(reference);
+        }
+        
+        qDebug() << "Sale #" << saleId << "- Row" << rowCount << "- Ref:" << reference 
+                 << "Designation:" << designation << "Prix:" << prix << "Qty:" << quantite << "Total:" << total;
+        
+        // Validate data
+        if (reference <= 0) {
+            qDebug() << "Sale #" << saleId << "- Skipping row" << rowCount << "- invalid reference:" << reference;
+            continue;
+        }
+        
+        if (quantite <= 0) {
+            qDebug() << "Sale #" << saleId << "- Skipping row" << rowCount << "- invalid quantity:" << quantite;
+            continue;
+        }
+        
+        // Calculate total if not provided or zero
+        if (total == 0.0 && prix > 0 && quantite > 0) {
+            total = prix * quantite;
+        }
+        
+        // Add product to cart model
+        QList<QStandardItem*> cartRow;
+        cartRow << new QStandardItem(QString::number(reference));
+        cartRow << new QStandardItem(designation);
+        cartRow << new QStandardItem(QString("%1 DT").arg(prix, 0, 'f', 2));
+        cartRow << new QStandardItem(QString::number(quantite));
+        cartRow << new QStandardItem(QString("%1 DT").arg(total, 0, 'f', 2));
+        
+        cartModel->appendRow(cartRow);
+        
+        // Add to cart items list
+        cartItems.append(qMakePair(reference, quantite));
+        productsAdded++;
+    }
+    
+    qDebug() << "Sale #" << saleId << "- Query returned" << rowCount << "rows, added" << productsAdded << "products to cart";
+    
+    ui->cartTableView->resizeColumnsToContents();
+    updateTotals();
+    
+    if (productsAdded > 0) {
+        QMessageBox::information(this, "Succès", 
+            QString("La vente #%1 a été chargée dans le panier.\n%2 produit(s) ajouté(s).\nVous pouvez maintenant modifier les produits.").arg(saleId).arg(productsAdded));
+    } else {
+        // Check if there are any products in contenir table for this sale
+        QSqlQuery checkQuery;
+        checkQuery.prepare("SELECT COUNT(*) FROM contenir WHERE id_vente = :id_vente");
+        checkQuery.bindValue(":id_vente", saleId);
+        
+        int count = 0;
+        if (checkQuery.exec() && checkQuery.next()) {
+            count = checkQuery.value(0).toInt();
+            qDebug() << "Sale #" << saleId << "- Found" << count << "products in contenir table";
+        }
+        
+        if (count > 0) {
+            QMessageBox::warning(this, "Avertissement", 
+                QString("La vente #%1 contient %2 produit(s) dans la base de données mais aucun produit valide n'a pu être chargé.\n\n"
+                       "Vérifiez que les produits existent et ont des quantités valides.").arg(saleId).arg(count));
+        } else {
+            QMessageBox::warning(this, "Avertissement", 
+                QString("Aucun produit trouvé pour la vente #%1 dans la table contenir.").arg(saleId));
+        }
+    }
 }
