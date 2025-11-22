@@ -8,6 +8,7 @@ TARGET = gestionemploye0
 # Sources
 SOURCES += \
     Connection.cpp \
+    WindowManager.cpp \
     main.cpp \
     login.cpp \
     tab.cpp \
@@ -24,11 +25,13 @@ SOURCES += \
     produit.cpp \
     vente.cpp \
     employe.cpp \
-    fournisseur.cpp
+    fournisseur.cpp \
+    employeeditdialog.cpp
 
 # Headers
 HEADERS += \
     Connection.h \
+    WindowManager.h \
     login.h \
     tab.h \
     gestionemploye00.h \
@@ -44,7 +47,8 @@ HEADERS += \
     produit.h \
     vente.h \
     employe.h \
-    fournisseur.h
+    fournisseur.h \
+    employeeditdialog.h
 
 # Forms (UI)
 FORMS += \

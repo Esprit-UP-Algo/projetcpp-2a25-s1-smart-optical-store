@@ -82,10 +82,57 @@ void Fournisseur::set_nom_entreprise(QString nom)
 void Fournisseur::set_nom_contact(QString nom)
 {
     nom_contact = nom;
+
+    QSqlDatabase db = QSqlDatabase::database();
+    if (!db.isValid() || !db.isOpen()) {
+        qDebug() << "Erreur: connexion base de données invalide ou fermée";
+        return false;
+    }
+    
+    QSqlQuery query(db);
+    QString sql = "INSERT INTO FOURNISSEUR (NOM_ENTREPRISE, NOM_CONTACT, EMAIL, TELEPHONE, "
+                  "TYPE_PRODUIT_FOURNIS, CONDITION_PAIEMENT, HISTORIQUE_COMMANDE_PASSEE) "
+                  "VALUES (:nom_entreprise, :nom_contact, :email, :telephone, "
+                  ":type_produit_fournis, :condition_paiement, :historique_commande_passee)";
+    query.prepare(sql);
+    
+    query.bindValue(":nom_entreprise", nom_entreprise);
+    query.bindValue(":nom_contact", nom_contact);
+    query.bindValue(":email", email);
+    query.bindValue(":telephone", telephone);
+    query.bindValue(":type_produit_fournis", type_produit_fournis);
+    query.bindValue(":condition_paiement", condition_paiement);
+    query.bindValue(":historique_commande_passee", historique_commande_passee);
+    
+    if (!query.exec()) {
+        // Try with lowercase
+        query.clear();
+        sql = "INSERT INTO fournisseur (nom_entreprise, nom_contact, email, telephone, "
+              "type_produit_fournis, condition_paiement, historique_commande_passee) "
+              "VALUES (:nom_entreprise, :nom_contact, :email, :telephone, "
+              ":type_produit_fournis, :condition_paiement, :historique_commande_passee)";
+        query.prepare(sql);
+        query.bindValue(":nom_entreprise", nom_entreprise);
+        query.bindValue(":nom_contact", nom_contact);
+        query.bindValue(":email", email);
+        query.bindValue(":telephone", telephone);
+        query.bindValue(":type_produit_fournis", type_produit_fournis);
+        query.bindValue(":condition_paiement", condition_paiement);
+        query.bindValue(":historique_commande_passee", historique_commande_passee);
+        
+        if (!query.exec()) {
+            qDebug() << "Erreur lors de l'ajout du fournisseur:" << query.lastError().text();
+            return false;
+        }
+    }
+    
+    return true;
+
 }
 
 void Fournisseur::set_email(QString em)
 {
+
     email = em;
 }
 
@@ -151,11 +198,60 @@ bool Fournisseur::ajouter()
         qDebug() << "Erreur lors de l'ajout:" << query.lastError().text();
         return false;
     }
+
+    QSqlDatabase db = QSqlDatabase::database();
+    if (!db.isValid() || !db.isOpen()) {
+        qDebug() << "Erreur: connexion base de données invalide ou fermée";
+        return false;
+    }
+    
+    QSqlQuery query(db);
+    QString sql = "UPDATE FOURNISSEUR SET NOM_ENTREPRISE = :nom_entreprise, NOM_CONTACT = :nom_contact, "
+                  "EMAIL = :email, TELEPHONE = :telephone, TYPE_PRODUIT_FOURNIS = :type_produit_fournis, "
+                  "CONDITION_PAIEMENT = :condition_paiement, HISTORIQUE_COMMANDE_PASSEE = :historique_commande_passee "
+                  "WHERE ID_FOURNISSEUR = :id_fournisseur";
+    query.prepare(sql);
+    
+    query.bindValue(":id_fournisseur", id_fournisseur);
+    query.bindValue(":nom_entreprise", nom_entreprise);
+    query.bindValue(":nom_contact", nom_contact);
+    query.bindValue(":email", email);
+    query.bindValue(":telephone", telephone);
+    query.bindValue(":type_produit_fournis", type_produit_fournis);
+    query.bindValue(":condition_paiement", condition_paiement);
+    query.bindValue(":historique_commande_passee", historique_commande_passee);
+    
+    if (!query.exec()) {
+        // Try with lowercase
+        query.clear();
+        sql = "UPDATE fournisseur SET nom_entreprise = :nom_entreprise, nom_contact = :nom_contact, "
+              "email = :email, telephone = :telephone, type_produit_fournis = :type_produit_fournis, "
+              "condition_paiement = :condition_paiement, historique_commande_passee = :historique_commande_passee "
+              "WHERE id_fournisseur = :id_fournisseur";
+        query.prepare(sql);
+        query.bindValue(":id_fournisseur", id_fournisseur);
+        query.bindValue(":nom_entreprise", nom_entreprise);
+        query.bindValue(":nom_contact", nom_contact);
+        query.bindValue(":email", email);
+        query.bindValue(":telephone", telephone);
+        query.bindValue(":type_produit_fournis", type_produit_fournis);
+        query.bindValue(":condition_paiement", condition_paiement);
+        query.bindValue(":historique_commande_passee", historique_commande_passee);
+        
+        if (!query.exec()) {
+            qDebug() << "Erreur lors de la modification du fournisseur:" << query.lastError().text();
+            return false;
+        }
+    }
+    
+    return true;
+
 }
 
 // MÉTHODE SUPPRIMER
 bool Fournisseur::supprimer(int id)
 {
+
     QSqlQuery query;
     query.prepare("DELETE FROM FOURNISSEUR WHERE ID_FOURNISSEUR = :id");
     query.bindValue(":id", id);
@@ -170,6 +266,48 @@ bool Fournisseur::supprimer(int id)
         qDebug() << "Erreur lors de la suppression:" << query.lastError().text();
         return false;
     }
+
+    QSqlDatabase db = QSqlDatabase::database();
+    if (!db.isValid() || !db.isOpen()) {
+        qDebug() << "Erreur: connexion base de données invalide ou fermée";
+        return false;
+    }
+    
+    QSqlQuery query(db);
+    
+    // D'abord supprimer les relations dans la table fournir
+    QString sql = "DELETE FROM FOURNIR WHERE ID_FOURNISSEUR = :id";
+    query.prepare(sql);
+    query.bindValue(":id", id);
+    
+    if (!query.exec()) {
+        // Try with lowercase
+        query.clear();
+        sql = "DELETE FROM fournir WHERE id_fournisseur = :id";
+        query.prepare(sql);
+        query.bindValue(":id", id);
+        query.exec(); // Don't fail if this doesn't work
+    }
+    
+    // Ensuite supprimer le fournisseur
+    sql = "DELETE FROM FOURNISSEUR WHERE ID_FOURNISSEUR = :id";
+    query.prepare(sql);
+    query.bindValue(":id", id);
+    
+    if (!query.exec()) {
+        // Try with lowercase
+        query.clear();
+        sql = "DELETE FROM fournisseur WHERE id_fournisseur = :id";
+        query.prepare(sql);
+        query.bindValue(":id", id);
+        
+        if (!query.exec()) {
+            qDebug() << "Erreur lors de la suppression du fournisseur:" << query.lastError().text();
+            return false;
+        }
+    }
+    
+    return true;
 }
 
 // MÉTHODE AFFICHER
@@ -177,6 +315,32 @@ QSqlQueryModel* Fournisseur::afficher()
 {
     QSqlQueryModel* model = new QSqlQueryModel();
     model->setQuery("SELECT * FROM FOURNISSEUR");
+
+    
+    QString sql = "SELECT ID_FOURNISSEUR, NOM_ENTREPRISE, NOM_CONTACT, EMAIL, TELEPHONE, "
+                  "TYPE_PRODUIT_FOURNIS, CONDITION_PAIEMENT, HISTORIQUE_COMMANDE_PASSEE "
+                  "FROM FOURNISSEUR";
+    model->setQuery(sql);
+    
+    // If query fails, try with lowercase
+    if (model->lastError().isValid()) {
+        sql = "SELECT id_fournisseur, nom_entreprise, nom_contact, email, telephone, "
+              "type_produit_fournis, condition_paiement, historique_commande_passee "
+              "FROM fournisseur";
+        model->setQuery(sql);
+    }
+    
+    model->setHeaderData(0, Qt::Horizontal, QObject::tr("ID"));
+    model->setHeaderData(1, Qt::Horizontal, QObject::tr("Entreprise"));
+    model->setHeaderData(2, Qt::Horizontal, QObject::tr("Contact"));
+    model->setHeaderData(3, Qt::Horizontal, QObject::tr("Email"));
+    model->setHeaderData(4, Qt::Horizontal, QObject::tr("Téléphone"));
+    model->setHeaderData(5, Qt::Horizontal, QObject::tr("Type de produit"));
+    model->setHeaderData(6, Qt::Horizontal, QObject::tr("Condition de paiement"));
+    model->setHeaderData(7, Qt::Horizontal, QObject::tr("Historique"));
+    
+    return model;
+}
 
     model->setHeaderData(0, Qt::Horizontal, QObject::tr("ID"));
     model->setHeaderData(1, Qt::Horizontal, QObject::tr("Entreprise"));

@@ -252,6 +252,8 @@ background-color: rgb(41, 102, 148);
        </property>
        <property name="text">
         <string>nom_entreprise</string>
+
+        <string>Entreprise</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_2">
@@ -268,13 +270,21 @@ background-color: rgb(41, 102, 148);
 </string>
        </property>
        <property name="text">
+
         <string>nom_contact</string>
+
+        <string>Contact</string>
+
        </property>
       </widget>
       <widget class="QLabel" name="label_3">
        <property name="geometry">
         <rect>
+
          <x>10</x>
+
+         <x>20</x>
+
          <y>210</y>
          <width>101</width>
          <height>20</height>
@@ -302,7 +312,11 @@ background-color: rgb(41, 102, 148);
 </string>
        </property>
        <property name="text">
+
         <string>telephone</string>
+
+        <string>Telephone</string>
+
        </property>
       </widget>
       <widget class="QLineEdit" name="lineEdit">
@@ -374,7 +388,11 @@ background-color: rgb(41, 102, 148);
        <property name="geometry">
         <rect>
          <x>10</x>
+
          <y>510</y>
+
+         <y>500</y>
+
          <width>113</width>
          <height>28</height>
         </rect>
@@ -394,6 +412,7 @@ background-color: rgb(41, 102, 148);
        </property>
        <property name="text">
         <string/>
+
        </property>
       </widget>
       <widget class="QLineEdit" name="lineEdit_13">
@@ -448,6 +467,28 @@ background-color: rgb(41, 102, 148);
         <rect>
          <x>10</x>
          <y>400</y>
+
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_13">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>370</y>
+         <width>113</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_11">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>330</y>
+
          <width>161</width>
          <height>31</height>
         </rect>
@@ -457,6 +498,7 @@ background-color: rgb(41, 102, 148);
 </string>
        </property>
        <property name="text">
+
         <string>condition_paeiment</string>
        </property>
       </widget>
@@ -466,6 +508,17 @@ background-color: rgb(41, 102, 148);
          <x>140</x>
          <y>440</y>
          <width>21</width>
+
+        <string>type_produit_fournis</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_12">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>470</y>
+         <width>161</width>
+
          <height>31</height>
         </rect>
        </property>
@@ -474,6 +527,7 @@ background-color: rgb(41, 102, 148);
 </string>
        </property>
        <property name="text">
+
         <string>c:1</string>
        </property>
       </widget>
@@ -483,6 +537,16 @@ background-color: rgb(41, 102, 148);
          <x>190</x>
          <y>440</y>
          <width>21</width>
+
+        <string>Date</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_13">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>400</y>
+         <width>161</width>
          <height>31</height>
         </rect>
        </property>
@@ -510,6 +574,9 @@ background-color: rgb(41, 102, 148);
       <property name="text">
        <string>modifier</string>
       </property>
+        <string>Paiement</string>
+       </property>
+      </widget>
      </widget>
     </widget>
     <widget class="QWidget" name="page_2"/>

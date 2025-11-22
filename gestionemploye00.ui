@@ -65,7 +65,7 @@ font: 28pt &quot;Segoe MDL2 Assets&quot;;
     <bool>true</bool>
    </property>
    <property name="alignment">
-    <set>Qt::AlignCenter</set>
+    <set>Qt::AlignmentFlag::AlignCenter</set>
    </property>
   </widget>
   <widget class="QLineEdit" name="lineEdit_12">
@@ -214,6 +214,26 @@ color:white;</string>
    <property name="text">
     <string>trier</string>
    </property>
+  </widget>
+  <widget class="QComboBox" name="comboBox_tri">
+   <property name="geometry">
+    <rect>
+     <x>820</x>
+     <y>730</y>
+     <width>160</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>Nom (A-Z)</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Salaire (desc)</string>
+    </property>
+   </item>
   </widget>
   <widget class="QPushButton" name="pushButton_6">
    <property name="geometry">
@@ -561,7 +581,7 @@ background-color: rgb(41, 102, 148);
      <string>Disponibilite:</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_11">
+   <widget class="QComboBox" name="comboBox_disponibilite">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -570,6 +590,16 @@ background-color: rgb(41, 102, 148);
       <height>28</height>
      </rect>
     </property>
+    <item>
+     <property name="text">
+      <string>O</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>N</string>
+     </property>
+    </item>
    </widget>
    <widget class="QPushButton" name="pushButton_12">
     <property name="geometry">
@@ -602,7 +632,7 @@ color:white;</string>
 color:white;</string>
     </property>
     <property name="text">
-     <string>Vlider</string>
+     <string>Valider</string>
     </property>
    </widget>
   </widget>
@@ -800,6 +830,8 @@ background-color: rgb(41, 102, 148);
    </widget>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

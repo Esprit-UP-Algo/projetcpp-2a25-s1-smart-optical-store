@@ -6,6 +6,7 @@
 #include "Connection.h"
 #include <QApplication>
 #include <QMessageBox>
+#include <QObject>
 
 int main(int argc, char *argv[])
 {
