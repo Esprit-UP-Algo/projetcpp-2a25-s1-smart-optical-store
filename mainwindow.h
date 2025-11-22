@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <produit.h>
+
 #include <QEvent>
 
 QT_BEGIN_NAMESPACE
@@ -37,8 +39,21 @@ private slots:
     void on_tableWidget_cellDoubleClicked(int row, int column);
     void loadProducts();  // Load products into table
 
+    void on_pushButton_2_clicked(); //mariem
+    void on_pushButton_31_clicked();
+    void showToast(QString message);
+    void on_pushButton_5_clicked();
+    void on_pushButtonR_clicked();
+    void on_pushButton_9_clicked();
+    void on_pushButton_32_clicked();
+    void on_tableWidget_cellClicked(int row);
+
+
+
 private:
     Ui::MainWindow *ui;
+    Produit Etmp;
+
     bool eventFilter(QObject *obj, QEvent *event) override;
     int currentProductRef;  // For editing mode
     void clearForm();

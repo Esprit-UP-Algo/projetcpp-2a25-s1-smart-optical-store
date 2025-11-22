@@ -1,0 +1,10 @@
+release/arduino.o
+release/fournisseur.o
+release/main.o
+release/mainwindow.o
+release/connection.o
+release/produit.o
+release/smtp.o
+release/moc_arduino.o
+release/moc_mainwindow.o
+release/moc_smtp.o
