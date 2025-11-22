@@ -53,6 +53,9 @@ private slots:
     // Table action buttons
     void handleModifyFromTable();
     void handleDeleteFromTable();
+    
+    // PDF Export
+    void exportEmployeesToPdf();
 
 private:
     Ui::gestionemploye00 *ui;

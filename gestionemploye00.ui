@@ -659,7 +659,7 @@ background-color: rgb(41, 102, 148);
 }</string>
     </property>
     <property name="text">
-     <string>Produit</string>
+     <string>Employe</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_8">

@@ -52,10 +52,8 @@ FournisseurWindow* FournisseurWindow::getInstance(QWidget *parent)
 
 FournisseurWindow::FournisseurWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::FournisseurWindow),selectedId(-1)
-
-
     , ui(new Ui::FournisseurWindow)
+    , selectedId(-1)
     , currentFournisseurId(-1)
     , isEditing(false)
 {
@@ -218,116 +216,7 @@ void FournisseurWindow::on_tableWidget_2_itemClicked()
     }
 }
 
-void FournisseurWindow::on_pushButton_ajouter_clicked()
-{
-    QString idStr = ui->lineEdit->text();
-    QString nom_ent = ui->lineEdit_3->text();
-    QString nom_cont = ui->lineEdit_4->text();
-    QString email = ui->lineEdit_5->text();
-    QString tel = ui->lineEdit_6->text();
-    QString type_prod = ui->lineEdit_13->text();
-    QString condStr = ui->lineEdit_12->text();
-    QString histStr = ui->lineEdit_11->text();
-
-    // === VALIDATIONS ===
-    if (idStr.isEmpty() || !QRegularExpression("^[0-9]+$").match(idStr).hasMatch()) {
-        QMessageBox::warning(this, "Attention", "L'ID doit contenir uniquement des chiffres !");
-        return;
-    }
-    if (!QRegularExpression("^\\d{8}$").match(tel).hasMatch()) {
-        QMessageBox::warning(this, "Attention", "Le téléphone doit avoir 8 chiffres !");
-        return;
-    }
-    if (!QRegularExpression("^[01]$").match(condStr).hasMatch()) {
-        QMessageBox::warning(this, "Attention", "Condition paiement doit être 0 ou 1 !");
-        return;
-    }
-
-    QDate hist = QDate::fromString(histStr, "dd/MM/yyyy");
-    if (!hist.isValid()) {
-        QMessageBox::warning(this, "Attention", "Format date : jj/MM/aaaa !");
-        return;
-    }
-
-    int id = idStr.toInt();
-    int cond_paie = condStr.toInt();
-
-    Fournisseur F(id, nom_ent, nom_cont, email, tel, type_prod, cond_paie, hist);
-
-    if (F.ajouter()) {
-        QMessageBox::information(this, "Succès", "Fournisseur ajouté !");
-        afficherFournisseurs();
-    } else {
-        QMessageBox::critical(this, "Erreur", "Ajout échoué !");
-    }
-}
-
-void FournisseurWindow::on_pushButton_modifier_clicked()
-{
-    if (selectedId == -1) {
-        QMessageBox::warning(this, "Attention", "Sélectionnez un fournisseur !");
-        return;
-    }
-
-    QString nom_ent = ui->lineEdit_3->text();
-    QString nom_cont = ui->lineEdit_4->text();
-    QString email = ui->lineEdit_5->text();
-    QString tel = ui->lineEdit_6->text();
-    QString type_prod = ui->lineEdit_13->text();
-    QString condStr = ui->lineEdit_12->text();
-    QString histStr = ui->lineEdit_11->text();
-
-    if (!QRegularExpression("^\\d{8}$").match(tel).hasMatch()) {
-        QMessageBox::warning(this, "Attention", "Téléphone invalide !");
-        return;
-    }
-
-    int cond_paie = condStr.toInt();
-    QDate hist = QDate::fromString(histStr, "dd/MM/yyyy");
-
-    Fournisseur F(selectedId, nom_ent, nom_cont, email, tel, type_prod, cond_paie, hist);
-
-    if (F.modifier(selectedId)) {
-        QMessageBox::information(this, "Succès", "Fournisseur modifié !");
-        afficherFournisseurs();
-    } else {
-        QMessageBox::critical(this, "Erreur", "Modification échouée !");
-    }
-}
-
-void FournisseurWindow::on_pushButton_delete_clicked()
-{
-    if (selectedId == -1) {
-        QMessageBox::warning(this, "Attention", "Veuillez sélectionner un fournisseur à supprimer !");
-        return;
-    }
-
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "Confirmation",
-                                  "Êtes-vous sûr de vouloir supprimer ce fournisseur ?",
-                                  QMessageBox::Yes | QMessageBox::No);
-    if (reply == QMessageBox::Yes)
-    {
-        Fournisseur f;
-        if (f.supprimer(selectedId)) {
-            QMessageBox::information(this, "Succès", "Fournisseur supprimé avec succès !");
-            afficherFournisseurs();
-            selectedId = -1;
-            ui->pushButton_delete->setEnabled(false);
-
-            ui->lineEdit->clear();
-            ui->lineEdit_3->clear();
-            ui->lineEdit_4->clear();
-            ui->lineEdit_5->clear();
-            ui->lineEdit_6->clear();
-            ui->lineEdit_13->clear();
-            ui->lineEdit_12->clear();
-            ui->lineEdit_11->clear();
-        } else {
-            QMessageBox::critical(this, "Erreur", "Échec de la suppression !");
-        }
-    }
-}
+// Removed duplicate function definitions - using newer implementations below
 
 bool FournisseurWindow::eventFilter(QObject *obj, QEvent *event)
 {
@@ -492,17 +381,21 @@ void FournisseurWindow::on_pushButton_ajouter_clicked()
     }
     
     Fournisseur f;
-    f.setNomEntreprise(nomEntreprise);
-    f.setNomContact(nomContact);
-    f.setEmail(email);
-    f.setTelephone(telephone);
-    f.setTypeProduit(typeProduit);
-    f.setConditionPaiement(conditionPaiement);
-    f.setHistoriqueCommande(historique);
+    f.set_nom_entreprise(nomEntreprise);
+    f.set_nom_contact(nomContact);
+    f.set_email(email);
+    f.set_telephone(telephone);
+    f.set_type_produit_fournis(typeProduit);
+    f.set_condition_paiement(conditionPaiement.toInt());
+    QDate histDate = QDate::fromString(historique, "dd/MM/yyyy");
+    if (!histDate.isValid()) {
+        histDate = QDate::currentDate();
+    }
+    f.set_historique(histDate);
     
     if (isEditing && currentFournisseurId > 0) {
-        f.setId(currentFournisseurId);
-        if (f.modifier()) {
+        f.set_id_fournisseur(currentFournisseurId);
+        if (f.modifier(currentFournisseurId)) {
             QMessageBox::information(this, "Succès", "Fournisseur modifié avec succès!");
             clearForm();
             loadFournisseurs();

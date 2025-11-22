@@ -28,6 +28,21 @@
 #include "WindowManager.h"
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QPdfWriter>
+#include <QPainter>
+#include <QFont>
+#include <QColor>
+#include <QPen>
+#include <QBrush>
+#include <QRect>
+#include <QPageSize>
+#include <QPageLayout>
+#include <QMarginsF>
+#include <QSqlQuery>
+#include <QSqlQueryModel>
+#include <QVariant>
 
 // Initialize static instance pointer
 gestionemploye00* gestionemploye00::instance = nullptr;
@@ -160,8 +175,7 @@ void gestionemploye00::on_pushButton_6_clicked()
 
 void gestionemploye00::on_pushButton_10_clicked()
 {
-    Exporter *h = new Exporter();
-    h->show();
+    exportEmployeesToPdf();
 }
 
 void gestionemploye00::on_pushButton_14_clicked()
@@ -759,4 +773,212 @@ void gestionemploye00::searchEmployees(const QString &text)
 
     Employe e;
     populateTable(e.rechercherParNom(trimmed));
+}
+
+void gestionemploye00::exportEmployeesToPdf()
+{
+    // Check database connection
+    QSqlDatabase db = QSqlDatabase::database();
+    if (!db.isValid() || !db.isOpen()) {
+        QMessageBox::critical(this, "Erreur", "La connexion à la base de données n'est pas active!");
+        return;
+    }
+    
+    // Get all employees from database
+    Employe e;
+    QSqlQueryModel* model = e.afficher();
+    
+    if (!model || model->rowCount() == 0) {
+        QMessageBox::warning(this, "Avertissement", "Aucun employé à exporter.");
+        if (model) delete model;
+        return;
+    }
+    
+    // Get file path for saving PDF
+    QString fileName = QFileDialog::getSaveFileName(this, 
+        "Exporter les employés en PDF", 
+        QString("employes_%1.pdf").arg(QDate::currentDate().toString("yyyy-MM-dd")),
+        "PDF Files (*.pdf)");
+    
+    if (fileName.isEmpty()) {
+        delete model;
+        return;
+    }
+    
+    // Ensure .pdf extension
+    if (!fileName.endsWith(".pdf", Qt::CaseInsensitive)) {
+        fileName += ".pdf";
+    }
+    
+    // Check if file exists and can be written
+    QFileInfo fileInfo(fileName);
+    if (fileInfo.exists() && !fileInfo.isWritable()) {
+        QMessageBox::critical(this, "Erreur", "Le fichier existe déjà et ne peut pas être modifié.\nVeuillez choisir un autre nom ou fermer le fichier s'il est ouvert.");
+        delete model;
+        return;
+    }
+    
+    // Create PDF writer
+    QPdfWriter pdfWriter(fileName);
+    pdfWriter.setPageSize(QPageSize::A4);
+    pdfWriter.setPageMargins(QMarginsF(15, 15, 15, 15), QPageLayout::Millimeter);
+    
+    // Create painter
+    QPainter painter(&pdfWriter);
+    painter.setRenderHint(QPainter::Antialiasing);
+    
+    // Check if PDF writer is valid
+    if (!painter.isActive()) {
+        QMessageBox::critical(this, "Erreur", "Impossible de créer le fichier PDF.\nVérifiez que le fichier n'est pas ouvert dans une autre application.");
+        delete model;
+        return;
+    }
+    
+    // Company information
+    QString companyName = "Smart Optical Store";
+    QString companyAddress = "123 Rue Principale, Tunis, Tunisie";
+    QString companyPhone = "+216 12 345 678";
+    QString companyEmail = "contact@smartopticalstore.com";
+    
+    // Page dimensions (in pixels)
+    int pageWidth = pdfWriter.width();
+    int pageHeight = pdfWriter.height();
+    int margin = 60;
+    int yPos = margin;
+    int lineHeight = 20;
+    int tableStartY = 0;
+    
+    // Setup fonts
+    QFont titleFont("Arial", 24, QFont::Bold);
+    QFont headerFont("Arial", 11, QFont::Bold);
+    QFont normalFont("Arial", 9);
+    QFont smallFont("Arial", 8);
+    QFont tableHeaderFont("Arial", 9, QFont::Bold);
+    QFont tableFont("Arial", 8);
+    
+    // Draw header on first page
+    painter.setFont(titleFont);
+    painter.setPen(QPen(Qt::black));
+    painter.drawText(QRect(0, yPos, pageWidth, 40), Qt::AlignCenter, companyName);
+    yPos += 50;
+    
+    painter.setFont(headerFont);
+    painter.drawText(QRect(0, yPos, pageWidth, 20), Qt::AlignCenter, "Liste des Employés");
+    yPos += 30;
+    
+    painter.setFont(smallFont);
+    painter.drawText(QRect(0, yPos, pageWidth, 15), Qt::AlignCenter, 
+                     QString("Généré le: %1").arg(QDate::currentDate().toString("dd/MM/yyyy")));
+    yPos += 25;
+    
+    // Draw company info
+    painter.setFont(smallFont);
+    painter.drawText(QRect(margin, yPos, pageWidth - 2*margin, 15), 
+                     QString("Adresse: %1 | Tél: %2 | Email: %3").arg(companyAddress).arg(companyPhone).arg(companyEmail));
+    yPos += 30;
+    
+    // Table header
+    tableStartY = yPos;
+    painter.setFont(tableHeaderFont);
+    painter.setPen(QPen(Qt::black, 1));
+    painter.setBrush(QBrush(QColor(200, 200, 200)));
+    
+    // Column widths (proportional to page width)
+    int colWidths[] = {60, 100, 100, 120, 80, 80, 100, 100, 80, 60, 80};
+    int xPos = margin;
+    QStringList headers = {"ID", "Nom", "Prénom", "Email", "Téléphone", "Date Naiss.", 
+                          "Adresse", "Poste", "Salaire", "Enfants", "Disponibilité"};
+    
+    // Draw table header
+    for (int col = 0; col < headers.size() && col < 11; ++col) {
+        painter.drawRect(xPos, yPos, colWidths[col], lineHeight + 5);
+        painter.drawText(QRect(xPos + 2, yPos + 2, colWidths[col] - 4, lineHeight + 1), 
+                        Qt::AlignLeft | Qt::AlignVCenter, headers[col]);
+        xPos += colWidths[col];
+    }
+    yPos += lineHeight + 7;
+    
+    // Draw table rows
+    painter.setFont(tableFont);
+    painter.setBrush(QBrush(Qt::white));
+    int rowHeight = lineHeight + 3;
+    int maxRowsPerPage = (pageHeight - yPos - margin) / rowHeight;
+    int currentRow = 0;
+    int pageNum = 1;
+    
+    for (int row = 0; row < model->rowCount(); ++row) {
+        // Check if we need a new page
+        if (currentRow >= maxRowsPerPage) {
+            pdfWriter.newPage();
+            yPos = margin;
+            currentRow = 0;
+            pageNum++;
+            
+            // Redraw header on new page
+            painter.setFont(smallFont);
+            painter.drawText(QRect(0, yPos, pageWidth, 15), Qt::AlignCenter, 
+                           QString("Page %1 - %2").arg(pageNum).arg(companyName));
+            yPos += 20;
+            
+            // Redraw table header
+            painter.setFont(tableHeaderFont);
+            painter.setBrush(QBrush(QColor(200, 200, 200)));
+            xPos = margin;
+            for (int col = 0; col < headers.size() && col < 11; ++col) {
+                painter.drawRect(xPos, yPos, colWidths[col], lineHeight + 5);
+                painter.drawText(QRect(xPos + 2, yPos + 2, colWidths[col] - 4, lineHeight + 1), 
+                                Qt::AlignLeft | Qt::AlignVCenter, headers[col]);
+                xPos += colWidths[col];
+            }
+            yPos += lineHeight + 7;
+            painter.setFont(tableFont);
+            painter.setBrush(QBrush(Qt::white));
+        }
+        
+        // Get data from model
+        QString id = model->data(model->index(row, 0)).toString();
+        QString nom = model->data(model->index(row, 1)).toString();
+        QString prenom = model->data(model->index(row, 2)).toString();
+        QString email = model->data(model->index(row, 3)).toString();
+        QString telephone = model->data(model->index(row, 4)).toString();
+        QString dateNaiss = model->data(model->index(row, 5)).toString();
+        QString adresse = model->data(model->index(row, 6)).toString();
+        QString poste = model->data(model->index(row, 7)).toString();
+        QString salaire = model->data(model->index(row, 8)).toString();
+        QString nEnfants = model->data(model->index(row, 9)).toString();
+        QString disponibilite = model->data(model->index(row, 10)).toString();
+        
+        // Truncate long strings
+        if (email.length() > 15) email = email.left(12) + "...";
+        if (adresse.length() > 12) adresse = adresse.left(10) + "...";
+        
+        // Draw row
+        xPos = margin;
+        QStringList rowData = {id, nom, prenom, email, telephone, dateNaiss, 
+                              adresse, poste, salaire, nEnfants, disponibilite};
+        
+        for (int col = 0; col < rowData.size() && col < 11; ++col) {
+            painter.setPen(QPen(Qt::black, 0.5));
+            painter.drawRect(xPos, yPos, colWidths[col], rowHeight);
+            painter.setPen(QPen(Qt::black));
+            painter.drawText(QRect(xPos + 2, yPos + 2, colWidths[col] - 4, rowHeight - 4), 
+                           Qt::AlignLeft | Qt::AlignVCenter, rowData[col]);
+            xPos += colWidths[col];
+        }
+        
+        yPos += rowHeight;
+        currentRow++;
+    }
+    
+    // Draw footer on last page
+    painter.setFont(smallFont);
+    painter.setPen(QPen(Qt::gray));
+    painter.drawText(QRect(0, pageHeight - 30, pageWidth, 20), Qt::AlignCenter, 
+                    QString("Total: %1 employé(s)").arg(model->rowCount()));
+    
+    painter.end();
+    delete model;
+    
+    QMessageBox::information(this, "Succès", 
+                            QString("Les employés ont été exportés avec succès dans:\n%1").arg(fileName));
 }

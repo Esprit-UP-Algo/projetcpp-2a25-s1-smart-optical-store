@@ -27,6 +27,12 @@
 #include <QLabel>
 #include <QPropertyAnimation>
 #include <QFileDialog>
+#include <QTextStream>
+#include <QStandardPaths>
+#include <QDesktopServices>
+#include <QUrl>
+#include <QTimer>
+#include <QPixmap>
 
 // Initialize static instance pointer
 MainWindow* MainWindow::instance = nullptr;
@@ -51,9 +57,8 @@ MainWindow* MainWindow::getInstance(QWidget *parent)
 }
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow),Etmp()
-
     , ui(new Ui::MainWindow)
+    , Etmp()
     , currentProductRef(0)
 {
     ui->setupUi(this);
@@ -75,14 +80,56 @@ MainWindow::MainWindow(QWidget *parent)
     
     ui->lineEdit_5->setPlaceholderText("  Recherche par référence ou Nom ...");
     qDebug() << "Chemin courant =" << QDir::currentPath();
-    ui->logoLabel->setPixmap(QPixmap(":/images/logof.jpg"));
-    ui->logoLabel->setScaledContents(true);
     
-    // Make logo clickable
-    if (ui->logoLabel) {
-        ui->logoLabel->setCursor(Qt::PointingHandCursor);
-        ui->logoLabel->installEventFilter(this);
-        ui->logoLabel->setAttribute(Qt::WA_TransparentForMouseEvents, false);
+    // Setup logo - ensure it's visible and clickable
+    // Find topRightLogoLabel (the logo visible in the interface) and logoLabel
+    QLabel* topRightLogoLabel = this->findChild<QLabel*>("topRightLogoLabel", Qt::FindChildrenRecursively);
+    QLabel* logoLabel = this->findChild<QLabel*>("logoLabel", Qt::FindChildrenRecursively);
+    if (!logoLabel) {
+        logoLabel = ui->logoLabel;
+    }
+    
+    // Setup topRightLogoLabel (main logo visible in stock management page)
+    if (topRightLogoLabel) {
+        // Load logo image from resources
+        QPixmap logoPixmap(":/images/logof.jpg");
+        if (logoPixmap.isNull()) {
+            logoPixmap = QPixmap("images/logof.jpg");
+        }
+        if (!logoPixmap.isNull()) {
+            topRightLogoLabel->setPixmap(logoPixmap);
+            topRightLogoLabel->setScaledContents(true);
+            qDebug() << "✅ topRightLogoLabel loaded successfully, size:" << logoPixmap.size();
+        }
+        
+        // Make logo clickable
+        topRightLogoLabel->setCursor(Qt::PointingHandCursor);
+        topRightLogoLabel->installEventFilter(this);
+        topRightLogoLabel->setAttribute(Qt::WA_TransparentForMouseEvents, false);
+        topRightLogoLabel->setToolTip("Cliquez pour aller au Tableau de bord");
+        topRightLogoLabel->show();
+        topRightLogoLabel->raise();
+        qDebug() << "✅ topRightLogoLabel setup complete - clickable and ready";
+    } else {
+        qDebug() << "⚠️ topRightLogoLabel widget not found in UI";
+    }
+    
+    // Also setup logoLabel if it exists
+    if (logoLabel) {
+        QPixmap logoPixmap(":/images/logof.jpg");
+        if (logoPixmap.isNull()) {
+            logoPixmap = QPixmap("images/logof.jpg");
+        }
+        if (!logoPixmap.isNull()) {
+            logoLabel->setPixmap(logoPixmap);
+            logoLabel->setScaledContents(true);
+        }
+        logoLabel->setCursor(Qt::PointingHandCursor);
+        logoLabel->installEventFilter(this);
+        logoLabel->setAttribute(Qt::WA_TransparentForMouseEvents, false);
+        logoLabel->setToolTip("Cliquez pour aller au Tableau de bord");
+        logoLabel->show();
+        logoLabel->raise();
     }
     
     // Setup table widget
@@ -96,8 +143,10 @@ MainWindow::MainWindow(QWidget *parent)
     // Connect table double-click
     connect(ui->tableWidget, &QTableWidget::cellDoubleClicked, this, &MainWindow::on_tableWidget_cellDoubleClicked);
     
-    // Load products on startup
-    loadProducts();
+    // Load products on startup - delay to ensure UI is fully initialized
+    QTimer::singleShot(500, this, [this]() {
+        loadProducts();
+    });
     clearForm();
 
     // Wire tableau de bord buttons by their visible text to avoid object-name differences
@@ -160,6 +209,45 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_3_clicked()
 {
     ui->stackedWidget->setCurrentIndex(0);
+    // Ensure logos are visible and clickable when switching to stock page
+    QLabel* topRightLogoLabel = this->findChild<QLabel*>("topRightLogoLabel", Qt::FindChildrenRecursively);
+    QLabel* logoLabel = this->findChild<QLabel*>("logoLabel", Qt::FindChildrenRecursively);
+    if (!logoLabel) {
+        logoLabel = ui->logoLabel;
+    }
+    
+    // Setup topRightLogoLabel (the visible logo)
+    if (topRightLogoLabel) {
+        topRightLogoLabel->show();
+        topRightLogoLabel->raise();
+        QPixmap logoPixmap(":/images/logof.jpg");
+        if (logoPixmap.isNull()) {
+            logoPixmap = QPixmap("images/logof.jpg");
+        }
+        if (!logoPixmap.isNull()) {
+            topRightLogoLabel->setPixmap(logoPixmap);
+        }
+        topRightLogoLabel->installEventFilter(this);
+        topRightLogoLabel->setCursor(Qt::PointingHandCursor);
+        topRightLogoLabel->setAttribute(Qt::WA_TransparentForMouseEvents, false);
+    }
+    
+    // Setup logoLabel
+    if (logoLabel) {
+        logoLabel->show();
+        logoLabel->raise();
+        QPixmap logoPixmap(":/images/logof.jpg");
+        if (logoPixmap.isNull()) {
+            logoPixmap = QPixmap("images/logof.jpg");
+        }
+        if (!logoPixmap.isNull()) {
+            logoLabel->setPixmap(logoPixmap);
+        }
+        logoLabel->installEventFilter(this);
+        logoLabel->setCursor(Qt::PointingHandCursor);
+    }
+    // Reload products when switching to stock page
+    loadProducts();
 }
 
 
@@ -177,60 +265,7 @@ void MainWindow::on_lineEdit_5_cursorPositionChanged(int arg1, int arg2)
     Q_UNUSED(arg2);
 }
 
-void MainWindow::on_pushButton_2_clicked()
-{
-    QString ref        = ui->lineEdit_3->text();
-    QString designation = ui->lineEdit_2->text();
-    QString marque     = ui->lineEdit_7->text();
-    QString couleur    = ui->lineEdit_8->text();
-    QString prix       = ui->lineEdit_36->text();
-    QString quantite   = ui->lineEdit_9->text();
-
-    // REGEX
-    QRegularExpression rxRef("^[A-Za-z]{2}[0-9]{5}$");
-    QRegularExpression rxDesignation("^[A-Za-z]{5}[0-9]{2}$");
-    QRegularExpression rxMarque("^[A-Za-z]+$");
-    QRegularExpression rxCouleur("^[A-Za-z]+$");
-    QRegularExpression rxPrix("^[0-9]+(\\.[0-9]+)?$");
-    QRegularExpression rxQuantite("^[0-9]+$");
-
-    // Vérifications
-    if (!rxRef.match(ref).hasMatch()) {
-        QMessageBox::warning(this, "Erreur", "La référence doit contenir 2 lettres + 5 chiffres (ex: AB12345).");
-        return;
-    }
-
-    if (!rxDesignation.match(designation).hasMatch()) {
-        QMessageBox::warning(this, "Erreur", "La désignation doit contenir 5 lettres + 2 chiffres (ex: ABCDE12).");
-        return;
-    }
-
-    if (!rxMarque.match(marque).hasMatch()) {
-        QMessageBox::warning(this, "Erreur", "La marque doit contenir seulement des lettres.");
-        return;
-    }
-
-    if (!rxCouleur.match(couleur).hasMatch()) {
-        QMessageBox::warning(this, "Erreur", "La couleur doit contenir seulement des lettres.");
-        return;
-    }
-
-    if (!rxPrix.match(prix).hasMatch()) {
-        QMessageBox::warning(this, "Erreur", "Le prix doit être un nombre (ex: 45 ou 45.6).");
-        return;
-    }
-
-    if (!rxQuantite.match(quantite).hasMatch()) {
-        QMessageBox::warning(this, "Erreur", "La quantité doit être un nombre.");
-        return;
-    }
-
-    // Si tout est valide -> ajouter
-    Produit p(ui);
-    p.ajouter();
-    p.afficher(ui);
-    MainWindow::on_pushButton_31_clicked();
-}
+// Removed duplicate on_pushButton_2_clicked() - using newer implementation below
 
 void MainWindow::on_pushButton_31_clicked()
 {
@@ -281,24 +316,7 @@ void MainWindow::showToast(QString message)
 
 
 
-void MainWindow::on_pushButton_5_clicked()
-{
-    QString ref = ui->lineEdit_6->text();
-
-    Produit c;
-    bool test = c.supprimer(ref);
-
-    if (test)
-    {
-        QMessageBox::information(this, tr("Suppression réussie"),tr("Le produit a été supprimé avec succès."));
-        c.afficher(ui);
-    }
-    else
-    {
-        QMessageBox::critical(this,tr("Erreur"),tr("La suppression a échoué. Vérifiez la ref saisi.") );
-    }
-    ui->lineEdit_6->clear();
-}
+// Removed duplicate on_pushButton_5_clicked() - using newer implementation below
 
 
 void MainWindow::on_pushButtonR_clicked()
@@ -315,28 +333,7 @@ void MainWindow::on_pushButtonR_clicked()
 }
 
 
-void MainWindow::on_pushButton_9_clicked()
-{
-    QString trier = ui->comboBox->currentText();
-    if (trier == "categories")
-    {
-
-        ui->tableWidget->sortItems(6, Qt::AscendingOrder);
-    }
-    else if (trier == "prix")
-    {
-
-        ui->tableWidget->sortItems(3, Qt::AscendingOrder);
-    }
-    else if (trier == "genre")
-    {
-        ui->tableWidget->sortItems(2, Qt::DescendingOrder );
-    }
-    else
-    {
-        QMessageBox::warning(this, "Tri", "Choisissez un critère valide !");
-    }
-}
+// Removed duplicate on_pushButton_9_clicked() - using newer implementation below
 void MainWindow::on_pushButton_32_clicked()
 {
     Produit c(ui);
@@ -354,10 +351,12 @@ void MainWindow::on_pushButton_32_clicked()
 }
 void MainWindow::on_tableWidget_cellClicked(int row)
 {
-    ui->lineEdit_3->setText(ui->tableWidget->item(row, 0)->text());
-    ui->lineEdit_8->setText(ui->tableWidget->item(row, 1)->text());
+    // Updated column order: {"Id", "Nom", "Couleur", "Genre", "Prix", "Quantité", "Marque", "Référence", "Fournisseur"}
+    ui->lineEdit_3->setText(ui->tableWidget->item(row, 0)->text()); // REF (Id)
+    ui->lineEdit_2->setText(ui->tableWidget->item(row, 1)->text()); // DESIGNATION (Nom)
+    ui->lineEdit_8->setText(ui->tableWidget->item(row, 2)->text()); // Couleur
 
-    QString genre = ui->tableWidget->item(row, 2)->text();
+    QString genre = ui->tableWidget->item(row, 3)->text(); // Genre
     if (genre == "Homme") {
         ui->radioButton->setChecked(true);
         ui->radioButton_2->setChecked(false);
@@ -375,86 +374,191 @@ void MainWindow::on_tableWidget_cellClicked(int row)
         ui->radioButton_2->setAutoExclusive(true);
     }
 
-    ui->lineEdit_36->setText(ui->tableWidget->item(row, 3)->text());
-    ui->lineEdit_9->setText(ui->tableWidget->item(row, 4)->text());
-    ui->lineEdit_7->setText(ui->tableWidget->item(row, 5)->text());
-    ui->comboBox_4->setCurrentText(ui->tableWidget->item(row, 6)->text());
-    ui->lineEdit_2->setText(ui->tableWidget->item(row, 7)->text());
-    ui->dateEdit->setDate(QDate::fromString(ui->tableWidget->item(row, 8)->text(), "yyyy-MM-dd"));
+    ui->lineEdit_36->setText(ui->tableWidget->item(row, 4)->text()); // Prix
+    ui->lineEdit_9->setText(ui->tableWidget->item(row, 5)->text()); // Quantité
+    ui->lineEdit_7->setText(ui->tableWidget->item(row, 6)->text()); // Marque
+    // row, 7 is REF again (duplicate), skip
+    // row, 8 is Fournisseur, skip
+}
+
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
-    if (obj == ui->logoLabel && event->type() == QEvent::MouseButtonPress) {
-        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-        if (mouseEvent->button() == Qt::LeftButton) {
-            on_logoClicked();
-            return true;
+    // Find both logo labels recursively to handle nested widgets
+    QLabel* topRightLogoLabel = this->findChild<QLabel*>("topRightLogoLabel", Qt::FindChildrenRecursively);
+    QLabel* logoLabel = this->findChild<QLabel*>("logoLabel", Qt::FindChildrenRecursively);
+    if (!logoLabel) {
+        logoLabel = ui->logoLabel;
+    }
+    
+    // Check if clicked object is topRightLogoLabel (the visible logo)
+    if (topRightLogoLabel && obj == topRightLogoLabel) {
+        if (event->type() == QEvent::MouseButtonPress) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+            if (mouseEvent->button() == Qt::LeftButton) {
+                qDebug() << "🖱️ topRightLogoLabel clicked - navigating to Dashboard";
+                on_logoClicked();
+                return true;
+            }
         }
     }
+    
+    // Check if clicked object is logoLabel
+    if (logoLabel && obj == logoLabel) {
+        if (event->type() == QEvent::MouseButtonPress) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+            if (mouseEvent->button() == Qt::LeftButton) {
+                qDebug() << "🖱️ logoLabel clicked - navigating to Dashboard";
+                on_logoClicked();
+                return true;
+            }
+        }
+    }
+    
     return QMainWindow::eventFilter(obj, event);
 }
 
 void MainWindow::on_logoClicked()
 {
-    DashboardWindow::getInstance();
-    this->close();
+    qDebug() << "🔄 Logo clicked - Navigating to Dashboard...";
+    // Navigate to Dashboard like other interfaces
+    // Get or create dashboard instance
+    DashboardWindow* dashboard = DashboardWindow::getInstance();
+    if (dashboard) {
+        // Show and activate dashboard
+        dashboard->show();
+        dashboard->raise();
+        dashboard->activateWindow();
+        qDebug() << "✅ Dashboard opened successfully";
+    } else {
+        qDebug() << "❌ Failed to open Dashboard";
+        QMessageBox::warning(this, "Erreur", "Impossible d'ouvrir le Tableau de bord.");
+        return;
+    }
+    // Close current window after a short delay to ensure dashboard is shown
+    QTimer::singleShot(200, this, [this]() {
+        this->close();
+    });
+}
+
+void MainWindow::on_pushButton_exportExcel_clicked()
+{
+    // Check if table has data
+    if (ui->tableWidget->rowCount() == 0) {
+        QMessageBox::warning(this, "Avertissement", "Aucun produit à exporter.");
+        return;
+    }
+    
+    // Get file path for saving Excel/CSV
+    QString fileName = QFileDialog::getSaveFileName(this, 
+        "Exporter les produits en Excel", 
+        QString("produits_%1.csv").arg(QDate::currentDate().toString("yyyy-MM-dd")),
+        "Excel Files (*.csv);;All Files (*)");
+    
+    if (fileName.isEmpty()) {
+        return;
+    }
+    
+    // Ensure .csv extension
+    if (!fileName.endsWith(".csv", Qt::CaseInsensitive)) {
+        fileName += ".csv";
+    }
+    
+    // Open file for writing
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Erreur", "Impossible de créer le fichier.\nVérifiez les permissions.");
+        return;
+    }
+    
+    QTextStream out(&file);
+    #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    out.setEncoding(QStringConverter::Utf8);
+    #else
+    out.setCodec("UTF-8");
+    #endif
+    
+    // Write BOM for Excel UTF-8 compatibility
+    out << "\xEF\xBB\xBF";
+    
+    // Write headers
+    QStringList headers;
+    for (int col = 0; col < ui->tableWidget->columnCount(); ++col) {
+        QTableWidgetItem *headerItem = ui->tableWidget->horizontalHeaderItem(col);
+        if (headerItem) {
+            headers << headerItem->text();
+        } else {
+            headers << QString("Column %1").arg(col + 1);
+        }
+    }
+    out << headers.join(",") << "\n";
+    
+    // Write data rows
+    for (int row = 0; row < ui->tableWidget->rowCount(); ++row) {
+        QStringList rowData;
+        for (int col = 0; col < ui->tableWidget->columnCount(); ++col) {
+            QTableWidgetItem *item = ui->tableWidget->item(row, col);
+            QString cellValue = item ? item->text() : "";
+            // Escape commas and quotes in CSV
+            if (cellValue.contains(",") || cellValue.contains("\"") || cellValue.contains("\n")) {
+                cellValue.replace("\"", "\"\""); // Escape quotes
+                cellValue = "\"" + cellValue + "\""; // Wrap in quotes
+            }
+            rowData << cellValue;
+        }
+        out << rowData.join(",") << "\n";
+    }
+    
+    file.close();
+    
+    QMessageBox::information(this, "Succès", 
+                            QString("Les produits ont été exportés avec succès dans:\n%1\n\nLe fichier peut être ouvert dans Microsoft Excel.").arg(fileName));
+    
+    // Optionally open the file
+    QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
 }
 
 void MainWindow::loadProducts()
 {
     QSqlDatabase db = QSqlDatabase::database();
     if (!db.isValid() || !db.isOpen()) {
-        qDebug() << "Database not connected in loadProducts()";
-        return;
-    }
-    
-    // Disable updates temporarily for better performance
-    ui->tableWidget->setUpdatesEnabled(false);
-    
-    Produit p;
-    QSqlQueryModel* model = p.afficher();
-    
-    if (!model) {
-        qDebug() << "Failed to create model";
-        ui->tableWidget->setUpdatesEnabled(true);
-        return;
-    }
-    
-    // Clear existing rows
-    ui->tableWidget->setRowCount(0);
-    
-    // Populate table
-    for (int i = 0; i < model->rowCount(); ++i) {
-        int row = ui->tableWidget->rowCount();
-        ui->tableWidget->insertRow(row);
+        qDebug() << "❌ Database not connected in loadProducts()";
+        qDebug() << "   Is Valid:" << db.isValid();
+        qDebug() << "   Is Open:" << db.isOpen();
+        qDebug() << "   Database Name:" << db.databaseName();
         
-        ui->tableWidget->setItem(row, 0, new QTableWidgetItem(model->data(model->index(i, 0)).toString()));
-        ui->tableWidget->setItem(row, 1, new QTableWidgetItem(model->data(model->index(i, 1)).toString()));
-        ui->tableWidget->setItem(row, 2, new QTableWidgetItem(model->data(model->index(i, 5)).toString())); // Couleur
-        ui->tableWidget->setItem(row, 3, new QTableWidgetItem(model->data(model->index(i, 6)).toString())); // Genre
-        ui->tableWidget->setItem(row, 4, new QTableWidgetItem(QString::number(model->data(model->index(i, 3)).toDouble(), 'f', 2)));
-        ui->tableWidget->setItem(row, 5, new QTableWidgetItem(model->data(model->index(i, 2)).toString()));
-        ui->tableWidget->setItem(row, 6, new QTableWidgetItem(model->data(model->index(i, 7)).toString()));
-        ui->tableWidget->setItem(row, 7, new QTableWidgetItem(model->data(model->index(i, 0)).toString()));
-        ui->tableWidget->setItem(row, 8, new QTableWidgetItem("")); // Fournisseur - not in produit table
+        // Try to reconnect
+        Connection c;
+        if (c.createconnect()) {
+            qDebug() << "✅ Reconnected to database";
+            db = QSqlDatabase::database();
+        } else {
+            QMessageBox::warning(this, "Erreur", "Impossible de se connecter à la base de données!\nVérifiez votre connexion.");
+            return;
+        }
     }
     
-    // Re-enable updates and refresh display
-    ui->tableWidget->setUpdatesEnabled(true);
-    ui->tableWidget->viewport()->update();
+    qDebug() << "🔄 Loading products from database...";
     
-    delete model;
-    qDebug() << "Products loaded:" << ui->tableWidget->rowCount();
+    // Use afficher which directly fills the table
+    Produit p;
+    p.afficher(ui);
+    
+    int rowCount = ui->tableWidget->rowCount();
+    qDebug() << "✅ Products loaded:" << rowCount;
+    
+    if (rowCount == 0) {
+        qDebug() << "⚠️ No products found in database. Table might be empty.";
+    }
 }
 
 void MainWindow::clearForm()
 {
-    ui->lineEdit_11->clear();  // Nom
+    ui->lineEdit_2->clear();  // Designation (Nom)
     ui->lineEdit_3->clear();  // Référence
-    ui->lineEdit_4->clear();  // Fournisseur
     ui->lineEdit_7->clear();  // Marque
     ui->lineEdit_9->clear();  // Quantité
     ui->lineEdit_8->clear();  // Couleur
-    ui->lineEdit_10->clear();  // Prix
+    ui->lineEdit_36->clear();  // Prix
     ui->dateEdit->setDate(QDate::currentDate());
     ui->radioButton->setChecked(true);  // Male
     currentProductRef = 0;
@@ -474,11 +578,11 @@ void MainWindow::fillForm(int reference)
     if (query.exec() && query.next()) {
         currentProductRef = reference;
         ui->lineEdit_3->setText(query.value(0).toString());  // Référence
-        ui->lineEdit_11->setText(query.value(1).toString());  // Nom
+        ui->lineEdit_2->setText(query.value(1).toString());  // Designation (Nom)
         ui->lineEdit_9->setText(query.value(2).toString());  // Quantité
-        // Set price in lineEdit_10
+        // Set price in lineEdit_36
         double prix = query.value(3).toDouble();
-        ui->lineEdit_10->setText(QString::number(prix, 'f', 2));  // Prix
+        ui->lineEdit_36->setText(QString::number(prix, 'f', 2));  // Prix
         ui->comboBox->setCurrentText(query.value(4).toString());  // Catégorie
         ui->lineEdit_8->setText(query.value(5).toString());  // Couleur
         QString genre = query.value(6).toString();
@@ -495,26 +599,26 @@ void MainWindow::fillForm(int reference)
 void MainWindow::on_pushButton_2_clicked()  // Valider - Add/Modify
 {
     // Validate required fields
-    if (ui->lineEdit_11->text().isEmpty()) {
+    if (ui->lineEdit_2->text().isEmpty()) {
         QMessageBox::warning(this, "Erreur", "Le nom du produit est requis!");
         return;
     }
     
     // Validate price
     bool prixOk = false;
-    double prix = ui->lineEdit_10->text().toDouble(&prixOk);
+    double prix = ui->lineEdit_36->text().toDouble(&prixOk);
     if (!prixOk || prix < 0) {
         QMessageBox::warning(this, "Erreur", "Le prix doit être un nombre valide et positif!");
         return;
     }
     
     Produit p;
-    p.setDesignation(ui->lineEdit_11->text());
+    p.setDesignation(ui->lineEdit_2->text());
     p.setQuantite(ui->lineEdit_9->text().toInt());
-    p.setPrix(prix);  // Use lineEdit_10 for price
-    p.setCategorie(ui->comboBox->currentText());
+    p.setPrix(prix);  // Use lineEdit_36 for price
+    p.setCategorie(ui->comboBox_4->currentText());
     p.setCouleur(ui->lineEdit_8->text());
-    p.setGenre(ui->radioButton->isChecked() ? "Homme" : "Femme");
+    p.setgenre(ui);  // setgenre takes UI pointer
     p.setMarque(ui->lineEdit_7->text());
     p.setDateExpiration(ui->dateEdit->date());
     
@@ -523,7 +627,7 @@ void MainWindow::on_pushButton_2_clicked()  // Valider - Add/Modify
     
     if (currentProductRef > 0) {
         // Modify existing
-        p.setReference(currentProductRef);
+        p.setRef(ui->lineEdit_3->text());
         success = p.modifier();
         if (success) {
             // Refresh table immediately
@@ -589,7 +693,7 @@ void MainWindow::on_pushButton_5_clicked()  // Delete
     
     if (ret == QMessageBox::Yes) {
         Produit p;
-        if (p.supprimer(reference)) {
+        if (p.supprimer(QString::number(reference))) {
             QMessageBox::information(this, "Succès", "Produit supprimé avec succès!");
             loadProducts();
             clearForm();
@@ -608,30 +712,11 @@ void MainWindow::on_pushButton_9_clicked()  // Filter
     }
     
     Produit p;
-    QSqlQueryModel* model = p.rechercher(searchText);
-    
-    if (!model) {
-        return;
+    // Use rech method which takes UI pointer
+    if (!p.rech(searchText, ui)) {
+        QMessageBox::information(this, "Recherche", "Aucun produit trouvé.");
     }
-    
-    ui->tableWidget->setRowCount(0);
-    
-    for (int i = 0; i < model->rowCount(); ++i) {
-        int row = ui->tableWidget->rowCount();
-        ui->tableWidget->insertRow(row);
-        
-        ui->tableWidget->setItem(row, 0, new QTableWidgetItem(model->data(model->index(i, 0)).toString()));
-        ui->tableWidget->setItem(row, 1, new QTableWidgetItem(model->data(model->index(i, 1)).toString()));
-        ui->tableWidget->setItem(row, 2, new QTableWidgetItem(model->data(model->index(i, 5)).toString()));
-        ui->tableWidget->setItem(row, 3, new QTableWidgetItem(model->data(model->index(i, 6)).toString()));
-        ui->tableWidget->setItem(row, 4, new QTableWidgetItem(QString::number(model->data(model->index(i, 3)).toDouble(), 'f', 2)));
-        ui->tableWidget->setItem(row, 5, new QTableWidgetItem(model->data(model->index(i, 2)).toString()));
-        ui->tableWidget->setItem(row, 6, new QTableWidgetItem(model->data(model->index(i, 7)).toString()));
-        ui->tableWidget->setItem(row, 7, new QTableWidgetItem(model->data(model->index(i, 0)).toString()));
-        ui->tableWidget->setItem(row, 8, new QTableWidgetItem(""));
-    }
-    
-    delete model;
+    // rech already displays results in the table
 }
 
 void MainWindow::on_tableWidget_cellDoubleClicked(int row, int column)
@@ -649,8 +734,9 @@ void MainWindow::on_tableWidget_cellDoubleClicked(int row, int column)
 void MainWindow::scrollToProduct(int reference)
 {
     // Find the product in the table and scroll to it
+    // Column 0 is Id (REF), Column 7 is also Référence (REF)
     for (int row = 0; row < ui->tableWidget->rowCount(); ++row) {
-        QTableWidgetItem* refItem = ui->tableWidget->item(row, 7);  // Référence column
+        QTableWidgetItem* refItem = ui->tableWidget->item(row, 0);  // Id column (REF)
         if (refItem && refItem->text().toInt() == reference) {
             ui->tableWidget->scrollToItem(refItem, QAbstractItemView::EnsureVisible);
             ui->tableWidget->selectRow(row);

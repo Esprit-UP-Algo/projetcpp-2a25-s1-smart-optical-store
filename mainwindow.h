@@ -36,17 +36,14 @@ private slots:
     void on_pushButton_2_clicked();  // Valider (Add/Modify)
     void on_pushButton_5_clicked();  // Delete
     void on_pushButton_9_clicked();  // Filter
-    void on_tableWidget_cellDoubleClicked(int row, int column);
-    void loadProducts();  // Load products into table
-
-    void on_pushButton_2_clicked(); //mariem
     void on_pushButton_31_clicked();
-    void showToast(QString message);
-    void on_pushButton_5_clicked();
-    void on_pushButtonR_clicked();
-    void on_pushButton_9_clicked();
     void on_pushButton_32_clicked();
+    void on_pushButtonR_clicked();
+    void on_tableWidget_cellDoubleClicked(int row, int column);
     void on_tableWidget_cellClicked(int row);
+    void loadProducts();  // Load products into table
+    void showToast(QString message);
+    void on_pushButton_exportExcel_clicked();  // Export to Excel
 
 
 

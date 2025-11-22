@@ -34,7 +34,8 @@ bool Produit::ajouter()
 {
 
     QSqlQuery query;
-    query.prepare("INSERT INTO PRODUITS (REF, DESIGNATION, CATEGORIE, MARQUE, PRIX, QUANTITE, COULEUR, GENRE, DATEEXPIRATION) "
+    // Table name is PRODUIT (singular) and column is REFERENCE (not REF)
+    query.prepare("INSERT INTO PRODUIT (REFERENCE, DESIGNATION, CATEGORIE, MARQUE, PRIX, QUANTITE, COULEUR, GENRE, DATE_EXPIRATION) "
                   "VALUES (:ref, :designation, :categorie, :marque, :prix, :quantite, :couleur, :genre, :dateExpiration)");
 
     query.bindValue(":ref", ref);
@@ -56,36 +57,57 @@ bool Produit::ajouter()
 }
 void Produit::afficher(Ui::MainWindow *ui)
 {
+    QSqlDatabase db = QSqlDatabase::database();
+    if (!db.isValid() || !db.isOpen()) {
+        qDebug() << "⚠️ Database not connected in afficher()";
+        return;
+    }
 
-    QSqlQuery query;
-    query.prepare("SELECT * FROM PRODUITS");
+    QSqlQuery query(db);
+    // Table name is PRODUIT (singular) and column is REFERENCE (not REF)
+    query.prepare("SELECT * FROM PRODUIT ORDER BY REFERENCE");
 
-    if (query.exec())
-    {
-        ui->tableWidget->setRowCount(0); // clear table first
-        int row = 0;
-
-        while (query.next())
-        {
-            ui->tableWidget->insertRow(row);
-            ui->tableWidget->setItem(row, 0, new QTableWidgetItem(query.value("REF").toString()));
-            ui->tableWidget->setItem(row, 1, new QTableWidgetItem(query.value("COULEUR").toString()));
-            ui->tableWidget->setItem(row, 2, new QTableWidgetItem(query.value("GENRE").toString()));
-            ui->tableWidget->setItem(row, 3, new QTableWidgetItem(query.value("PRIX").toString()));
-            ui->tableWidget->setItem(row, 4, new QTableWidgetItem(query.value("QUANTITE").toString()));
-            ui->tableWidget->setItem(row, 5, new QTableWidgetItem(query.value("MARQUE").toString()));
-            ui->tableWidget->setItem(row, 6, new QTableWidgetItem(query.value("CATEGORIE").toString()));
-            ui->tableWidget->setItem(row, 7, new QTableWidgetItem(query.value("DESIGNATION").toString()));
-            ui->tableWidget->setItem(row, 8, new QTableWidgetItem(query.value("DATEEXPIRATION").toString()));
-
-            row++;
+    if (!query.exec()) {
+        qDebug() << "❌ Error in afficher():" << query.lastError().text();
+        qDebug() << "   Database:" << db.databaseName();
+        qDebug() << "   Is Open:" << db.isOpen();
+        qDebug() << "   Is Valid:" << db.isValid();
+        // Try alternative table name (case sensitivity)
+        query.prepare("SELECT * FROM produit ORDER BY REFERENCE");
+        if (!query.exec()) {
+            qDebug() << "❌ Error with lowercase table name:" << query.lastError().text();
+            return;
         }
     }
+
+    ui->tableWidget->setRowCount(0); // clear table first
+    int row = 0;
+
+    while (query.next())
+    {
+        ui->tableWidget->insertRow(row);
+        // Column order: {"Id", "Nom", "Couleur", "Genre", "Prix", "Quantité", "Marque", "Référence", "Fournisseur"}
+        // Database columns: REFERENCE, DESIGNATION, QUANTITE, PRIX, CATEGORIE, COULEUR, GENRE, MARQUE, DATE_EXPIRATION
+        ui->tableWidget->setItem(row, 0, new QTableWidgetItem(query.value("REFERENCE").toString())); // Id (REFERENCE)
+        ui->tableWidget->setItem(row, 1, new QTableWidgetItem(query.value("DESIGNATION").toString())); // Nom
+        ui->tableWidget->setItem(row, 2, new QTableWidgetItem(query.value("COULEUR").toString())); // Couleur
+        ui->tableWidget->setItem(row, 3, new QTableWidgetItem(query.value("GENRE").toString())); // Genre
+        ui->tableWidget->setItem(row, 4, new QTableWidgetItem(QString::number(query.value("PRIX").toDouble(), 'f', 2))); // Prix
+        ui->tableWidget->setItem(row, 5, new QTableWidgetItem(query.value("QUANTITE").toString())); // Quantité
+        ui->tableWidget->setItem(row, 6, new QTableWidgetItem(query.value("MARQUE").toString())); // Marque
+        ui->tableWidget->setItem(row, 7, new QTableWidgetItem(query.value("REFERENCE").toString())); // Référence
+        // Fournisseur - set to "N/A" for now (can be joined later if needed)
+        ui->tableWidget->setItem(row, 8, new QTableWidgetItem("N/A")); // Fournisseur
+
+        row++;
+    }
+    
+    qDebug() << "✅ Loaded" << row << "products from database";
 }
 bool Produit::supprimer(QString ref)
 {
     QSqlQuery query;
-    query.prepare("DELETE FROM PRODUITS WHERE REF = :ref");
+    query.prepare("DELETE FROM PRODUIT WHERE REFERENCE = :ref");
     query.bindValue(":ref", ref);
 
     if (!query.exec())
@@ -98,7 +120,7 @@ bool Produit::supprimer(QString ref)
 bool Produit::existe(QString ref)
 {
     QSqlQuery query;
-    query.prepare("SELECT REF FROM PRODUITS WHERE REF = :ref");
+    query.prepare("SELECT REFERENCE FROM PRODUIT WHERE REFERENCE = :ref");
     query.bindValue(":ref", ref);
     query.exec();
     return query.next();
@@ -106,7 +128,7 @@ bool Produit::existe(QString ref)
 bool Produit::rech(QString recherche, Ui::MainWindow *ui)
 {
     QSqlQuery query;
-    query.prepare("SELECT * FROM PRODUITS WHERE REF LIKE :rech OR DESIGNATION LIKE :rech");
+    query.prepare("SELECT * FROM PRODUIT WHERE REFERENCE LIKE :rech OR DESIGNATION LIKE :rech");
     query.bindValue(":rech", "%" + recherche + "%");
 
     if (!query.exec()) {
@@ -120,15 +142,16 @@ bool Produit::rech(QString recherche, Ui::MainWindow *ui)
 
     while (query.next()) {
         table->insertRow(row);
-        table->setItem(row, 0, new QTableWidgetItem(query.value("REF").toString()));
-        table->setItem(row, 1, new QTableWidgetItem(query.value("COULEUR").toString()));
-        table->setItem(row, 2, new QTableWidgetItem(query.value("GENRE").toString()));
-        table->setItem(row, 3, new QTableWidgetItem(query.value("PRIX").toString()));
-        table->setItem(row, 4, new QTableWidgetItem(query.value("QUANTITE").toString()));
-        table->setItem(row, 5, new QTableWidgetItem(query.value("MARQUE").toString()));
-        table->setItem(row, 6, new QTableWidgetItem(query.value("CATEGORIE").toString()));
-        table->setItem(row, 7, new QTableWidgetItem(query.value("DESIGNATION").toString()));
-        table->setItem(row, 8, new QTableWidgetItem(query.value("DATEEXPIRATION").toString()));
+        // Column order: {"Id", "Nom", "Couleur", "Genre", "Prix", "Quantité", "Marque", "Référence", "Fournisseur"}
+        table->setItem(row, 0, new QTableWidgetItem(query.value("REFERENCE").toString())); // Id
+        table->setItem(row, 1, new QTableWidgetItem(query.value("DESIGNATION").toString())); // Nom
+        table->setItem(row, 2, new QTableWidgetItem(query.value("COULEUR").toString())); // Couleur
+        table->setItem(row, 3, new QTableWidgetItem(query.value("GENRE").toString())); // Genre
+        table->setItem(row, 4, new QTableWidgetItem(QString::number(query.value("PRIX").toDouble(), 'f', 2))); // Prix
+        table->setItem(row, 5, new QTableWidgetItem(query.value("QUANTITE").toString())); // Quantité
+        table->setItem(row, 6, new QTableWidgetItem(query.value("MARQUE").toString())); // Marque
+        table->setItem(row, 7, new QTableWidgetItem(query.value("REFERENCE").toString())); // Référence
+        table->setItem(row, 8, new QTableWidgetItem("N/A")); // Fournisseur
         row++;
     }
 
@@ -145,8 +168,8 @@ bool Produit:: modifier()
 
     QSqlQuery query;
 
-    query.prepare("UPDATE PRODUITS SET COULEUR=:couleur, GENRE=:genre, PRIX=:prix, QUANTITE=:quantite, MARQUE=:marque, CATEGORIE=:categorie, DESIGNATION=:designation, DATEEXPIRATION=:dateExpiration "
-                  "WHERE REF=:ref");
+    query.prepare("UPDATE PRODUIT SET COULEUR=:couleur, GENRE=:genre, PRIX=:prix, QUANTITE=:quantite, MARQUE=:marque, CATEGORIE=:categorie, DESIGNATION=:designation, DATE_EXPIRATION=:dateExpiration "
+                  "WHERE REFERENCE=:ref");
 
     query.bindValue(":ref", ref);
     query.bindValue(":couleur", couleur);
@@ -171,7 +194,7 @@ bool Produit:: modifier()
 void Produit::afficherRestock(Ui::MainWindow *ui, int seuil)
 {
     QSqlQuery query;
-    query.prepare("SELECT * FROM PRODUITS WHERE QUANTITE < :seuil ORDER BY QUANTITE ASC");
+    query.prepare("SELECT * FROM PRODUIT WHERE QUANTITE < :seuil ORDER BY QUANTITE ASC");
     query.bindValue(":seuil", seuil);
 
     if (!query.exec()) {
