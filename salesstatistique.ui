@@ -1,0 +1,591 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SalesStatistique</class>
+ <widget class="QDialog" name="SalesStatistique">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Statistiques des ventes</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: #1e1e1e;
+color: #e0e0e0;</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="headerLayout">
+     <item>
+      <widget class="QLabel" name="titleLabel">
+       <property name="font">
+        <font>
+         <pointsize>18</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: #4a9eff;</string>
+       </property>
+       <property name="text">
+        <string>Statistiques des ventes</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="refreshButton">
+       <property name="styleSheet">
+        <string notr="true">background-color: #4a9eff;
+color: white;
+padding: 8px 16px;
+border-radius: 5px;
+font-weight: bold;</string>
+       </property>
+       <property name="text">
+        <string>Rafraîchir</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="topRowLayout">
+     <item>
+      <widget class="QGroupBox" name="totalSalesGroupBox">
+       <property name="styleSheet">
+        <string notr="true">QGroupBox {
+    background-color: #2d2d2d;
+    border: 2px solid #4a9eff;
+    border-radius: 10px;
+    padding: 15px;
+    color: #e0e0e0;
+}
+QGroupBox::title {
+    color: #4a9eff;
+    font-weight: bold;
+}
+QLabel {
+    background-color: transparent;
+    color: #e0e0e0;
+}</string>
+       </property>
+       <property name="title">
+        <string>TOTAL VENTES</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLabel" name="totalSalesLabel">
+          <property name="font">
+           <font>
+            <pointsize>24</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="totalSalesSubtitleLabel">
+          <property name="text">
+           <string>Nombre total de ventes</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="totalRevenueGroupBox">
+       <property name="styleSheet">
+        <string notr="true">QGroupBox {
+    background-color: #2d2d2d;
+    border: 2px solid #4a9eff;
+    border-radius: 10px;
+    padding: 15px;
+    color: #e0e0e0;
+}
+QGroupBox::title {
+    color: #4a9eff;
+    font-weight: bold;
+}
+QLabel {
+    background-color: transparent;
+    color: #e0e0e0;
+}</string>
+       </property>
+       <property name="title">
+        <string>REVENU TOTAL</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QLabel" name="totalRevenueLabel">
+          <property name="font">
+           <font>
+            <pointsize>20</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>0.00 DT</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="totalRevenueSubtitleLabel">
+          <property name="text">
+           <string>Chiffre d'affaires total</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="avgSaleGroupBox">
+       <property name="styleSheet">
+        <string notr="true">QGroupBox {
+    background-color: #2d2d2d;
+    border: 2px solid #4a9eff;
+    border-radius: 10px;
+    padding: 15px;
+    color: #e0e0e0;
+}
+QGroupBox::title {
+    color: #4a9eff;
+    font-weight: bold;
+}
+QLabel {
+    background-color: transparent;
+    color: #e0e0e0;
+}</string>
+       </property>
+       <property name="title">
+        <string>VENTE MOYENNE</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QLabel" name="avgSaleLabel">
+          <property name="font">
+           <font>
+            <pointsize>20</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>0.00 DT</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="avgSaleSubtitleLabel">
+          <property name="text">
+           <string>Montant moyen par vente</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="middleRowLayout">
+     <item>
+      <widget class="QGroupBox" name="salesTodayGroupBox">
+       <property name="styleSheet">
+        <string notr="true">QGroupBox {
+    background-color: #2d2d2d;
+    border: 2px solid #4a9eff;
+    border-radius: 10px;
+    padding: 15px;
+    color: #e0e0e0;
+}
+QGroupBox::title {
+    color: #4a9eff;
+    font-weight: bold;
+}
+QLabel {
+    background-color: transparent;
+    color: #e0e0e0;
+}</string>
+       </property>
+       <property name="title">
+        <string>VENTES AUJOURD'HUI</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QLabel" name="salesTodayLabel">
+          <property name="font">
+           <font>
+            <pointsize>24</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="salesTodaySubtitleLabel">
+          <property name="text">
+           <string>Nombre de ventes aujourd'hui</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="revenueTodayGroupBox">
+       <property name="styleSheet">
+        <string notr="true">QGroupBox {
+    background-color: #2d2d2d;
+    border: 2px solid #4a9eff;
+    border-radius: 10px;
+    padding: 15px;
+    color: #e0e0e0;
+}
+QGroupBox::title {
+    color: #4a9eff;
+    font-weight: bold;
+}
+QLabel {
+    background-color: transparent;
+    color: #e0e0e0;
+}</string>
+       </property>
+       <property name="title">
+        <string>REVENU AUJOURD'HUI</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="QLabel" name="revenueTodayLabel">
+          <property name="font">
+           <font>
+            <pointsize>20</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>0.00 DT</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="revenueTodaySubtitleLabel">
+          <property name="text">
+           <string>Chiffre d'affaires du jour</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="completedGroupBox">
+       <property name="styleSheet">
+        <string notr="true">QGroupBox {
+    background-color: #2d2d2d;
+    border: 2px solid #4a9eff;
+    border-radius: 10px;
+    padding: 15px;
+    color: #e0e0e0;
+}
+QGroupBox::title {
+    color: #4a9eff;
+    font-weight: bold;
+}
+QLabel {
+    background-color: transparent;
+    color: #e0e0e0;
+}</string>
+       </property>
+       <property name="title">
+        <string>VENTES COMPLÉTÉES</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <item>
+         <widget class="QLabel" name="completedLabel">
+          <property name="font">
+           <font>
+            <pointsize>24</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="completedSubtitleLabel">
+          <property name="text">
+           <string>Ventes finalisées</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="bottomRowLayout">
+     <item>
+      <widget class="QGroupBox" name="paymentMethodsGroupBox">
+       <property name="styleSheet">
+        <string notr="true">QGroupBox {
+    background-color: #2d2d2d;
+    border: 2px solid #4a9eff;
+    border-radius: 10px;
+    padding: 15px;
+    color: #e0e0e0;
+}
+QGroupBox::title {
+    color: #4a9eff;
+    font-weight: bold;
+}
+QLabel {
+    background-color: transparent;
+    color: #e0e0e0;
+}</string>
+       </property>
+       <property name="title">
+        <string>Ventes de la semaine</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_8">
+        <item>
+         <widget class="QWidget" name="paymentChartWidget" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>150</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: #2d2d2d;
+border: 1px solid #4a9eff;
+border-radius: 5px;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTextEdit" name="paymentMethodsText">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: #2d2d2d;
+border: 1px solid #4a9eff;
+border-radius: 5px;
+color: #e0e0e0;</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="topClientsGroupBox">
+       <property name="styleSheet">
+        <string notr="true">QGroupBox {
+    background-color: #2d2d2d;
+    border: 2px solid #4a9eff;
+    border-radius: 10px;
+    padding: 15px;
+    color: #e0e0e0;
+}
+QGroupBox::title {
+    color: #4a9eff;
+    font-weight: bold;
+}
+QLabel {
+    background-color: transparent;
+    color: #e0e0e0;
+}</string>
+       </property>
+       <property name="title">
+        <string>Top 5 clients</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_9">
+        <item>
+         <widget class="QWidget" name="clientsChartWidget" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>150</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: #2d2d2d;
+border: 1px solid #4a9eff;
+border-radius: 5px;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTextEdit" name="topClientsText">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: #2d2d2d;
+border: 1px solid #4a9eff;
+border-radius: 5px;
+color: #e0e0e0;</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="statusGroupBox">
+       <property name="styleSheet">
+        <string notr="true">QGroupBox {
+    background-color: #2d2d2d;
+    border: 2px solid #4a9eff;
+    border-radius: 10px;
+    padding: 15px;
+    color: #e0e0e0;
+}
+QGroupBox::title {
+    color: #4a9eff;
+    font-weight: bold;
+}
+QLabel {
+    background-color: transparent;
+    color: #e0e0e0;
+}</string>
+       </property>
+       <property name="title">
+        <string>Statut des ventes</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_10">
+        <item>
+         <widget class="QWidget" name="statusChartWidget" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>150</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: #2d2d2d;
+border: 1px solid #4a9eff;
+border-radius: 5px;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTextEdit" name="statusText">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: #2d2d2d;
+border: 1px solid #4a9eff;
+border-radius: 5px;
+color: #e0e0e0;</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QPushButton" name="exportButton">
+     <property name="styleSheet">
+      <string notr="true">background-color: #4a9eff;
+color: white;
+padding: 10px 20px;
+border-radius: 5px;
+font-weight: bold;</string>
+     </property>
+     <property name="text">
+      <string>Exporter</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
+

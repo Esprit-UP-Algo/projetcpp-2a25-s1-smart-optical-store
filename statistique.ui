@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Statistique</class>
+ <widget class="QDialog" name="Statistique">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1000</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Statistiques des employés</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: #b8e2f2;</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="headerLayout">
+     <item>
+      <widget class="QLabel" name="titleLabel">
+       <property name="font">
+        <font>
+         <pointsize>18</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Statistiques des employés</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="refreshButton">
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(41, 102, 148);
+color: white;
+padding: 8px 16px;
+border-radius: 5px;</string>
+       </property>
+       <property name="text">
+        <string>Rafraîchir</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="topRowLayout">
+     <item>
+      <widget class="QGroupBox" name="totalGroupBox">
+       <property name="styleSheet">
+        <string notr="true">QGroupBox {
+    background-color: #87CEEB;
+    border: 2px solid rgb(41, 102, 148);
+    border-radius: 10px;
+    padding: 15px;
+}
+QLabel {
+    background-color: transparent;
+}</string>
+       </property>
+       <property name="title">
+        <string>TOTAL EMPLOYÉS</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLabel" name="totalEmployeesLabel">
+          <property name="font">
+           <font>
+            <pointsize>24</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="totalSubtitleLabel">
+          <property name="text">
+           <string>Nombre d'employés enregistrés</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="avgSalaryGroupBox">
+       <property name="styleSheet">
+        <string notr="true">QGroupBox {
+    background-color: #87CEEB;
+    border: 2px solid rgb(41, 102, 148);
+    border-radius: 10px;
+    padding: 15px;
+}
+QLabel {
+    background-color: transparent;
+}</string>
+       </property>
+       <property name="title">
+        <string>SALAIRE MOYEN</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QLabel" name="avgSalaryLabel">
+          <property name="font">
+           <font>
+            <pointsize>20</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>0.00 DT</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="avgSalarySubtitleLabel">
+          <property name="text">
+           <string>Moyenne actuelle des salaires</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="middleRowLayout">
+     <item>
+      <widget class="QGroupBox" name="availableGroupBox">
+       <property name="styleSheet">
+        <string notr="true">QGroupBox {
+    background-color: #87CEEB;
+    border: 2px solid rgb(41, 102, 148);
+    border-radius: 10px;
+    padding: 15px;
+}
+QLabel {
+    background-color: transparent;
+}</string>
+       </property>
+       <property name="title">
+        <string>DISPONIBLES</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QLabel" name="availableLabel">
+          <property name="font">
+           <font>
+            <pointsize>24</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="availableSubtitleLabel">
+          <property name="text">
+           <string>Employés marqués comme disponibles</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="unavailableGroupBox">
+       <property name="styleSheet">
+        <string notr="true">QGroupBox {
+    background-color: #87CEEB;
+    border: 2px solid rgb(41, 102, 148);
+    border-radius: 10px;
+    padding: 15px;
+}
+QLabel {
+    background-color: transparent;
+}</string>
+       </property>
+       <property name="title">
+        <string>INDISPONIBLES</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QLabel" name="unavailableLabel">
+          <property name="font">
+           <font>
+            <pointsize>24</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>0</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="unavailableSubtitleLabel">
+          <property name="text">
+           <string>Employés non disponibles</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="bottomRowLayout">
+     <item>
+      <widget class="QGroupBox" name="availabilityGroupBox">
+       <property name="styleSheet">
+        <string notr="true">QGroupBox {
+    background-color: #87CEEB;
+    border: 2px solid rgb(41, 102, 148);
+    border-radius: 10px;
+    padding: 15px;
+}
+QLabel {
+    background-color: transparent;
+}</string>
+       </property>
+       <property name="title">
+        <string>Répartition de la disponibilité</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="QWidget" name="availabilityChartWidget" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>150</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: white;
+border: 1px solid rgb(41, 102, 148);
+border-radius: 5px;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTextEdit" name="availabilityText">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: white;
+border: 1px solid rgb(41, 102, 148);
+border-radius: 5px;</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="positionsGroupBox">
+       <property name="styleSheet">
+        <string notr="true">QGroupBox {
+    background-color: #87CEEB;
+    border: 2px solid rgb(41, 102, 148);
+    border-radius: 10px;
+    padding: 15px;
+}
+QLabel {
+    background-color: transparent;
+}</string>
+       </property>
+       <property name="title">
+        <string>Top 5 des postes</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <item>
+         <widget class="QWidget" name="positionsChartWidget" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>150</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: white;
+border: 1px solid rgb(41, 102, 148);
+border-radius: 5px;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTextEdit" name="topPositionsText">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background-color: white;
+border: 1px solid rgb(41, 102, 148);
+border-radius: 5px;</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QPushButton" name="exportButton">
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(41, 102, 148);
+color: white;
+padding: 10px 20px;
+border-radius: 5px;
+font-weight: bold;</string>
+   </property>
+   <property name="text">
+      <string>Exporter</string>
+   </property>
+  </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
