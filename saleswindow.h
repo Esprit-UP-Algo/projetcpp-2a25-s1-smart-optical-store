@@ -91,6 +91,14 @@ private:
     void loadSaleIntoNewSaleForm(int saleId);  // Load sale data into new sale form
     bool eventFilter(QObject *obj, QEvent *event) override;
     void showEvent(QShowEvent *event) override;  // Refresh products when window is shown
+    void updateSalesTableFromQuery(QSqlQuery &query);
+    void setSalesModelHeaders();
+    bool persistSaleItems(int saleId, bool updateStock);
+    bool insertDetailRecord(int saleId, const QString &reference, int quantity, double unitPrice);
+    bool insertContenirRecord(int saleId, const QString &reference, int quantity, double unitPrice);
+    bool updateProductStock(const QString &reference, int quantity);
+    int fetchLatestSaleId() const;
+    double getUnitPriceForReference(const QString &reference) const;
     
     // Loyalty and promo code functions
     void calculateLoyaltyDiscount(int clientId);  // Calculate loyalty discount based on total purchases

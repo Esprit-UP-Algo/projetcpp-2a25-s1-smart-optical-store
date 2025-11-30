@@ -5021,8 +5021,12 @@ debug/salesstatistique.o: ../../salesstatistique.cpp ../../salesstatistique.h \
 		D:/QT/6.7.3/mingw_64/include/QtGui/QColor \
 		D:/QT/6.7.3/mingw_64/include/QtGui/QPainter \
 		D:/QT/6.7.3/mingw_64/include/QtGui/QShowEvent \
+		D:/QT/6.7.3/mingw_64/include/QtGui/QCloseEvent \
 		D:/QT/6.7.3/mingw_64/include/QtWidgets/QApplication \
-		D:/QT/6.7.3/mingw_64/include/QtWidgets/qapplication.h
+		D:/QT/6.7.3/mingw_64/include/QtWidgets/qapplication.h \
+		D:/QT/6.7.3/mingw_64/include/QtCore/QTimer \
+		D:/QT/6.7.3/mingw_64/include/QtCore/qtimer.h \
+		D:/QT/6.7.3/mingw_64/include/QtCore/qbasictimer.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\salesstatistique.o ..\..\salesstatistique.cpp
 
 debug/exporter.o: ../../exporter.cpp ../../exporter.h \
@@ -5730,8 +5734,6 @@ debug/saleswindow.o: ../../saleswindow.cpp ../../saleswindow.h \
 		D:/QT/6.7.3/mingw_64/include/QtWidgets/QDialog \
 		D:/QT/6.7.3/mingw_64/include/QtWidgets/qdialog.h \
 		D:/QT/6.7.3/mingw_64/include/QtSql/QSqlDatabase \
-		../../promomanager.h \
-		D:/QT/6.7.3/mingw_64/include/QtGui/QCloseEvent \
 		D:/QT/6.7.3/mingw_64/include/QtGui/QMouseEvent \
 		D:/QT/6.7.3/mingw_64/include/QtWidgets/QApplication \
 		D:/QT/6.7.3/mingw_64/include/QtWidgets/qapplication.h \
@@ -5797,24 +5799,16 @@ debug/saleswindow.o: ../../saleswindow.cpp ../../saleswindow.h \
 		D:/QT/6.7.3/mingw_64/include/QtGui/qpagelayout.h \
 		D:/QT/6.7.3/mingw_64/include/QtGui/qpagesize.h \
 		D:/QT/6.7.3/mingw_64/include/QtGui/qpageranges.h \
-		D:/QT/6.7.3/mingw_64/include/QtCore/QTimer \
-		D:/QT/6.7.3/mingw_64/include/QtCore/qtimer.h \
-		D:/QT/6.7.3/mingw_64/include/QtCore/qbasictimer.h \
 		D:/QT/6.7.3/mingw_64/include/QtGui/QPainter \
 		D:/QT/6.7.3/mingw_64/include/QtGui/qpainter.h \
 		D:/QT/6.7.3/mingw_64/include/QtGui/QFont \
 		D:/QT/6.7.3/mingw_64/include/QtGui/QColor \
 		D:/QT/6.7.3/mingw_64/include/QtGui/QPen \
-		D:/QT/6.7.3/mingw_64/include/QtCore/QMap \
 		D:/QT/6.7.3/mingw_64/include/QtGui/QBrush \
 		D:/QT/6.7.3/mingw_64/include/QtGui/QPageSize \
 		D:/QT/6.7.3/mingw_64/include/QtGui/QPageLayout \
 		D:/QT/6.7.3/mingw_64/include/QtCore/QMarginsF \
-		D:/QT/6.7.3/mingw_64/include/QtCore/QVariant \
-		D:/QT/6.7.3/mingw_64/include/QtWidgets/QAbstractItemView \
-		D:/QT/6.7.3/mingw_64/include/QtWidgets/qabstractitemview.h \
-		D:/QT/6.7.3/mingw_64/include/QtWidgets/qabstractscrollarea.h \
-		D:/QT/6.7.3/mingw_64/include/QtCore/qitemselectionmodel.h
+		D:/QT/6.7.3/mingw_64/include/QtCore/QVariant
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\saleswindow.o ..\..\saleswindow.cpp
 
 debug/gclient1.o: ../../gclient1.cpp ../../gclient1.h \
