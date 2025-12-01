@@ -2,7 +2,7 @@
 #define FOURNISSEURWINDOW_H
 
 #include <QMainWindow>
-#include <QEvent>
+#include "fournisseur.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -17,29 +17,34 @@ class FournisseurWindow : public QMainWindow
 public:
     explicit FournisseurWindow(QWidget *parent = nullptr);
     ~FournisseurWindow();
-    
-    // Singleton pattern
+
+    // Singleton
     static FournisseurWindow* getInstance(QWidget *parent = nullptr);
     static FournisseurWindow* instance;
 
 private slots:
-    void on_logoClicked();  // Logo click -> Dashboard
     void on_pushButton_ajouter_clicked();
     void on_pushButton_modifier_clicked();
+    void on_tableWidget_2_itemClicked();
     void on_pushButton_delete_clicked();
-    void on_pushButton_modifier_3_clicked();  // Display/Refresh button
-    void on_tableWidget_2_cellDoubleClicked(int row, int column);
+    void on_pushButton_6_clicked();
+    void on_pushButton_7_clicked();
+    void on_pushButton_8_clicked();
+    void on_pushButton_9_clicked();
+    void on_pushButton_38_clicked();      // SMS fournisseur
+
+    void on_pushButton_modifier_3_clicked(); // <<==== RECHERCHE PAR ID
 
 private:
     Ui::FournisseurWindow *ui;
-    bool eventFilter(QObject *obj, QEvent *event) override;
-    void loadFournisseurs();  // Load all fournisseurs into table
-    void clearForm();          // Clear the form
-    void fillForm(int row);    // Fill form from table row
-    int currentFournisseurId;  // Current fournisseur ID being edited
-    bool isEditing;            // Whether we're editing or adding
+    Fournisseur Ftmp;
+    int selectedId;                            // ID de la ligne sélectionnée
+
+    void afficherFournisseurs();
+    void ecrireHistorique(const QString &action, int id, const QString &nomEntreprise);
+
+    // ==== Fonction SMS fournisseur (Twilio) ====
+    bool envoyerSmsFournisseur(const QString &numero, const QString &message);
 };
+
 #endif // FOURNISSEURWINDOW_H
-
-
-

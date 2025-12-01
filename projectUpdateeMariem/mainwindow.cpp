@@ -60,7 +60,11 @@
 #include <QTextFrameFormat>
 #include <QLocale>
 
-// Initialize static instance pointer
+#include <QProcess>
+#include <QTemporaryFile>
+#include <QFile>
+
+
 MainWindow* MainWindow::instance = nullptr;
 
 MainWindow* MainWindow::getInstance(QWidget *parent)
@@ -83,15 +87,18 @@ MainWindow::MainWindow(QWidget *parent)
     //, currentProductRef(0)
 {
     ui->setupUi(this);
+    //connect(ui->pushButton_micro, &QPushButton::clicked, this, &MainWindow::startSpeechToText);
 
 
 
     Produit p;
     p.afficher(ui);
 
-
     ui->lineEdit_5->setPlaceholderText("Tapez la référence ou designation");
     ui->lineEdit_6->setPlaceholderText("Tapez la référence");
+
+    connect(ui->comboBox_2, &QComboBox::currentTextChanged,
+            this, &MainWindow::loadFournisseursByCategorie);
 
     connect(ui->pushButton_12, &QPushButton::clicked, this, [=](){
         ui->travaille->setCurrentIndex(0);
@@ -114,6 +121,10 @@ MainWindow::MainWindow(QWidget *parent)
     qDebug() << "Chemin courant =" << QDir::currentPath();
     ui->logoLabel->setPixmap(QPixmap(":/images/logof.jpg"));
     ui->logoLabel->setScaledContents(true);
+
+
+    loadFournisseursByCategorie("Lunettes");
+
     
     if (ui->logoLabel) {
         ui->logoLabel->setCursor(Qt::PointingHandCursor);
@@ -178,9 +189,8 @@ void MainWindow::on_pushButton_3_clicked()
 
 void MainWindow::on_pushButton_4_clicked()
 {
-    ui->travaille->setCurrentIndex(1);}
-
-
+    ui->travaille->setCurrentIndex(1);
+}
 
 
 
@@ -209,9 +219,36 @@ void MainWindow::on_logoClicked()
     this->close();
 }
 
+void MainWindow::loadFournisseursByCategorie(const QString &categorie)
+{
+    ui->comboBox_idFour->clear();
 
+    QSqlQuery query;
+    query.prepare(
+        "SELECT ID_FOURNISSEUR, NOM_ENTREPRISE "
+        "FROM FOURNISSEUR "
+        "WHERE UPPER(TYPE_PRODUIT_FOURNIS) = UPPER(:category)"
+        );
 
+    query.bindValue(":category", categorie);
 
+    if (!query.exec()) {
+        qDebug() << "Erreur loadFournisseursByCategorie:" << query.lastError().text();
+        return;
+    }
+
+    while (query.next())
+    {
+        QString id  = query.value(0).toString();
+        QString nom = query.value(1).toString();
+
+        ui->comboBox_idFour->addItem(id + " - " + nom, id);
+    }
+
+    if (ui->comboBox_idFour->count() == 0) {
+        ui->comboBox_idFour->addItem("Aucun fournisseur disponible", -1);
+    }
+}
 
 void MainWindow::on_pushButton_7_clicked()
 {
@@ -957,3 +994,5 @@ void MainWindow::on_tableWidget_cellClicked(int row)
     ui->radioButton->setChecked(genre == "Homme");
     ui->radioButton_2->setChecked(genre == "Femme");
 }
+
+

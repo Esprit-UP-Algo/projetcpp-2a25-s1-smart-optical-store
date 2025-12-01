@@ -27,9 +27,9 @@ private slots:
 
 
     void on_lineEdit_5_cursorPositionChanged(int arg1, int arg2);
-    void on_logoClicked();  // Logo click -> Dashboard
-    
+    void on_logoClicked();
 
+    
 
     //mariem
     void on_pushButton_2_clicked();
@@ -50,9 +50,8 @@ private slots:
 private:
     Ui::MainWindow *ui;
     bool eventFilter(QObject *obj, QEvent *event) override;
-    //int currentProductRef;  // For editing mode
-
-    void scrollToProduct(QString reference);    // Scroll to product in table
+    void loadFournisseursByCategorie(const QString &categorie);
+    void scrollToProduct(QString reference);
 
 
 };

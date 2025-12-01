@@ -18,6 +18,7 @@ private:
     QString couleur;
     QString genre;
     QString marque;
+    int id_four;
     QDate dateExpiration;
     void checkLowQuantity();
     QString getEmployeeEmail();
@@ -37,6 +38,8 @@ public:
     void setgenre(Ui::MainWindow *ui);
     void setMarque(const QString &m) { marque = m; }
     void setDateExpiration(const QDate &de) { dateExpiration = de; }
+    void setIdFour(int id) { id_four = id; }
+    int getIdFour() const { return id_four; }
 
     // Getters
     QString getReference() const { return reference; }

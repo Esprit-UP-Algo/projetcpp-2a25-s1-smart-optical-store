@@ -32,6 +32,8 @@ Produit::Produit(Ui::MainWindow *ui)
     this->setgenre(ui);
     this->marque = ui->lineEdit_7->text();
     this->dateExpiration = ui->dateEdit->date();
+    this->id_four = ui->comboBox_idFour->currentData().toInt();
+
 }
 
 QString Produit::getEmployeeEmail()
@@ -94,18 +96,24 @@ bool Produit::ajouter()
     checkLowQuantity();
 
     QSqlQuery query;
-    query.prepare("INSERT INTO PRODUIT (REFERENCE, DESIGNATION, CATEGORIE, MARQUE, PRIX, QUANTITE, COULEUR, GENRE, DATEEXPIRATION) "
-                  "VALUES (:reference, :designation, :categorie, :marque, :prix, :quantite, :couleur, :genre, :dateExpiration)");
+    query.prepare(
+        "INSERT INTO PRODUIT "
+        "(REFERENCE, DESIGNATION, CATEGORIE, MARQUE, PRIX, QUANTITE, "
+        "COULEUR, GENRE, DATEEXPIRATION, ID_FOUR) "
+        "VALUES (:reference, :designation, :categorie, :marque, :prix, "
+        ":quantite, :couleur, :genre, :dateExpiration, :id_four)"
+        );
 
     query.bindValue(":reference", reference);
     query.bindValue(":designation", designation);
     query.bindValue(":categorie", categorie);
     query.bindValue(":marque", marque);
-    query.bindValue(":genre", genre);
-    query.bindValue(":couleur", couleur);
     query.bindValue(":prix", prix);
     query.bindValue(":quantite", quantite);
+    query.bindValue(":couleur", couleur);
+    query.bindValue(":genre", genre);
     query.bindValue(":dateExpiration", dateExpiration);
+    query.bindValue(":id_four", id_four);
 
     if (!query.exec())
     {
@@ -138,6 +146,7 @@ void Produit::afficher(Ui::MainWindow *ui)
             ui->tableWidget->setItem(row, 7, new QTableWidgetItem(query.value("DESIGNATION").toString()));
             //ui->tableWidget->setItem(row, 8, new QTableWidgetItem(query.value("DATEEXPIRATION").toString()));
             ui->tableWidget->setItem(row, 8, new QTableWidgetItem(query.value("DATEEXPIRATION").toDate().toString("dd/MM/yyyy")));
+            ui->tableWidget->setItem(row, 9, new QTableWidgetItem(query.value("ID_FOUR").toString()));
 
             row++;
         }
@@ -209,8 +218,13 @@ bool Produit:: modifier()
 
     QSqlQuery query;
 
-    query.prepare("UPDATE PRODUIT SET COULEUR=:couleur, GENRE=:genre, PRIX=:prix, QUANTITE=:quantite, MARQUE=:marque, CATEGORIE=:categorie, DESIGNATION=:designation, DATEEXPIRATION=:dateExpiration "
-                  "WHERE REFERENCE=:reference");
+    query.prepare(
+        "UPDATE PRODUIT SET "
+        "COULEUR=:couleur, GENRE=:genre, PRIX=:prix, QUANTITE=:quantite, "
+        "MARQUE=:marque, CATEGORIE=:categorie, DESIGNATION=:designation, "
+        "DATEEXPIRATION=:dateExpiration, ID_FOUR=:id_four "
+        "WHERE REFERENCE=:reference"
+        );
 
     query.bindValue(":reference", reference);
     query.bindValue(":couleur", couleur);
@@ -221,7 +235,7 @@ bool Produit:: modifier()
     query.bindValue(":categorie", categorie);
     query.bindValue(":designation", designation);
     query.bindValue(":dateExpiration", dateExpiration);
-
+    query.bindValue(":id_four", id_four);
 
     bool test = query.exec();
 
