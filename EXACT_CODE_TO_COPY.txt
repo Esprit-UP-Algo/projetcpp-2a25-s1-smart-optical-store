@@ -1,0 +1,191 @@
+// ============================================
+// EXACT CODE TO COPY INTO fournisseurwindow.cpp
+// ============================================
+// COPY THE SECTIONS BELOW INTO YOUR fournisseurwindow.cpp FILE
+
+// ============================================
+// SECTION 1: Update getInstance() method
+// ============================================
+// FIND THIS METHOD (around line 49) and ADDTHE TWO LINES MARKED WITH // <-- ADD
+//
+// ORIGINAL:
+// FournisseurWindow* FournisseurWindow::getInstance(const QString &role, QWidget *parent)
+// {
+//     if (instance == nullptr)
+//     {
+//         instance = new FournisseurWindow(parent);
+//     }
+//     instance->show();
+//     instance->raise();
+//     instance->activateWindow();
+//     return instance;
+// }
+//
+// REPLACE WITH:
+
+FournisseurWindow* FournisseurWindow::getInstance(const QString &role, QWidget *parent)
+{
+    if (instance == nullptr)
+    {
+        instance = new FournisseurWindow(parent);
+        instance->userRole = role;  // <-- ADD THIS LINE
+        instance->configureRoleBasedAccess();  // <-- ADD THIS LINE
+    }
+    instance->show();
+    instance->raise();
+    instance->activateWindow();
+    return instance;
+}
+
+// ============================================
+// SECTION 2: Update Constructor
+// ============================================
+// FIND THE CONSTRUCTOR (around line 60) and ADD THE LINE MARKED// <-- ADD
+//
+// ORIGINAL:
+// FournisseurWindow::FournisseurWindow(QWidget *parent)
+//     : QMainWindow(parent)
+//     , ui(new Ui::FournisseurWindow)
+//     , selectedId(-1)
+// {
+//
+// REPLACE WITH:
+
+FournisseurWindow::FournisseurWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::FournisseurWindow)
+    , selectedId(-1)
+    , userRole("")  // <-- ADD THIS LINE (comma on previous line!)
+{
+    ui->setupUi(this);
+    afficherFournisseurs();
+    ui->pushButton_delete->setEnabled(false);
+}
+
+// ============================================
+// SECTION 3: Add configureRoleBasedAccess() Method
+// ============================================
+// ADD THIS COMPLETE METHOD AT THE END OF THE FILE (before the last closing brace)
+//
+// Scroll to the bottom of fournisseurwindow.cpp and add this:
+
+void FournisseurWindow::configureRoleBasedAccess()
+{
+    qDebug() << "Configuring access for role:" << userRole;
+    
+    // If user is fournisseur role, hide navigation to other modules
+    if (userRole.toLower() == "fournisseur")
+    {
+        // Hide navigation buttons to other modules
+        ui->pushButton->setVisible(false);      // Stock button
+        ui->pushButton_2->setVisible(false);    // Ventes button
+        ui->pushButton_3->setVisible(false);    // Clients button
+        ui->pushButton_4->setVisible(false);    // Employés button
+        // pushButton_5 is Fournisseur - keep it visible (don't hide it)
+        
+        // Optionally hide the entire navigation panel
+        // ui->groupBox->setVisible(false);  // Uncomment this to hide entire "Tableau de bord" group
+        
+        qDebug() << "Role-based access configured: fournisseur role - navigation restricted";
+        
+        // Show info message (optional - remove if you don't want the popup)
+        QMessageBox::information(this, "Mode Fournisseur",
+            "Vous êtes connecté en mode Fournisseur.\n"
+            "Accès limité au module de gestion des fournisseurs.");
+    }
+    else if (userRole.toLower() == "admin" || userRole.isEmpty())
+    {
+        // Full access for admin - all buttons visible (default state)
+        qDebug() << "Full access granted for role:" << userRole;
+    }
+    else
+    {
+        // For other roles, you can add specific restrictions here
+        qDebug() << "Unknown role:" << userRole << "- defaulting to full access";
+    }
+}
+
+// ============================================
+// SECTION 4: Add Role Checks to Navigation Slots (OPTIONAL)
+// ============================================
+// This adds double-protection in case buttons are still visible
+// FIND these methods (around lines 85-105) and ADD the role check at the beginning
+
+// For Stock navigation (find the method that handles pushButton click - around line 87)
+void FournisseurWindow::on_pushButton_clicked()  // Stock button
+{
+    // ADD THIS CHECK
+    if (userRole.toLower() == "fournisseur")
+    {
+        QMessageBox::warning(this, "Accès refusé",
+            "Vous n'avez pas l'autorisation d'accéder au module Stock.");
+        return;
+    }
+    
+    // Original code continues here
+    MainWindow::getInstance();
+    this->hide();
+}
+
+// For Ventes navigation (find the method around line 92)
+void FournisseurWindow::on_pushButton_2_clicked()  // Ventes button
+{
+    // ADD THIS CHECK
+    if (userRole.toLower() == "fournisseur")
+    {
+        QMessageBox::warning(this, "Accès refusé",
+            "Vous n'avez pas l'autorisation d'accéder au module Ventes.");
+        return;
+    }
+    
+    // Original code continues here
+    SalesWindow::getInstance();
+    this->hide();
+}
+
+// For Employés navigation (find the method around line 97)
+void FournisseurWindow::on_pushButton_4_clicked()  // Employés button
+{
+    // ADD THIS CHECK
+    if (userRole.toLower() == "fournisseur")
+    {
+        QMessageBox::warning(this, "Accès refusé",
+            "Vous n'avez pas l'autorisation d'accéder au module Employés.");
+        return;
+    }
+    
+    // Original code continues here
+    gestionemploye00::getInstance();
+    this->hide();
+}
+
+// For Clients navigation (find the method around line 102)
+void FournisseurWindow::on_pushButton_3_clicked()  // Clients button
+{
+    // ADD THIS CHECK
+    if (userRole.toLower() == "fournisseur")
+    {
+        QMessageBox::warning(this, "Accès refusé",
+            "Vous n'avez pas l'autorisation d'accéder au module Clients.");
+        return;
+    }
+    
+    // Original code continues here
+    Gclient1::getInstance();
+    this->hide();
+}
+
+// ============================================
+// SUMMARY OF CHANGES NEEDED
+// ============================================
+// 1. ✅ Header file already updated (fournisseurwindow.h)
+// 2. ⏳ Update getInstance() - add 2 lines
+// 3. ⏳ Update constructor - add 1 line
+// 4. ⏳ Add configureRoleBasedAccess() method - copy entire method
+// 5. ⏳ (Optional) Add role checks to navigation slots - add if statements
+
+// After making these changes:
+// - Save the file (Ctrl+S)
+// - Build the project (Ctrl+B)
+// - Test with fournisseur role login
+// - Navigation buttons should be hidden!

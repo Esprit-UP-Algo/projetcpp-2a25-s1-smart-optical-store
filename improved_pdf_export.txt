@@ -1,0 +1,313 @@
+/**
+ * Improved PDF Export Function for Sales Window
+ * 
+ * This file contains a well-formatted PDF export implementation
+ * Replace the existing exportSalesToPdf() function in saleswindow.cpp with this code
+ * 
+ * INSTRUCTIONS:
+ * 1. Open saleswindow.cpp in your Qt Creator
+ * 2. Find the exportSalesToPdf() function
+ * 3. Replace the entire function body with the code below
+ */
+
+void SalesWindow::exportSalesToPdf()
+{
+    // Get file path from user
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    tr("Exporter les ventes en PDF"),
+                                                    QString("rapport_ventes_%1.pdf").arg(QDate::currentDate().toString("yyyy-MM-dd")),
+                                                    tr("PDF Files (*.pdf)"));
+    
+    if (fileName.isEmpty())
+        return;
+
+    // Ensure .pdf extension
+    if (!fileName.endsWith(".pdf", Qt::CaseInsensitive))
+        fileName += ".pdf";
+
+    // Setup printer
+    QPrinter printer(QPrinter::HighResolution);
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setOutputFileName(fileName);
+    printer.setPageSize(QPageSize::A4);
+    printer.setPageMargins(QMarginsF(15, 15, 15, 15), QPageLayout::Millimeter);
+
+    // Create painter
+    QPainter painter;
+    if (!painter.begin(&printer)) {
+        QMessageBox::warning(this, tr("Erreur"), tr("Impossible de créer le fichier PDF"));
+        return;
+    }
+
+    // Page setup
+    int pageWidth = printer.pageRect(QPrinter::DevicePixel).width();
+    int pageHeight = printer.pageRect(QPrinter::DevicePixel).height();
+    int margin = 60;
+    int yPos = margin;
+    
+    // Fonts
+    QFont titleFont("Arial", 24, QFont::Bold);
+    QFont headerFont("Arial", 12, QFont::Bold);
+    QFont normalFont("Arial", 10);
+    QFont smallFont("Arial", 9);
+
+    // Colors
+    QColor headerColor(41, 102, 148);  // Blue
+    QColor lightBlue(135, 206, 235);   // Light blue
+    QColor darkText(0, 0, 0);
+    QColor lightGray(240, 240, 240);
+
+    // ==================== HEADER ====================
+    painter.setFont(titleFont);
+    painter.setPen(headerColor);
+    QString title = "Rapport des Ventes";
+    painter.drawText(QRect(margin, yPos, pageWidth - 2 * margin, 80), 
+                     Qt::AlignCenter, title);
+    yPos += 90;
+
+    // Subtitle with date
+    painter.setFont(normalFont);
+    painter.setPen(darkText);
+    QString dateStr = QString("Généré le: %1").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy hh:mm"));
+    painter.drawText(QRect(margin, yPos, pageWidth - 2 * margin, 30), 
+                     Qt::AlignCenter, dateStr);
+    yPos += 50;
+
+    // Draw horizontal line
+    painter.setPen(QPen(headerColor, 2));
+    painter.drawLine(margin, yPos, pageWidth - margin, yPos);
+    yPos += 30;
+
+    // ==================== TABLE HEADER ====================
+    painter.setFont(headerFont);
+    painter.setPen(Qt::white);
+    painter.setBrush(headerColor);
+
+    int tableWidth = pageWidth - 2 * margin;
+    int col1Width = tableWidth * 0.10;  // ID
+    int col2Width = tableWidth * 0.15;  // Client
+    int col3Width = tableWidth * 0.15;  // Date
+    int col4Width = tableWidth * 0.15;  // Prix TTC
+    int col5Width = tableWidth * 0.15;  // Statut Vente
+    int col6Width = tableWidth * 0.15;  // Statut Paiement
+    int col7Width = tableWidth * 0.15;  // Mode Paiement
+
+    int rowHeight = 40;
+
+    // Draw header background
+    painter.drawRect(margin, yPos, tableWidth, rowHeight);
+
+    // Draw header text
+    int xPos = margin;
+    painter.drawText(QRect(xPos, yPos, col1Width, rowHeight), 
+                     Qt::AlignCenter, "ID");
+    xPos += col1Width;
+    
+    painter.drawText(QRect(xPos, yPos, col2Width, rowHeight), 
+                     Qt::AlignCenter, "Client");
+    xPos += col2Width;
+    
+    painter.drawText(QRect(xPos, yPos, col3Width, rowHeight), 
+                     Qt::AlignCenter, "Date");
+    xPos += col3Width;
+    
+    painter.drawText(QRect(xPos, yPos, col4Width, rowHeight), 
+                     Qt::AlignCenter, "Prix TTC");
+    xPos += col4Width;
+    
+    painter.drawText(QRect(xPos, yPos, col5Width, rowHeight), 
+                     Qt::AlignCenter, "Statut Vente");
+    xPos += col5Width;
+    
+    painter.drawText(QRect(xPos, yPos, col6Width, rowHeight), 
+                     Qt::AlignCenter, "Statut Paiement");
+    xPos += col6Width;
+    
+    painter.drawText(QRect(xPos, yPos, col7Width, rowHeight), 
+                     Qt::AlignCenter, "Mode Paiement");
+
+    yPos += rowHeight;
+
+    // ==================== TABLE DATA ====================
+    painter.setFont(normalFont);
+    painter.setPen(darkText);
+
+    // Get sales data from database
+    QSqlQuery query;
+    query.prepare("SELECT v.id_vente, c.nom_client, v.date_vente, v.prix_ttc, "
+                  "v.statut_vente, v.statut_paiement, v.mode_paiement "
+                  "FROM VENTE v "
+                  "LEFT JOIN CLIENT c ON v.id_client = c.id_client "
+                  "ORDER BY v.date_vente DESC");
+
+    if (!query.exec()) {
+        painter.end();
+        QMessageBox::warning(this, tr("Erreur"), 
+                           tr("Erreur lors de la récupération des données: %1").arg(query.lastError().text()));
+        return;
+    }
+
+    int rowCount = 0;
+    double totalVentes = 0.0;
+    bool alternateRow = false;
+
+    while (query.next()) {
+        // Check if we need a new page
+        if (yPos + rowHeight > pageHeight - margin - 100) {
+            // Draw footer on current page
+            painter.setFont(smallFont);
+            painter.setPen(darkText);
+            painter.drawText(QRect(margin, pageHeight - margin, pageWidth - 2 * margin, 30),
+                           Qt::AlignCenter, 
+                           QString("Page %1").arg(QString::number((rowCount / 20) + 1)));
+            
+            printer.newPage();
+            yPos = margin;
+            
+            // Redraw header on new page
+            painter.setFont(headerFont);
+            painter.setPen(Qt::white);
+            painter.setBrush(headerColor);
+            painter.drawRect(margin, yPos, tableWidth, rowHeight);
+            
+            xPos = margin;
+            painter.drawText(QRect(xPos, yPos, col1Width, rowHeight), Qt::AlignCenter, "ID");
+            xPos += col1Width;
+            painter.drawText(QRect(xPos, yPos, col2Width, rowHeight), Qt::AlignCenter, "Client");
+            xPos += col2Width;
+            painter.drawText(QRect(xPos, yPos, col3Width, rowHeight), Qt::AlignCenter, "Date");
+            xPos += col3Width;
+            painter.drawText(QRect(xPos, yPos, col4Width, rowHeight), Qt::AlignCenter, "Prix TTC");
+            xPos += col4Width;
+            painter.drawText(QRect(xPos, yPos, col5Width, rowHeight), Qt::AlignCenter, "Statut Vente");
+            xPos += col5Width;
+            painter.drawText(QRect(xPos, yPos, col6Width, rowHeight), Qt::AlignCenter, "Statut Paiement");
+            xPos += col6Width;
+            painter.drawText(QRect(xPos, yPos, col7Width, rowHeight), Qt::AlignCenter, "Mode Paiement");
+            
+            yPos += rowHeight;
+            painter.setFont(normalFont);
+            painter.setPen(darkText);
+        }
+
+        // Alternate row background
+        if (alternateRow) {
+            painter.setBrush(lightGray);
+            painter.setPen(Qt::NoPen);
+            painter.drawRect(margin, yPos, tableWidth, rowHeight);
+            painter.setPen(darkText);
+        } else {
+            painter.setBrush(Qt::white);
+        }
+        alternateRow = !alternateRow;
+
+        // Draw cell borders
+        painter.setPen(QPen(Qt::lightGray, 1));
+        painter.setBrush(Qt::NoBrush);
+        painter.drawRect(margin, yPos, tableWidth, rowHeight);
+
+        // Draw data
+        painter.setPen(darkText);
+        xPos = margin;
+        
+        // ID
+        QString idStr = query.value(0).toString();
+        painter.drawText(QRect(xPos + 5, yPos, col1Width - 10, rowHeight), 
+                        Qt::AlignVCenter | Qt::AlignCenter, idStr);
+        xPos += col1Width;
+        
+        // Client
+        QString clientName = query.value(1).toString();
+        if (clientName.isEmpty()) clientName = "N/A";
+        QFontMetrics fm(normalFont);
+        clientName = fm.elidedText(clientName, Qt::ElideRight, col2Width - 10);
+        painter.drawText(QRect(xPos + 5, yPos, col2Width - 10, rowHeight), 
+                        Qt::AlignVCenter | Qt::AlignLeft, clientName);
+        xPos += col2Width;
+        
+        // Date
+        QString dateStr = query.value(2).toDate().toString("dd/MM/yyyy");
+        painter.drawText(QRect(xPos + 5, yPos, col3Width - 10, rowHeight), 
+                        Qt::AlignVCenter | Qt::AlignCenter, dateStr);
+        xPos += col3Width;
+        
+        // Prix TTC
+        double prixTtc = query.value(3).toDouble();
+        totalVentes += prixTtc;
+        QString prixStr = QString::number(prixTtc, 'f', 2) + " DT";
+        painter.drawText(QRect(xPos + 5, yPos, col4Width - 10, rowHeight), 
+                        Qt::AlignVCenter | Qt::AlignRight, prixStr);
+        xPos += col4Width;
+        
+        // Statut Vente
+        QString statutVente = query.value(4).toString();
+        painter.drawText(QRect(xPos + 5, yPos, col5Width - 10, rowHeight), 
+                        Qt::AlignVCenter | Qt::AlignCenter, statutVente);
+        xPos += col5Width;
+        
+        // Statut Paiement
+        QString statutPaiement = query.value(5).toString();
+        painter.drawText(QRect(xPos + 5, yPos, col6Width - 10, rowHeight), 
+                        Qt::AlignVCenter | Qt::AlignCenter, statutPaiement);
+        xPos += col6Width;
+        
+        // Mode Paiement
+        QString modePaiement = query.value(6).toString();
+        painter.drawText(QRect(xPos + 5, yPos, col7Width - 10, rowHeight), 
+                        Qt::AlignVCenter | Qt::AlignCenter, modePaiement);
+
+        yPos += rowHeight;
+        rowCount++;
+    }
+
+    // ==================== SUMMARY ====================
+    yPos += 20;
+    
+    // Draw summary box
+    painter.setBrush(QColor(245, 245, 245));
+    painter.setPen(QPen(headerColor, 2));
+    int summaryHeight = 80;
+    painter.drawRect(pageWidth - margin - 300, yPos, 300, summaryHeight);
+
+    // Summary text
+    painter.setFont(headerFont);
+    painter.setPen(headerColor);
+    painter.drawText(QRect(pageWidth - margin - 290, yPos + 10, 280, 30), 
+                     Qt::AlignLeft, "Résumé");
+    
+    painter.setFont(normalFont);
+    painter.setPen(darkText);
+    painter.drawText(QRect(pageWidth - margin - 290, yPos + 35, 280, 20), 
+                     Qt::AlignLeft, QString("Nombre de ventes: %1").arg(rowCount));
+    
+    painter.setFont(headerFont);
+    painter.setPen(headerColor);
+    painter.drawText(QRect(pageWidth - margin - 290, yPos + 55, 280, 25), 
+                     Qt::AlignLeft, QString("Total: %1 DT").arg(QString::number(totalVentes, 'f', 2)));
+
+    // ==================== FOOTER ====================
+    painter.setFont(smallFont);
+    painter.setPen(darkText);
+    painter.drawText(QRect(margin, pageHeight - margin, pageWidth - 2 * margin, 30),
+                    Qt::AlignCenter, 
+                    "Smart Optical Store - Système de Gestion des Ventes");
+
+    painter.end();
+
+    QMessageBox::information(this, tr("Succès"), 
+                           tr("Le rapport PDF a été généré avec succès!\nFichier: %1").arg(fileName));
+}
+
+/* 
+ * ADDITIONAL REQUIRED INCLUDES FOR saleswindow.cpp
+ * Make sure these are at the top of saleswindow.cpp:
+ * 
+ * #include <QPrinter>
+ * #include <QPainter>
+ * #include <QFileDialog>
+ * #include <QMessageBox>
+ * #include <QTextDocument>
+ * #include <QFontMetrics>
+ * #include <QPageLayout>
+ * #include <QPageSize>
+ */

@@ -6,14 +6,19 @@
 #include <QSqlQueryModel>
 #include <QSqlError>
 #include <QDebug>
-#include <QDate>
 
 class Fournisseur
 {
 public:
-    // Constructeurs
     Fournisseur();
-    Fournisseur(int, QString, QString, QString, QString, QString, int, QDate);
+    Fournisseur(int id,
+                QString nom_ent,
+                QString nom_cont,
+                QString em,
+                QString tel,
+                QString type_prod,
+                int cond_paie,
+                QString hist);
 
     // Getters
     int get_id_fournisseur();
@@ -23,7 +28,7 @@ public:
     QString get_telephone();
     QString get_type_produit_fournis();
     int get_condition_paiement();
-    QDate get_historique();
+    QString get_historique();
 
     // Setters
     void set_id_fournisseur(int);
@@ -33,9 +38,9 @@ public:
     void set_telephone(QString);
     void set_type_produit_fournis(QString);
     void set_condition_paiement(int);
-    void set_historique(QDate);
+    void set_historique(QString);
 
-    // Méthodes CRUD
+    // CRUD
     bool ajouter();
     bool supprimer(int);
     bool modifier(int);
@@ -46,10 +51,10 @@ private:
     QString nom_entreprise;
     QString nom_contact;
     QString email;
-    QString telephone;  // String pour vérifier 8 chiffres
+    QString telephone;           // 8 chiffres
     QString type_produit_fournis;
-    int condition_paiement;  // 0 ou 1 seulement
-    QDate historique;  // Date
+    int condition_paiement;      // 0 ou 1
+    QString historique;          // texte libre
 };
 
 #endif // FOURNISSEUR_H

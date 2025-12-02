@@ -1,4 +1,4 @@
-QT += widgets sql serialport charts
+QT += widgets sql serialport charts printsupport network
 CONFIG += c++17
 TEMPLATE = app
 

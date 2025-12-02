@@ -97,6 +97,7 @@ private:
     bool insertDetailRecord(int saleId, const QString &reference, int quantity, double unitPrice);
     bool insertContenirRecord(int saleId, const QString &reference, int quantity, double unitPrice);
     bool updateProductStock(const QString &reference, int quantity);
+    bool updateStockFromContenir(int saleId);  // Update stock based on contenir table
     int fetchLatestSaleId() const;
     double getUnitPriceForReference(const QString &reference) const;
     

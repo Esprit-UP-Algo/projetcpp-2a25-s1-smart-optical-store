@@ -29,6 +29,7 @@ private slots:
 private:
     Ui::DashboardWindow *ui;
     bool eventFilter(QObject *obj, QEvent *event) override;
+    void showEvent(QShowEvent *event) override;  // Refresh when window is shown
     void loadDashboardData();  // Load all dashboard statistics
     void loadRecentSales();     // Load recent sales table
     Arduino *arduino;
