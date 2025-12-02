@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PromoManager</class>
+ <widget class="QDialog" name="PromoManager">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Gestion des Codes Promo</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: #b8e2f2; color: black;</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="titleLabel">
+     <property name="font">
+      <font>
+       <pointsize>16</pointsize>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(41, 102, 148);</string>
+     </property>
+     <property name="text">
+      <string>Gestion des Codes Promotionnels</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="formGroupBox">
+     <property name="title">
+      <string>Ajouter/Modifier Code Promo</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QGroupBox {
+    background-color: rgb(41, 102, 148);
+    border: 2px solid black;
+    border-radius: 8px;
+    margin-top: 20px;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+QGroupBox::title {
+    border: 2px solid black;
+    border-radius: 8px;
+    background-color: rgb(41, 102, 148);
+    subcontrol-origin: margin;
+    subcontrol-position: top center;
+    padding: 2px 10px;
+}</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="codeLabel">
+        <property name="styleSheet">
+         <string notr="true">background-color: #55aaff;
+color:black;</string>
+        </property>
+        <property name="text">
+         <string>Code Promo :</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="codeLineEdit">
+        <property name="styleSheet">
+         <string notr="true">background-color: #87CEEB; color: black;</string>
+        </property>
+        <property name="placeholderText">
+         <string>Entrer le code promo</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="generateCodeButton">
+        <property name="styleSheet">
+         <string notr="true">background-color: #55aaff;
+color:black;</string>
+        </property>
+        <property name="text">
+         <string>Générer</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="descriptionLabel">
+        <property name="styleSheet">
+         <string notr="true">background-color: #55aaff;
+color:black;</string>
+        </property>
+        <property name="text">
+         <string>Description :</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="2">
+       <widget class="QLineEdit" name="descriptionLineEdit">
+        <property name="styleSheet">
+         <string notr="true">background-color: #87CEEB; color: black;</string>
+        </property>
+        <property name="placeholderText">
+         <string>Entrer une description (optionnel)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="discountLabel">
+        <property name="styleSheet">
+         <string notr="true">background-color: #55aaff;
+color:black;</string>
+        </property>
+        <property name="text">
+         <string>Remise (%) :</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="2">
+       <widget class="QDoubleSpinBox" name="discountSpinBox">
+        <property name="styleSheet">
+         <string notr="true">background-color: #87CEEB; color: black;</string>
+        </property>
+        <property name="decimals">
+         <number>2</number>
+        </property>
+        <property name="maximum">
+         <double>100.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="startDateLabel">
+        <property name="styleSheet">
+         <string notr="true">background-color: #55aaff;
+color:black;</string>
+        </property>
+        <property name="text">
+         <string>Date Début :</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1" colspan="2">
+       <widget class="QDateEdit" name="startDateEdit">
+        <property name="styleSheet">
+         <string notr="true">background-color: #87CEEB; color: black;</string>
+        </property>
+        <property name="calendarPopup">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="endDateLabel">
+        <property name="styleSheet">
+         <string notr="true">background-color: #55aaff;
+color:black;</string>
+        </property>
+        <property name="text">
+         <string>Date Fin :</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1" colspan="2">
+       <widget class="QDateEdit" name="endDateEdit">
+        <property name="styleSheet">
+         <string notr="true">background-color: #87CEEB; color: black;</string>
+        </property>
+        <property name="calendarPopup">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="activeLabel">
+        <property name="styleSheet">
+         <string notr="true">background-color: #55aaff;
+color:black;</string>
+        </property>
+        <property name="text">
+         <string>Actif :</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1" colspan="2">
+       <widget class="QCheckBox" name="activeCheckBox">
+        <property name="styleSheet">
+         <string notr="true">background-color: #55aaff;
+color:black;</string>
+        </property>
+        <property name="text">
+         <string>Code promo actif</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="buttonLayout">
+     <item>
+      <widget class="QPushButton" name="addButton">
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(41, 102, 148);
+color: white;</string>
+       </property>
+       <property name="text">
+        <string>Ajouter</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="editButton">
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(41, 102, 148);
+color: white;</string>
+       </property>
+       <property name="text">
+        <string>Modifier</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="deleteButton">
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(41, 102, 148);
+color: white;</string>
+       </property>
+       <property name="text">
+        <string>Supprimer</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="listGroupBox">
+     <property name="title">
+      <string>Codes Promo Existants</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QGroupBox {
+    background-color: rgb(41, 102, 148);
+    border: 2px solid black;
+    border-radius: 8px;
+    margin-top: 20px;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+QGroupBox::title {
+    border: 2px solid black;
+    border-radius: 8px;
+    background-color: rgb(41, 102, 148);
+    subcontrol-origin: margin;
+    subcontrol-position: top center;
+    padding: 2px 10px;
+}</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QTableView" name="promoTableView">
+        <property name="styleSheet">
+         <string notr="true">background-color: white; color: black;</string>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SingleSelection</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Close</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>PromoManager</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>PromoManager</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
