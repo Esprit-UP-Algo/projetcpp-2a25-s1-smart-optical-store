@@ -1081,7 +1081,7 @@ color: rgb(0, 0, 0);</string>
             <string/>
            </property>
            <property name="pixmap">
-            <pixmap resource="resources.qrc">:/images/logof.jpg</pixmap>
+            <pixmap resource="../../../Users/mimi/Desktop/projectUpdateeMariem/resources.qrc">:/images/logof.jpg</pixmap>
            </property>
            <property name="scaledContents">
             <bool>true</bool>
@@ -1170,7 +1170,7 @@ color: rgb(0, 0, 0);</string>
             <string/>
            </property>
            <property name="pixmap">
-            <pixmap resource="resources.qrc">:/images/logof.jpg</pixmap>
+            <pixmap resource="../../../Users/mimi/Desktop/projectUpdateeMariem/resources.qrc">:/images/logof.jpg</pixmap>
            </property>
            <property name="scaledContents">
             <bool>true</bool>
@@ -1245,8 +1245,6 @@ color: rgb(0, 0, 0);</string>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
