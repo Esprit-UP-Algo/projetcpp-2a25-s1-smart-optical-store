@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QEvent>
+#include "arduino.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -29,7 +30,7 @@ private slots:
     void on_lineEdit_5_cursorPositionChanged(int arg1, int arg2);
     void on_logoClicked();
 
-
+    void readSerialData();
 
     //mariem
     void on_pushButton_2_clicked();
@@ -48,6 +49,7 @@ private slots:
     void on_tableWidget_cellClicked(int row);
 
 private:
+    Arduino A;
     Ui::MainWindow *ui;
     bool eventFilter(QObject *obj, QEvent *event) override;
     void loadFournisseursByCategorie(const QString &categorie);

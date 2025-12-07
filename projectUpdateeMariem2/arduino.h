@@ -23,8 +23,9 @@ public:
 
 private:
     QSerialPort *serial;
-    static const quint16 arduino_uno_vendor_id = 0x2341;
-    static const quint16 arduino_uno_producy_id = 0x0043;
+    const quint16 arduino_uno_vendor_id = 0x2341; // your Arduino VID
+    const quint16 arduino_uno_producy_id = 0x0043; // your Arduino PID
+
     QString arduino_port_name;
     bool arduino_is_available;
     QByteArray data;

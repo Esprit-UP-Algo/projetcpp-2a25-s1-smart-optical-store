@@ -306,7 +306,7 @@ background-color: rgb(41, 102, 148);
        <string notr="true"> background-color: rgb(41, 102, 148);</string>
       </property>
       <property name="text">
-       <string>Export format Excel</string>
+       <string>statistique graphique</string>
       </property>
      </widget>
      <widget class="QTableWidget" name="tableWidget_2">
@@ -780,7 +780,7 @@ background-color: rgb(41, 102, 148);
         <x>250</x>
         <y>350</y>
         <width>256</width>
-        <height>192</height>
+        <height>111</height>
        </rect>
       </property>
      </widget>

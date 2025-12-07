@@ -132,7 +132,7 @@ DashboardWindow::DashboardWindow(const QString &role, QWidget *parent) :
     qDebug() << "========================================";
     qDebug() << "[DASHBOARD] Auto-connecting to Arduino on startup...";
     qDebug() << "========================================";
-    int result = arduino->connect_arduino();
+    /* int result = arduino->connect_arduino();
     if (result == 0) {
         qDebug() << "[DASHBOARD] ✓ Arduino auto-connected successfully on port:" << arduino->getarduino_port_name();
         qDebug() << "[DASHBOARD] Status:" << arduino->get_connection_status();
@@ -142,6 +142,7 @@ DashboardWindow::DashboardWindow(const QString &role, QWidget *parent) :
         qDebug() << "[DASHBOARD] Status:" << arduino->get_connection_status();
         qDebug() << "========================================";
     }
+    */
 }
 
 

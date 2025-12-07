@@ -84,10 +84,18 @@ MainWindow* MainWindow::getInstance(QWidget *parent)
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-//, currentProductRef(0)
+
 {
     ui->setupUi(this);
-    //connect(ui->pushButton_micro, &QPushButton::clicked, this, &MainWindow::startSpeechToText);
+
+
+
+//arduino
+    int ret = A.connect_arduino();
+    if (ret == 0) {
+        QObject::connect(A.getserial(), SIGNAL(readyRead()),
+                         this, SLOT(readSerialData()));
+    }
 
 
 
@@ -995,4 +1003,22 @@ void MainWindow::on_tableWidget_cellClicked(int row)
     ui->radioButton_2->setChecked(genre == "Femme");
 }
 
+void MainWindow::readSerialData()
+{
+    QByteArray data = A.read_from_arduino();
+    qDebug() << "RAW SERIAL DATA:" << data;
+
+    for (char c : data)
+    {
+        if (c >= '0' && c <= '9') {
+            ui->lineEdit_29->insert(QString(c));
+        }
+        else if (c == '*') {
+            ui->lineEdit_29->backspace();
+        }
+        else if (c == '#') {
+            ui->lineEdit_29->clear();
+        }
+    }
+}
 
