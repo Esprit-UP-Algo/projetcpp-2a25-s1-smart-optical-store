@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "./ui_mainwindow.h"
+//#include "./ui_mainwindow.h"
 #include <QDebug>
 #include <QDir>
 #include <QPushButton>
@@ -7,7 +7,6 @@
 #include "saleswindow.h"
 #include "gestionemploye00.h"
 #include "gclient1.h"
-#include "produit.h"
 #include "fournisseurwindow.h"
 #include "dashboardwindow.h"
 #include <QApplication>
@@ -22,32 +21,57 @@
 #include <QDate>
 #include <QAbstractItemView>
 
+#include "ui_mainwindow.h"
+#include <QFileDialog>
 #include <QMessageBox>
 #include <QRegularExpression>
 #include <QLabel>
 #include <QPropertyAnimation>
-#include <QFileDialog>
-#include <QTextStream>
-#include <QStandardPaths>
-#include <QDesktopServices>
-#include <QUrl>
-#include <QTimer>
-#include <QPixmap>
-#include <QBrush>
-#include <QColor>
+#include <QSerialPort>
+#include <QSerialPortInfo>
+#include <QPainter>
 
-// Initialize static instance pointer
+#include <QFont>
+#include <QPixmap>
+#include <QTimer>
+#include <QPropertyAnimation>
+#include <QEasingCurve>
+
+#include <QPainterPath>
+
+#include <QGraphicsOpacityEffect>
+#include <QPropertyAnimation>
+#include <QEasingCurve>
+#include <QtCharts/QChartView>
+#include <QtCharts/QBarSeries>
+#include <QtCharts/QBarSet>
+#include <QtCharts/QChart>
+#include <QtCharts/QBarCategoryAxis>
+#include <QtCharts/QValueAxis>
+
+#include <QPdfWriter>
+#include <QPagedPaintDevice>
+#include <QTextDocument>
+#include <QTextCursor>
+#include <QTextTable>
+#include <QTextTableFormat>
+#include <QTextBlockFormat>
+#include <QTextCharFormat>
+#include <QTextFrameFormat>
+#include <QLocale>
+
+#include <QProcess>
+#include <QTemporaryFile>
+#include <QFile>
+
+
 MainWindow* MainWindow::instance = nullptr;
 
 MainWindow* MainWindow::getInstance(const QString &role, QWidget *parent)
 {
-
     if (!instance || !QApplication::topLevelWidgets().contains(instance)) {
         instance = new MainWindow(role, parent);
         instance->setAttribute(Qt::WA_DeleteOnClose);
-        // Populate produit table immediately
-        Produit p(instance->ui);      // Use the MainWindow's UI
-        p.afficher(instance->ui);     // Fill table
         QObject::connect(instance, &QObject::destroyed, []() {
             instance = nullptr;
         });
@@ -60,166 +84,105 @@ MainWindow* MainWindow::getInstance(const QString &role, QWidget *parent)
 MainWindow::MainWindow(const QString &role, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , Etmp()
-    , currentProductRef("")
-    , generatedRef("")
+
 {
+    Q_UNUSED(role);  // Role handling can be added later if needed
     ui->setupUi(this);
 
 
 
+//arduino
+    int ret = A.connect_arduino();
+    if (ret == 0) {
+        QObject::connect(A.getserial(), SIGNAL(readyRead()),
+                         this, SLOT(readSerialData()));
+    }
 
-    
+
+
+    Produit p;
+    p.afficher(ui);
+
+    ui->lineEdit_5->setPlaceholderText("Tapez la référence ou designation");
+    ui->lineEdit_6->setPlaceholderText("Tapez la référence");
+
+    connect(ui->comboBox_2, &QComboBox::currentTextChanged,
+            this, &MainWindow::loadFournisseursByCategorie);
+
+    connect(ui->pushButton_12, &QPushButton::clicked, this, [=](){
+        ui->travaille->setCurrentIndex(0);
+    });
+
+    connect(ui->pushButton_7, &QPushButton::clicked, this, [=](){
+        ui->travaille->setCurrentIndex(1);
+
+
+    });
     // Use WindowManager to setup common window features
     WindowManager::setupWindow(this, "Gestion de Stock", 1200, 800);
-    
-    //ui->lineEdit_5->setPlaceholderText("  Recherche par référence ou Nom ...");
 
     // Initialize database connection
     Connection c;
     if (!c.createconnect()) {
         QMessageBox::critical(this, "Erreur", "Impossible de se connecter à la base de données!");
     }
-    
-    ui->lineEdit_5->setPlaceholderText("  Recherche par référence ou Nom ...");
+
     qDebug() << "Chemin courant =" << QDir::currentPath();
-    
-    // Setup logo - ensure it's visible and clickable
-    // Find topRightLogoLabel (the logo visible in the interface) and logoLabel
-    QLabel* topRightLogoLabel = this->findChild<QLabel*>("topRightLogoLabel", Qt::FindChildrenRecursively);
-    QLabel* logoLabel = this->findChild<QLabel*>("logoLabel", Qt::FindChildrenRecursively);
-    if (!logoLabel) {
-        logoLabel = ui->logoLabel;
+    ui->logoLabel->setPixmap(QPixmap(":/images/logof.jpg"));
+    ui->logoLabel->setScaledContents(true);
+
+
+    loadFournisseursByCategorie("Lunettes");
+
+
+    if (ui->logoLabel) {
+        ui->logoLabel->setCursor(Qt::PointingHandCursor);
+        ui->logoLabel->installEventFilter(this);
+        ui->logoLabel->setAttribute(Qt::WA_TransparentForMouseEvents, false);
     }
-    
-    // Setup topRightLogoLabel (main logo visible in stock management page)
-    if (topRightLogoLabel) {
-        // Load logo image from resources
-        QPixmap logoPixmap(":/images/logof.jpg");
-        if (logoPixmap.isNull()) {
-            logoPixmap = QPixmap("images/logof.jpg");
-        }
-        if (!logoPixmap.isNull()) {
-            topRightLogoLabel->setPixmap(logoPixmap);
-            topRightLogoLabel->setScaledContents(true);
-            qDebug() << "✅ topRightLogoLabel loaded successfully, size:" << logoPixmap.size();
-        }
-        
-        // Make logo clickable
-        topRightLogoLabel->setCursor(Qt::PointingHandCursor);
-        topRightLogoLabel->installEventFilter(this);
-        topRightLogoLabel->setAttribute(Qt::WA_TransparentForMouseEvents, false);
-        topRightLogoLabel->setToolTip("Cliquez pour aller au Tableau de bord");
-        topRightLogoLabel->show();
-        topRightLogoLabel->raise();
-        qDebug() << "✅ topRightLogoLabel setup complete - clickable and ready";
-    } else {
-        qDebug() << "⚠️ topRightLogoLabel widget not found in UI";
-    }
-    
-    // Also setup logoLabel if it exists
-    if (logoLabel) {
-        QPixmap logoPixmap(":/images/logof.jpg");
-        if (logoPixmap.isNull()) {
-            logoPixmap = QPixmap("images/logof.jpg");
-        }
-        if (!logoPixmap.isNull()) {
-            logoLabel->setPixmap(logoPixmap);
-            logoLabel->setScaledContents(true);
-        }
-        logoLabel->setCursor(Qt::PointingHandCursor);
-        logoLabel->installEventFilter(this);
-        logoLabel->setAttribute(Qt::WA_TransparentForMouseEvents, false);
-        logoLabel->setToolTip("Cliquez pour aller au Tableau de bord");
-        logoLabel->show();
-        logoLabel->raise();
-    }
-    
+
     // Setup table widget
-    ui->tableWidget->setColumnCount(9);
-    QStringList headers = {"Référence", "Couleur", "Genre", "Prix", "Quantité", "Marque", "Catégorie", "Designation", "Date d'expiration"};
+    /*ui->tableWidget->setColumnCount(9);
+    QStringList headers = {"Id", "Nom", "Couleur", "Genre", "Prix", "Quantité", "Marque", "Référence", "Fournisseur"};
     ui->tableWidget->setHorizontalHeaderLabels(headers);
     ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    
-    // Connect table double-click
-    connect(ui->tableWidget, &QTableWidget::cellDoubleClicked, this, &MainWindow::on_tableWidget_cellDoubleClicked);
-    
-    // Load products on startup - delay to ensure UI is fully initialized
-    QTimer::singleShot(500, this, [this]() {
-        loadProducts();
-    });
-    
-    // Make reference field read-only for auto-generation (will be editable when modifying)
-    ui->lineEdit_3->setReadOnly(false);  // Will be set to read-only in clearForm
-    clearForm();
+    */ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    // Wire tableau de bord buttons by their visible text to avoid object-name differences
+
+
+
+
     const auto buttons = this->findChildren<QPushButton*>();
     for (QPushButton *btn : buttons) {
         const QString label = btn->text().trimmed();
         if (label.compare("Stock", Qt::CaseInsensitive) == 0) {
-            if (role == "admin" || role == "stock") {
-                connect(btn, &QPushButton::clicked, this, [this]() {
-                    this->raise();
-                    this->activateWindow();
-                });
-            } else {
-                btn->setEnabled(false);
-            }
+            connect(btn, &QPushButton::clicked, this, [this]() {
+                this->raise();
+                this->activateWindow();
+            });
         } else if (label.compare("Ventes", Qt::CaseInsensitive) == 0) {
-            if (role == "admin" || role == "vente") {
-                connect(btn, &QPushButton::clicked, this, [this]() {
-                    SalesWindow::getInstance();
-                    this->close();
-                });
-            } else {
-                btn->setEnabled(false);
-            }
+            connect(btn, &QPushButton::clicked, this, [this]() {
+                SalesWindow::getInstance();
+                this->close();
+            });
         } else if (label.startsWith("Employ", Qt::CaseInsensitive)) {
-            if (role == "admin" || role == "employe") {
-                connect(btn, &QPushButton::clicked, this, [this]() {
-                    gestionemploye00::getInstance();
-                    this->close();
-                });
-            } else {
-                btn->setEnabled(false);
-            }
+            connect(btn, &QPushButton::clicked, this, [this]() {
+                gestionemploye00::getInstance();
+                this->close();
+            });
         } else if (label.startsWith("Client", Qt::CaseInsensitive)) {
-            if (role == "admin" || role == "client") {
-                connect(btn, &QPushButton::clicked, this, [this]() {
-                    Gclient1::getInstance();
-                    this->close();
-                });
-            } else {
-                btn->setEnabled(false);
-            }
+            connect(btn, &QPushButton::clicked, this, [this]() {
+                Gclient1::getInstance();
+                this->close();
+            });
         } else if (label.compare("Fournisseur", Qt::CaseInsensitive) == 0) {
-            if (role == "admin" || role == "fournisseur") {
-                connect(btn, &QPushButton::clicked, this, [this]() {
-                    FournisseurWindow::getInstance();
-                    this->close();
-                });
-            } else {
-                btn->setEnabled(false);
-            }
+            connect(btn, &QPushButton::clicked, this, [this]() {
+                FournisseurWindow::getInstance();
+                this->close();
+            });
         }
     }
-    Produit p;
-    p.afficher(ui);
-    p.afficherRestock(ui,10);
-
-
-    ui->lineEdit_5->setPlaceholderText("Tapez la référence ou designation");
-    ui->lineEdit_6->setPlaceholderText("Tapez la référence");
-
-    // Connect Stock button (pushButton_6) to show stock page
-    connect(ui->pushButton_6, &QPushButton::clicked, this, [=](){
-        ui->travaille->setCurrentIndex(0);
-        loadProducts();
-        clearForm();  // Auto-generate reference when switching to stock page
-    });
 }
 
 MainWindow::~MainWindow()
@@ -230,46 +193,6 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_3_clicked()
 {
     ui->travaille->setCurrentIndex(0);
-    // Ensure logos are visible and clickable when switching to stock page
-    QLabel* topRightLogoLabel = this->findChild<QLabel*>("topRightLogoLabel", Qt::FindChildrenRecursively);
-    QLabel* logoLabel = this->findChild<QLabel*>("logoLabel", Qt::FindChildrenRecursively);
-    if (!logoLabel) {
-        logoLabel = ui->logoLabel;
-    }
-    
-    // Setup topRightLogoLabel (the visible logo)
-    if (topRightLogoLabel) {
-        topRightLogoLabel->show();
-        topRightLogoLabel->raise();
-        QPixmap logoPixmap(":/images/logof.jpg");
-        if (logoPixmap.isNull()) {
-            logoPixmap = QPixmap("images/logof.jpg");
-        }
-        if (!logoPixmap.isNull()) {
-            topRightLogoLabel->setPixmap(logoPixmap);
-        }
-        topRightLogoLabel->installEventFilter(this);
-        topRightLogoLabel->setCursor(Qt::PointingHandCursor);
-        topRightLogoLabel->setAttribute(Qt::WA_TransparentForMouseEvents, false);
-    }
-    
-    // Setup logoLabel
-    if (logoLabel) {
-        logoLabel->show();
-        logoLabel->raise();
-        QPixmap logoPixmap(":/images/logof.jpg");
-        if (logoPixmap.isNull()) {
-            logoPixmap = QPixmap("images/logof.jpg");
-        }
-        if (!logoPixmap.isNull()) {
-            logoLabel->setPixmap(logoPixmap);
-        }
-        logoLabel->installEventFilter(this);
-        logoLabel->setCursor(Qt::PointingHandCursor);
-    }
-    // Reload products when switching to stock page
-    loadProducts();
-    clearForm();  // Auto-generate reference when switching to stock page
 }
 
 
@@ -287,64 +210,799 @@ void MainWindow::on_lineEdit_5_cursorPositionChanged(int arg1, int arg2)
     Q_UNUSED(arg2);
 }
 
-// Removed duplicate on_pushButton_2_clicked() - using newer implementation below
-
-void MainWindow::on_pushButton_31_clicked()
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
-    // Clear form and auto-generate new reference
-    clearForm();
+    if (obj == ui->logoLabel && event->type() == QEvent::MouseButtonPress) {
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+        if (mouseEvent->button() == Qt::LeftButton) {
+            on_logoClicked();
+            return true;
+        }
+    }
+    return QMainWindow::eventFilter(obj, event);
 }
 
-void MainWindow::showToast(QString message)
+void MainWindow::on_logoClicked()
 {
-    QLabel *toast = new QLabel(message, this);
-    toast->setStyleSheet(
-        "background-color: #ff4444; "
-        "color: white; "
-        "padding: 10px 18px; "
-        "border-radius: 8px; "
-        "font-weight: bold;"
+    DashboardWindow::getInstance();
+    this->close();
+}
+
+void MainWindow::loadFournisseursByCategorie(const QString &categorie)
+{
+    Q_UNUSED(categorie); // No longer filtering by category
+    
+    ui->comboBox_idFour->clear();
+
+    QSqlQuery query;
+    // Load ALL fournisseurs from the fournisseur table
+    // Note: Table and column names use special characters and need quotes
+    query.prepare(
+        "SELECT \"ID-fournisseur\", \"nom de l'entreprise\" "
+        "FROM \"fournisseur\" "
+        "ORDER BY \"ID-fournisseur\""
         );
-    toast->setAlignment(Qt::AlignCenter);
-    toast->setWindowFlags(Qt::FramelessWindowHint | Qt::ToolTip);
 
-    toast->adjustSize();
-    toast->move(width()/2 - toast->width()/2, 20);
-    toast->show();
+    if (!query.exec()) {
+        qDebug() << "Erreur loadFournisseursByCategorie:" << query.lastError().text();
+        return;
+    }
 
-    QPropertyAnimation *anim = new QPropertyAnimation(toast, "opacity");
-    anim->setDuration(2500);
-    anim->setStartValue(1.0);
-    anim->setEndValue(0.0);
-    anim->start(QAbstractAnimation::DeleteWhenStopped);
+    while (query.next())
+    {
+        QString id  = query.value(0).toString();
+        QString nom = query.value(1).toString();
 
-    connect(anim, &QPropertyAnimation::finished, toast, &QLabel::deleteLater);
+        ui->comboBox_idFour->addItem(id + " - " + nom, id);
+    }
+
+    if (ui->comboBox_idFour->count() == 0) {
+        ui->comboBox_idFour->addItem("Aucun fournisseur disponible", -1);
+    }
+}
+
+void MainWindow::on_pushButton_7_clicked()
+{
+    QSqlDatabase db = QSqlDatabase::database();
+    if (!db.isValid() || !db.isOpen()) {
+        QMessageBox::critical(this, "Erreur", "Connexion à la base de données non disponible!");
+        return;
+    }
+
+    QSqlQuery query(db);
+
+    // 🔴 CRITIQUE
+    int critique = 0;
+    if (query.exec("SELECT COUNT(*) FROM PRODUIT WHERE DATEEXPIRATION BETWEEN SYSDATE AND SYSDATE + 7")) {
+        if (query.next()) {
+            critique = query.value(0).toInt();
+        }
+    }
+
+    // 🟠 URGENT
+    int urgent = 0;
+    if (query.exec("SELECT COUNT(*) FROM PRODUIT WHERE DATEEXPIRATION BETWEEN SYSDATE + 8 AND SYSDATE + 15")) {
+        if (query.next()) {
+            urgent = query.value(0).toInt();
+        }
+    }
+
+    // 🟡 ATTENTION
+    int attention = 0;
+    if (query.exec("SELECT COUNT(*) FROM PRODUIT WHERE DATEEXPIRATION BETWEEN SYSDATE + 16 AND SYSDATE + 30")) {
+        if (query.next()) {
+            attention = query.value(0).toInt();
+        }
+    }
+
+    // ⚫ EXPIRÉS
+    int expires = 0;
+    if (query.exec("SELECT COUNT(*) FROM PRODUIT WHERE DATEEXPIRATION < SYSDATE")) {
+        if (query.next()) {
+            expires = query.value(0).toInt();
+        }
+    }
+
+    // Create Bar Sets for each urgency level
+    QBarSet *critiqueSet = new QBarSet(" CRITIQUE (0-7j)");
+    QBarSet *urgentSet = new QBarSet(" URGENT (8-15j)");
+    QBarSet *attentionSet = new QBarSet(" ATTENTION (16-30j)");
+    QBarSet *expiresSet = new QBarSet(" EXPIRÉS");
+
+    // Add data
+    *critiqueSet << critique;
+    *urgentSet << urgent;
+    *attentionSet << attention;
+    *expiresSet << expires;
+
+    // Set colors
+    critiqueSet->setColor(QColor(231, 76, 60));    // Rouge vif
+    urgentSet->setColor(QColor(230, 126, 34));     // Orange
+    attentionSet->setColor(QColor(241, 196, 15));  // Jaune
+    expiresSet->setColor(QColor(44, 62, 80));      // Noir
+
+    // Create bar series
+    QBarSeries *series = new QBarSeries();
+    series->append(critiqueSet);
+    series->append(urgentSet);
+    series->append(attentionSet);
+    series->append(expiresSet);
+
+    // Create chart
+    QChart *chart = new QChart();
+    chart->addSeries(series);
+    chart->setTitle("📊 ALERTES D'EXPIRATION PAR URGENCE");
+    chart->setAnimationOptions(QChart::SeriesAnimations);
+
+    // Set font for title
+    QFont titleFont;
+    titleFont.setPixelSize(18);
+    titleFont.setBold(true);
+    chart->setTitleFont(titleFont);
+
+    // Create axes
+    QBarCategoryAxis *axisX = new QBarCategoryAxis();
+    axisX->append("Produits");
+    chart->addAxis(axisX, Qt::AlignBottom);
+    series->attachAxis(axisX);
+
+    QValueAxis *axisY = new QValueAxis();
+    axisY->setTitleText("Nombre de produits");
+    axisY->setLabelFormat("%d");
+    axisY->setTickCount(6);
+
+    // Find max value for better Y-axis range
+    int maxValue = qMax(qMax(critique, urgent), qMax(attention, expires));
+    axisY->setRange(0, maxValue + 5);
+
+    chart->addAxis(axisY, Qt::AlignLeft);
+    series->attachAxis(axisY);
+
+    // Legend positioning
+    chart->legend()->setVisible(true);
+    chart->legend()->setAlignment(Qt::AlignBottom);
+
+    // Create chart view
+    QChartView *chartView = new QChartView(chart);
+    chartView->setRenderHint(QPainter::Antialiasing);
+
+    // Clear any existing layout/widgets in the label's parent
+    if (ui->label->layout()) {
+        QLayoutItem *item;
+        while ((item = ui->label->layout()->takeAt(0)) != nullptr) {
+            delete item->widget();
+            delete item;
+        }
+        delete ui->label->layout();
+    }
+
+    // Create new layout for the label
+    QVBoxLayout *layout = new QVBoxLayout(ui->label);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(chartView);
+
+    // Add summary text below chart
+    QString summaryText = QString(
+                              "<div style='padding: 10px; background-color: #ecf0f1; border-radius: 5px;'>"
+                              "<h3 style='color: #2c3e50; text-align: center; margin: 5px;'>📋 RÉSUMÉ</h3>"
+                              "<p style='font-size: 13px; margin: 5px;'>"
+                              "<span style='color: #e74c3c; font-weight: bold;'> CRITIQUE:</span><span style='color: #000000'> %1 produits (0-7 jours)</span><br>"
+                              "<span style='color: #e67e22; font-weight: bold;'> URGENT:</span><span style='color: #000000'> %2 produits (8-15 jours)</span><br>"
+                              "<span style='color: #f39c12; font-weight: bold;'> ATTENTION:</span><span style='color: #000000'> %3 produits (16-30 jours)</span><br>"
+                              "<span style='color: #95a5a6; font-weight: bold;'> EXPIRÉS:</span><span style='color: #000000'> %4 produits</span><br>"
+                              "<br><b><span style='color: #000000; font-weight: bold;'>TOTAL À RISQUE (30j):</span></b> <span style='color: #000000'>%5 produits</span>"
+                              "</p></div>"
+                              ).arg(critique).arg(urgent).arg(attention).arg(expires).arg(critique + urgent + attention);
+
+    QLabel *summaryLabel = new QLabel(summaryText);
+    summaryLabel->setTextFormat(Qt::RichText);
+    summaryLabel->setAlignment(Qt::AlignCenter);
+    layout->addWidget(summaryLabel);
+
+    ui->label->setLayout(layout);
 }
 
 
 
-// Removed duplicate on_pushButton_5_clicked() - using newer implementation below
+
+void MainWindow::on_pushButton_15_clicked()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    "Exporter le Rapport Stock",
+                                                    QString("Rapport_Stock_%1.pdf").arg(QDate::currentDate().toString("dd-MM-yyyy")),
+                                                    "PDF (*.pdf)");
+
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    // Create PDF writer
+    QPdfWriter pdfWriter(fileName);
+    pdfWriter.setPageSize(QPageSize(QPageSize::A4));
+    pdfWriter.setPageMargins(QMarginsF(20, 20, 20, 20));
+    pdfWriter.setResolution(300);
+
+    // Create text document
+    QTextDocument document;
+    QTextCursor cursor(&document);
+
+    // Format pour centrer le texte (utilisé dans tous les tableaux)
+    QTextBlockFormat centerFormat;
+    centerFormat.setAlignment(Qt::AlignCenter);
+    centerFormat.setLineHeight(130, QTextBlockFormat::ProportionalHeight);
+
+    // Configure French locale for date
+    QLocale frenchLocale(QLocale::French, QLocale::France);
+    QString dateStr = frenchLocale.toString(QDate::currentDate(), "dddd dd MMMM yyyy");
+    dateStr[0] = dateStr[0].toUpper();
+
+    // ========== HEADER ==========
+    QTextBlockFormat headerFormat;
+    headerFormat.setAlignment(Qt::AlignCenter);
+    headerFormat.setBackground(QBrush(QColor(45, 52, 54))); // Gris anthracite élégant
+    headerFormat.setTopMargin(20);
+    headerFormat.setBottomMargin(20);
+
+    QTextCharFormat headerTextFormat;
+    headerTextFormat.setForeground(QBrush(Qt::white));
+    headerTextFormat.setFontPointSize(24);
+    headerTextFormat.setFontWeight(QFont::Bold);
+    headerTextFormat.setFontFamily("Segoe UI");
+
+    cursor.setBlockFormat(headerFormat);
+    cursor.setCharFormat(headerTextFormat);
+    cursor.insertText("RAPPORT DE STOCK");
+    cursor.insertBlock();
+
+    // Date
+    QTextCharFormat dateHeaderFormat;
+    dateHeaderFormat.setForeground(QBrush(Qt::white));
+    dateHeaderFormat.setFontPointSize(11);
+    dateHeaderFormat.setFontFamily("Segoe UI");
+
+    cursor.setCharFormat(dateHeaderFormat);
+    cursor.insertText(dateStr);
+    cursor.insertBlock();
+    cursor.insertBlock();
+
+    // ========== VUE D'ENSEMBLE ==========
+    QTextBlockFormat titleFormat;
+    titleFormat.setAlignment(Qt::AlignLeft);
+    titleFormat.setTopMargin(25);
+    titleFormat.setBottomMargin(15);
+    titleFormat.setLeftMargin(10);
+    titleFormat.setBackground(QBrush(QColor(250, 250, 250))); // Gris très clair
+
+    QTextCharFormat titleTextFormat;
+    titleTextFormat.setFontPointSize(16);
+    titleTextFormat.setFontWeight(QFont::Bold);
+    titleTextFormat.setForeground(QBrush(QColor(45, 52, 54)));
+    titleTextFormat.setFontFamily("Segoe UI");
+
+    cursor.setBlockFormat(titleFormat);
+    cursor.setCharFormat(titleTextFormat);
+    cursor.insertText("Vue d'ensemble");
+    cursor.insertBlock();
+    cursor.insertBlock();
+
+    // Récupérer les statistiques
+    QSqlQuery statsQuery;
+    int totalProduits = 0;
+    int categoriesCount = 0;
+    int stockFaible = 0;
+    int produitsExpiration = 0;
+
+    if (statsQuery.exec("SELECT COUNT(*) FROM PRODUIT")) {
+        if (statsQuery.next()) totalProduits = statsQuery.value(0).toInt();
+    }
+
+    if (statsQuery.exec("SELECT COUNT(DISTINCT CATEGORIE) FROM PRODUIT")) {
+        if (statsQuery.next()) categoriesCount = statsQuery.value(0).toInt();
+    }
+
+    if (statsQuery.exec("SELECT COUNT(*) FROM PRODUIT WHERE QUANTITE < 10")) {
+        if (statsQuery.next()) stockFaible = statsQuery.value(0).toInt();
+    }
+
+    if (statsQuery.exec("SELECT COUNT(*) FROM PRODUIT WHERE DATEEXPIRATION BETWEEN SYSDATE AND SYSDATE + 15")) {
+        if (statsQuery.next()) produitsExpiration = statsQuery.value(0).toInt();
+    }
+
+    // Stats en format simple
+    QTextBlockFormat statsFormat;
+    statsFormat.setLeftMargin(20);
+    statsFormat.setLineHeight(150, QTextBlockFormat::ProportionalHeight); // Espacement 1.5
+
+    QTextCharFormat statsTextFormat;
+    statsTextFormat.setFontPointSize(11);
+    statsTextFormat.setForeground(QBrush(QColor(45, 52, 54)));
+    statsTextFormat.setFontFamily("Segoe UI");
+
+    cursor.setBlockFormat(statsFormat);
+    cursor.setCharFormat(statsTextFormat);
+    cursor.insertText(QString("• Nombre total de produits : %1").arg(totalProduits));
+    cursor.insertBlock();
+    cursor.insertText(QString("• Catégories actives : %1").arg(categoriesCount));
+    cursor.insertBlock();
+    cursor.insertText(QString("• Produits en stock faible (< 10 unités) : %1").arg(stockFaible));
+    cursor.insertBlock();
+    cursor.insertText(QString("• Produits proche expiration (< 15 jours) : %1").arg(produitsExpiration));
+    cursor.insertBlock();
+    cursor.insertBlock();
+
+    // ========== RÉPARTITION PAR CATÉGORIE ==========
+    cursor.setBlockFormat(titleFormat);
+    cursor.setCharFormat(titleTextFormat);
+    cursor.insertText("Répartition par catégorie");
+    cursor.insertBlock();
+    cursor.insertBlock();
+
+    // Table simple et élégante
+    QTextTableFormat tableFormat;
+    tableFormat.setAlignment(Qt::AlignCenter);
+    tableFormat.setCellPadding(12);
+    tableFormat.setCellSpacing(0);
+    tableFormat.setBorderStyle(QTextFrameFormat::BorderStyle_Solid);
+    tableFormat.setBorder(1);
+    tableFormat.setBorderBrush(QBrush(QColor(220, 220, 220))); // Bordure gris clair
+    tableFormat.setHeaderRowCount(1);
+    tableFormat.setBackground(QBrush(Qt::white));
+    tableFormat.setWidth(QTextLength(QTextLength::PercentageLength, 95));
+    tableFormat.setTopMargin(10);
+    tableFormat.setBottomMargin(10);
+
+    QSqlQuery categoryQuery;
+    categoryQuery.prepare("SELECT CATEGORIE, COUNT(*) as COUNT, SUM(QUANTITE) as TOTAL_QTE "
+                          "FROM PRODUIT "
+                          "GROUP BY CATEGORIE ORDER BY COUNT DESC");
+
+    if (categoryQuery.exec()) {
+        int rowCount = 0;
+        categoryQuery.last();
+        rowCount = categoryQuery.at() + 1;
+        categoryQuery.first();
+        categoryQuery.previous();
+
+        QTextTable *table = cursor.insertTable(rowCount + 1, 3, tableFormat);
+
+        // Format pour centrer le texte dans les cellules
+        QTextBlockFormat centerFormat;
+        centerFormat.setAlignment(Qt::AlignCenter);
+        centerFormat.setLineHeight(130, QTextBlockFormat::ProportionalHeight);
+
+        // Header élégant
+        QTextCharFormat headerCellFormat;
+        headerCellFormat.setBackground(QBrush(QColor(45, 52, 54))); // Gris anthracite
+        headerCellFormat.setForeground(QBrush(Qt::white));
+        headerCellFormat.setFontWeight(QFont::Bold);
+        headerCellFormat.setFontPointSize(11);
+        headerCellFormat.setFontFamily("Segoe UI");
+
+        QTextTableCell cell;
+        QTextCursor cellCursor;
+
+        cell = table->cellAt(0, 0);
+        cell.setFormat(headerCellFormat);
+        cellCursor = cell.firstCursorPosition();
+        cellCursor.setBlockFormat(centerFormat);
+        cellCursor.insertText("Catégorie");
+
+        cell = table->cellAt(0, 1);
+        cell.setFormat(headerCellFormat);
+        cellCursor = cell.firstCursorPosition();
+        cellCursor.setBlockFormat(centerFormat);
+        cellCursor.insertText("Nombre de produits");
+
+        cell = table->cellAt(0, 2);
+        cell.setFormat(headerCellFormat);
+        cellCursor = cell.firstCursorPosition();
+        cellCursor.setBlockFormat(centerFormat);
+        cellCursor.insertText("Quantité totale");
+
+        // Lignes avec alternance subtile
+        QTextCharFormat evenRowFormat;
+        evenRowFormat.setBackground(QBrush(QColor(250, 250, 250))); // Gris très léger
+        evenRowFormat.setFontPointSize(10);
+        evenRowFormat.setFontFamily("Segoe UI");
+        evenRowFormat.setForeground(QBrush(QColor(45, 52, 54)));
+
+        QTextCharFormat oddRowFormat;
+        oddRowFormat.setBackground(QBrush(Qt::white));
+        oddRowFormat.setFontPointSize(10);
+        oddRowFormat.setFontFamily("Segoe UI");
+        oddRowFormat.setForeground(QBrush(QColor(45, 52, 54)));
+
+        int row = 1;
+        while (categoryQuery.next()) {
+            QTextCharFormat rowFormat = (row % 2 == 0) ? evenRowFormat : oddRowFormat;
+
+            cell = table->cellAt(row, 0);
+            cell.setFormat(rowFormat);
+            cellCursor = cell.firstCursorPosition();
+            cellCursor.setBlockFormat(centerFormat);
+            cellCursor.insertText(categoryQuery.value("CATEGORIE").toString());
+
+            cell = table->cellAt(row, 1);
+            cell.setFormat(rowFormat);
+            cellCursor = cell.firstCursorPosition();
+            cellCursor.setBlockFormat(centerFormat);
+            cellCursor.insertText(QString::number(categoryQuery.value("COUNT").toInt()));
+
+            cell = table->cellAt(row, 2);
+            cell.setFormat(rowFormat);
+            cellCursor = cell.firstCursorPosition();
+            cellCursor.setBlockFormat(centerFormat);
+            cellCursor.insertText(QString::number(categoryQuery.value("TOTAL_QTE").toInt()));
+
+            row++;
+        }
+
+        cursor.movePosition(QTextCursor::End);
+    }
+
+    cursor.insertBlock();
+    cursor.insertBlock();
+
+    // ========== ALERTES D'EXPIRATION ==========
+    QTextBlockFormat alertTitleFormat = titleFormat;
+    alertTitleFormat.setBackground(QBrush(QColor(255, 245, 245))); // Rose très pâle
+
+    QTextCharFormat alertTitleTextFormat = titleTextFormat;
+    alertTitleTextFormat.setForeground(QBrush(QColor(220, 53, 69))); // Rouge élégant
+
+    cursor.setBlockFormat(alertTitleFormat);
+    cursor.setCharFormat(alertTitleTextFormat);
+    cursor.insertText("Alertes d'expiration (< 15 jours)");
+    cursor.insertBlock();
+    cursor.insertBlock();
+
+    QSqlQuery expirationQuery;
+    expirationQuery.prepare(
+        "SELECT REFERENCE, DESIGNATION, CATEGORIE, QUANTITE, DATEEXPIRATION, "
+        "(DATEEXPIRATION - SYSDATE) as JOURS_RESTANTS "
+        "FROM PRODUIT "
+        "WHERE DATEEXPIRATION BETWEEN SYSDATE AND SYSDATE + 15 "
+        "ORDER BY DATEEXPIRATION ASC"
+        );
+
+    if (expirationQuery.exec()) {
+        int expRowCount = 0;
+        expirationQuery.last();
+        expRowCount = expirationQuery.at() + 1;
+        expirationQuery.first();
+        expirationQuery.previous();
+
+        if (expRowCount > 0) {
+            QTextTable *expTable = cursor.insertTable(expRowCount + 1, 5, tableFormat);
+
+            // Format pour centrer le texte
+            QTextBlockFormat centerFormat;
+            centerFormat.setAlignment(Qt::AlignCenter);
+            centerFormat.setLineHeight(130, QTextBlockFormat::ProportionalHeight);
+
+            // Header
+            QTextCharFormat expHeaderFormat;
+            expHeaderFormat.setBackground(QBrush(QColor(220, 53, 69))); // Rouge élégant
+            expHeaderFormat.setForeground(QBrush(Qt::white));
+            expHeaderFormat.setFontWeight(QFont::Bold);
+            expHeaderFormat.setFontPointSize(10);
+            expHeaderFormat.setFontFamily("Segoe UI");
+
+            QTextTableCell cell;
+            QTextCursor cellCursor;
+
+            cell = expTable->cellAt(0, 0);
+            cell.setFormat(expHeaderFormat);
+            cellCursor = cell.firstCursorPosition();
+            cellCursor.setBlockFormat(centerFormat);
+            cellCursor.insertText("Référence");
+
+            cell = expTable->cellAt(0, 1);
+            cell.setFormat(expHeaderFormat);
+            cellCursor = cell.firstCursorPosition();
+            cellCursor.setBlockFormat(centerFormat);
+            cellCursor.insertText("Désignation");
+
+            cell = expTable->cellAt(0, 2);
+            cell.setFormat(expHeaderFormat);
+            cellCursor = cell.firstCursorPosition();
+            cellCursor.setBlockFormat(centerFormat);
+            cellCursor.insertText("Catégorie");
+
+            cell = expTable->cellAt(0, 3);
+            cell.setFormat(expHeaderFormat);
+            cellCursor = cell.firstCursorPosition();
+            cellCursor.setBlockFormat(centerFormat);
+            cellCursor.insertText("Quantité");
+
+            cell = expTable->cellAt(0, 4);
+            cell.setFormat(expHeaderFormat);
+            cellCursor = cell.firstCursorPosition();
+            cellCursor.setBlockFormat(centerFormat);
+            cellCursor.insertText("Jours restants");
+
+            // Lignes avec couleurs subtiles selon urgence
+            int row = 1;
+            while (expirationQuery.next()) {
+                int joursRestants = expirationQuery.value("JOURS_RESTANTS").toInt();
+
+                QTextCharFormat urgencyFormat;
+                urgencyFormat.setFontPointSize(10);
+                urgencyFormat.setFontFamily("Segoe UI");
+                urgencyFormat.setForeground(QBrush(QColor(45, 52, 54)));
+
+                // Couleurs subtiles selon urgence
+                if (joursRestants <= 7) {
+                    urgencyFormat.setBackground(QBrush(QColor(255, 235, 238))); // Rose très pâle
+                } else {
+                    urgencyFormat.setBackground(QBrush(QColor(255, 248, 240))); // Beige très pâle
+                }
+
+                cell = expTable->cellAt(row, 0);
+                cell.setFormat(urgencyFormat);
+                cellCursor = cell.firstCursorPosition();
+                cellCursor.setBlockFormat(centerFormat);
+                cellCursor.insertText(expirationQuery.value("REFERENCE").toString());
+
+                cell = expTable->cellAt(row, 1);
+                cell.setFormat(urgencyFormat);
+                cellCursor = cell.firstCursorPosition();
+                cellCursor.setBlockFormat(centerFormat);
+                cellCursor.insertText(expirationQuery.value("DESIGNATION").toString());
+
+                cell = expTable->cellAt(row, 2);
+                cell.setFormat(urgencyFormat);
+                cellCursor = cell.firstCursorPosition();
+                cellCursor.setBlockFormat(centerFormat);
+                cellCursor.insertText(expirationQuery.value("CATEGORIE").toString());
+
+                cell = expTable->cellAt(row, 3);
+                cell.setFormat(urgencyFormat);
+                cellCursor = cell.firstCursorPosition();
+                cellCursor.setBlockFormat(centerFormat);
+                cellCursor.insertText(QString::number(expirationQuery.value("QUANTITE").toInt()));
+
+                cell = expTable->cellAt(row, 4);
+
+                // Colorer le texte des jours selon urgence
+                QTextCharFormat daysFormat = urgencyFormat;
+                if (joursRestants <= 3) {
+                    daysFormat.setForeground(QBrush(QColor(220, 53, 69))); // Rouge
+                    daysFormat.setFontWeight(QFont::Bold);
+                } else if (joursRestants <= 7) {
+                    daysFormat.setForeground(QBrush(QColor(255, 127, 80))); // Orange corail
+                    daysFormat.setFontWeight(QFont::Bold);
+                }
+
+                cell.setFormat(daysFormat);
+                cellCursor = cell.firstCursorPosition();
+                cellCursor.setBlockFormat(centerFormat);
+                cellCursor.insertText(QString("%1 jour%2").arg(joursRestants).arg(joursRestants > 1 ? "s" : ""));
+
+                row++;
+            }
+
+            cursor.movePosition(QTextCursor::End);
+        } else {
+            QTextBlockFormat successFormat;
+            successFormat.setAlignment(Qt::AlignCenter);
+            successFormat.setTopMargin(15);
+            successFormat.setBottomMargin(15);
+            successFormat.setBackground(QBrush(QColor(240, 255, 244))); // Vert très pâle
+            successFormat.setLeftMargin(20);
+            successFormat.setRightMargin(20);
+
+            QTextCharFormat successTextFormat;
+            successTextFormat.setFontPointSize(11);
+            successTextFormat.setForeground(QBrush(QColor(40, 167, 69))); // Vert
+            successTextFormat.setFontFamily("Segoe UI");
+
+            cursor.setBlockFormat(successFormat);
+            cursor.setCharFormat(successTextFormat);
+            cursor.insertText("✓ Aucun produit en situation critique");
+        }
+    }
+
+    cursor.insertBlock();
+    cursor.insertBlock();
+
+    // ========== FOOTER ==========
+    QTextBlockFormat footerFormat;
+    footerFormat.setAlignment(Qt::AlignCenter);
+    footerFormat.setTopMargin(40);
+
+    QTextCharFormat footerTextFormat;
+    footerTextFormat.setFontPointSize(8);
+    footerTextFormat.setForeground(QBrush(QColor(150, 150, 150))); // Gris moyen
+    footerTextFormat.setFontFamily("Segoe UI");
+
+    cursor.setBlockFormat(footerFormat);
+    cursor.setCharFormat(footerTextFormat);
+    cursor.insertText("─────────────────────────────────────────");
+    cursor.insertBlock();
+    cursor.insertText("Document généré par le Système de Gestion de Stock");
+    cursor.insertBlock();
+    cursor.insertText(QString("© %1 - Tous droits réservés").arg(QDate::currentDate().year()));
+
+    // Print document to PDF
+    document.print(&pdfWriter);
+
+    QMessageBox::information(this, "Succès",
+                             QString("✅ Rapport exporté avec succès!\n\n📄 %1").arg(fileName));
+}
 
 
-void MainWindow::on_pushButtonR_clicked()
+
+
+
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    QString reference = ui->lineEdit_3->text();
+    QString designation = ui->lineEdit_des->text();
+    QString marque     = ui->lineEdit_7->text();
+    QString couleur    = ui->lineEdit_8->text();
+    QString prix       = ui->lineEdit_29->text();
+    QString quantite   = ui->lineEdit_9->text();
+
+    QRegularExpression rxReference("^[A-Za-z]{2}[0-9]{5}$");
+    QRegularExpression rxDesignation("^[A-Za-z]{5}[0-9]{2}$");
+    QRegularExpression rxMarque("^[A-Za-z]+$");
+    QRegularExpression rxCouleur("^[A-Za-z]+$");
+    QRegularExpression rxPrix("^[0-9]+(\\.[0-9]+)?$");
+    QRegularExpression rxQuantite("^[0-9]+$");
+
+    if (!rxReference.match(reference).hasMatch()) {
+        QMessageBox::warning(this, "Erreur", "La référence doit contenir 2 lettres + 5 chiffres (ex: AB12345).");
+        return;
+    }
+
+    if (!rxDesignation.match(designation).hasMatch()) {
+        QMessageBox::warning(this, "Erreur", "La désignation doit contenir 5 lettres + 2 chiffres (ex: ABCDE12).");
+        return;
+    }
+
+    if (!rxMarque.match(marque).hasMatch()) {
+        QMessageBox::warning(this, "Erreur", "La marque doit contenir seulement des lettres.");
+        return;
+    }
+
+    if (!rxCouleur.match(couleur).hasMatch()) {
+        QMessageBox::warning(this, "Erreur", "La couleur doit contenir seulement des lettres.");
+        return;
+    }
+
+    if (!rxPrix.match(prix).hasMatch()) {
+        QMessageBox::warning(this, "Erreur", "Le prix doit être un nombre (ex: 45 ou 45.6).");
+        return;
+    }
+
+    if (!rxQuantite.match(quantite).hasMatch()) {
+        QMessageBox::warning(this, "Erreur", "La quantité doit être un nombre.");
+        return;
+    }
+
+    Produit p(ui);
+    bool test=p.ajouter();
+    if (test)
+    {
+        QMessageBox::information(this, tr("Ajouté"), tr("Produit ajouté avec succès !"));
+
+    }
+    else
+    {
+        QMessageBox::critical(this, tr("Erreur"), tr("Échec de l'ajout du produit."));
+    }
+    p.afficher(ui);
+
+
+    MainWindow::on_pushButton_14_clicked();
+}
+
+void MainWindow::on_pushButton_14_clicked()
+{
+    ui->lineEdit_3->clear();   // Ref
+    ui->lineEdit_des->clear();   // Designation
+    ui->lineEdit_9->clear();   // Quantité
+    ui->lineEdit_29->clear();  // Prix
+    ui->comboBox_2->setCurrentIndex(0);  // Catégorie
+    ui->lineEdit_8->clear();   // Couleur
+    ui->lineEdit_7->clear();   // Marque
+    ui->dateEdit->setDate(QDate::currentDate()); // Date d’expiration
+    ui->radioButton->setAutoExclusive(false);
+    ui->radioButton_2->setAutoExclusive(false);
+    ui->radioButton->setChecked(false);
+    ui->radioButton_2->setChecked(false);
+    ui->radioButton->setAutoExclusive(true);
+    ui->radioButton_2->setAutoExclusive(true);
+
+
+}
+
+
+
+
+
+void MainWindow::on_pushButton_5_clicked()
+{
+    QString reference;
+    
+    // First, try to get the selected row from the table
+    int currentRow = ui->tableWidget->currentRow();
+    
+    if (currentRow >= 0 && ui->tableWidget->item(currentRow, 0) != nullptr) {
+        // Get reference from the selected row (column 0 = reference)
+        reference = ui->tableWidget->item(currentRow, 0)->text().trimmed();
+        qDebug() << "Deleting selected row with reference:" << reference;
+    } else {
+        // Fallback: use the text field
+        reference = ui->lineEdit_6->text().trimmed();
+        qDebug() << "Deleting from text field with reference:" << reference;
+    }
+    
+    if (reference.isEmpty()) {
+        QMessageBox::warning(this, tr("Erreur"), tr("Veuillez sélectionner un produit dans le tableau ou saisir une référence."));
+        return;
+    }
+    
+    // Confirm deletion
+    QMessageBox::StandardButton reply = QMessageBox::question(this, tr("Confirmation"),
+        tr("Êtes-vous sûr de vouloir supprimer le produit avec la référence '%1' ?").arg(reference),
+        QMessageBox::Yes | QMessageBox::No);
+    
+    if (reply != QMessageBox::Yes) {
+        return;
+    }
+
+    Produit c;
+    bool test = c.supprimer(reference);
+
+    if (test)
+    {
+        QMessageBox::information(this, tr("Suppression réussie"), tr("Le produit a été supprimé avec succès."));
+        c.afficher(ui);
+    }
+    else
+    {
+        QMessageBox::critical(this, tr("Erreur"), tr("La suppression a échoué. Vérifiez la référence saisie."));
+    }
+    ui->lineEdit_6->clear();
+}
+
+
+
+void MainWindow::on_pushButton_clicked()
 {
     QString rech = ui->lineEdit_5->text();
     Produit c;
 
-
     if (!c.rech(rech, ui)) {
         QMessageBox::critical(this, tr("Erreur"), tr("Aucun produit trouvé !"));
     }
-
-
 }
 
 
-// Removed duplicate on_pushButton_9_clicked() - using newer implementation below
-void MainWindow::on_pushButton_32_clicked()
+void MainWindow::on_pushButton_9_clicked()
+{
+    QString trier = ui->comboBox->currentText();
+    if (trier == "categories")
+    {
+
+        ui->tableWidget->sortItems(6, Qt::AscendingOrder);
+    }
+    else if (trier == "genre")
+    {
+        ui->tableWidget->sortItems(2, Qt::DescendingOrder );
+    }
+    else
+    {
+        QMessageBox::warning(this, "Tri", "Choisissez un critère valide !");
+    }
+}
+void MainWindow::on_pushButton_16_clicked()
 {
     Produit c(ui);
-    if (c.existe(c.getRef()))
+    if (c.existe(c.getReference()))
     {
         c.modifier();
         QMessageBox::information(this, " Modifié", "produit modifié avec succès");
@@ -356,651 +1014,42 @@ void MainWindow::on_pushButton_32_clicked()
     }
     c.afficher(ui);
 }
+
 void MainWindow::on_tableWidget_cellClicked(int row)
 {
-    // Table column order: Référence, Couleur, Genre, Prix, Quantité, Marque, Catégorie, Designation, Date d'expiration
-    QTableWidgetItem* refItem = ui->tableWidget->item(row, 0);
-    if (refItem) {
-        QString reference = refItem->text().trimmed();
-        ui->lineEdit_3->setText(reference); // Référence
-        currentProductRef = reference;  // Set current product reference for modify mode
-        // Make reference editable when modifying existing product
-        ui->lineEdit_3->setReadOnly(false);
-        ui->lineEdit_3->setStyleSheet("background-color: rgb(170, 255, 255); color: rgb(0, 0, 0);");
-    }
-    
-    QTableWidgetItem* colorItem = ui->tableWidget->item(row, 1);
-    if (colorItem) {
-        ui->lineEdit_8->setText(colorItem->text()); // Couleur
-    }
+    QString reference = ui->tableWidget->item(row, 0)->text();
 
-    QTableWidgetItem* genreItem = ui->tableWidget->item(row, 2);
-    if (genreItem) {
-        QString genre = genreItem->text(); // Genre
-        if (genre == "Homme") {
-            ui->radioButton->setChecked(true);
-            ui->radioButton_2->setChecked(false);
-        }
-        else if (genre == "Femme") {
-            ui->radioButton_2->setChecked(true);
-            ui->radioButton->setChecked(false);
-        }
-        else {
-            ui->radioButton->setAutoExclusive(false);
-            ui->radioButton_2->setAutoExclusive(false);
-            ui->radioButton->setChecked(false);
-            ui->radioButton_2->setChecked(false);
-            ui->radioButton->setAutoExclusive(true);
-            ui->radioButton_2->setAutoExclusive(true);
-        }
-    }
+    ui->lineEdit_3->setText(reference);
 
-    QTableWidgetItem* priceItem = ui->tableWidget->item(row, 3);
-    if (priceItem) {
-        ui->lineEdit_36->setText(priceItem->text()); // Prix
-    }
-    
-    QTableWidgetItem* qtyItem = ui->tableWidget->item(row, 4);
-    if (qtyItem) {
-        ui->lineEdit_9->setText(qtyItem->text()); // Quantité
-    }
-    
-    QTableWidgetItem* brandItem = ui->tableWidget->item(row, 5);
-    if (brandItem) {
-        ui->lineEdit_7->setText(brandItem->text()); // Marque
-    }
-    
-    QTableWidgetItem* catItem = ui->tableWidget->item(row, 6);
-    if (catItem) {
-        ui->comboBox_2->setCurrentText(catItem->text()); // Catégorie
-    }
-    
-    QTableWidgetItem* desigItem = ui->tableWidget->item(row, 7);
-    if (desigItem) {
-        ui->lineEdit_2->setText(desigItem->text()); // Designation
-    }
-    
-    QTableWidgetItem* dateItem = ui->tableWidget->item(row, 8);
-    if (dateItem) {
-        QDate dateExp = QDate::fromString(dateItem->text(), "yyyy-MM-dd");
-        if (dateExp.isValid()) {
-            ui->dateEdit->setDate(dateExp); // Date d'expiration
-        }
-    }
+    ui->lineEdit_des->setText(ui->tableWidget->item(row, 7)->text());
+    ui->comboBox_2->setCurrentText(ui->tableWidget->item(row, 6)->text());
+    ui->lineEdit_7->setText(ui->tableWidget->item(row, 5)->text());
+    ui->lineEdit_29->setText(ui->tableWidget->item(row, 3)->text());
+    ui->lineEdit_9->setText(ui->tableWidget->item(row, 4)->text());
+    ui->lineEdit_8->setText(ui->tableWidget->item(row, 1)->text());
+    ui->dateEdit->setDate(QDate::fromString(ui->tableWidget->item(row, 8)->text(), "yyyy-MM-dd"));
+
+    QString genre = ui->tableWidget->item(row, 2)->text();
+    ui->radioButton->setChecked(genre == "Homme");
+    ui->radioButton_2->setChecked(genre == "Femme");
 }
 
-bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+void MainWindow::readSerialData()
 {
-    // Find both logo labels recursively to handle nested widgets
-    QLabel* topRightLogoLabel = this->findChild<QLabel*>("topRightLogoLabel", Qt::FindChildrenRecursively);
-    QLabel* logoLabel = this->findChild<QLabel*>("logoLabel", Qt::FindChildrenRecursively);
-    if (!logoLabel) {
-        logoLabel = ui->logoLabel;
-    }
-    
-    // Check if clicked object is topRightLogoLabel (the visible logo)
-    if (topRightLogoLabel && obj == topRightLogoLabel) {
-        if (event->type() == QEvent::MouseButtonPress) {
-            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-            if (mouseEvent->button() == Qt::LeftButton) {
-                qDebug() << "🖱️ topRightLogoLabel clicked - navigating to Dashboard";
-                on_logoClicked();
-                return true;
-            }
-        }
-    }
-    
-    // Check if clicked object is logoLabel
-    if (logoLabel && obj == logoLabel) {
-        if (event->type() == QEvent::MouseButtonPress) {
-            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-            if (mouseEvent->button() == Qt::LeftButton) {
-                qDebug() << "🖱️ logoLabel clicked - navigating to Dashboard";
-                on_logoClicked();
-                return true;
-            }
-        }
-    }
-    
-    return QMainWindow::eventFilter(obj, event);
-}
+    QByteArray data = A.read_from_arduino();
+    qDebug() << "RAW SERIAL DATA:" << data;
 
-void MainWindow::on_logoClicked()
-{
-    qDebug() << "🔄 Logo clicked - Navigating to Dashboard...";
-    // Navigate to Dashboard like other interfaces
-    // Get or create dashboard instance
-    DashboardWindow* dashboard = DashboardWindow::getInstance();
-    if (dashboard) {
-        // Show and activate dashboard
-        dashboard->show();
-        dashboard->raise();
-        dashboard->activateWindow();
-        qDebug() << "✅ Dashboard opened successfully";
-    } else {
-        qDebug() << "❌ Failed to open Dashboard";
-        QMessageBox::warning(this, "Erreur", "Impossible d'ouvrir le Tableau de bord.");
-        return;
-    }
-    // Close current window after a short delay to ensure dashboard is shown
-    QTimer::singleShot(200, this, [this]() {
-        this->close();
-    });
-}
-
-void MainWindow::on_pushButton_exportExcel_clicked()
-{
-    // Check if table has data
-    if (ui->tableWidget->rowCount() == 0) {
-        QMessageBox::warning(this, "Avertissement", "Aucun produit à exporter.");
-        return;
-    }
-    
-    // Get file path for saving Excel/CSV
-    QString fileName = QFileDialog::getSaveFileName(this, 
-        "Exporter les produits en Excel", 
-        QString("produits_%1.csv").arg(QDate::currentDate().toString("yyyy-MM-dd")),
-        "Excel Files (*.csv);;All Files (*)");
-    
-    if (fileName.isEmpty()) {
-        return;
-    }
-    
-    // Ensure .csv extension
-    if (!fileName.endsWith(".csv", Qt::CaseInsensitive)) {
-        fileName += ".csv";
-    }
-    
-    // Open file for writing
-    QFile file(fileName);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Erreur", "Impossible de créer le fichier.\nVérifiez les permissions.");
-        return;
-    }
-    
-    QTextStream out(&file);
-    #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    out.setEncoding(QStringConverter::Utf8);
-    #else
-    out.setCodec("UTF-8");
-    #endif
-    
-    // Write BOM for Excel UTF-8 compatibility
-    out << "\xEF\xBB\xBF";
-    
-    // Write headers
-    QStringList headers;
-    for (int col = 0; col < ui->tableWidget->columnCount(); ++col) {
-        QTableWidgetItem *headerItem = ui->tableWidget->horizontalHeaderItem(col);
-        if (headerItem) {
-            headers << headerItem->text();
-        } else {
-            headers << QString("Column %1").arg(col + 1);
+    for (char c : data)
+    {
+        if (c >= '0' && c <= '9') {
+            ui->lineEdit_29->insert(QString(c));
         }
-    }
-    out << headers.join(",") << "\n";
-    
-    // Write data rows
-    for (int row = 0; row < ui->tableWidget->rowCount(); ++row) {
-        QStringList rowData;
-        for (int col = 0; col < ui->tableWidget->columnCount(); ++col) {
-            QTableWidgetItem *item = ui->tableWidget->item(row, col);
-            QString cellValue = item ? item->text() : "";
-            // Escape commas and quotes in CSV
-            if (cellValue.contains(",") || cellValue.contains("\"") || cellValue.contains("\n")) {
-                cellValue.replace("\"", "\"\""); // Escape quotes
-                cellValue = "\"" + cellValue + "\""; // Wrap in quotes
-            }
-            rowData << cellValue;
+        else if (c == '*') {
+            ui->lineEdit_29->backspace();
         }
-        out << rowData.join(",") << "\n";
-    }
-    
-    file.close();
-    
-    QMessageBox::information(this, "Succès", 
-                            QString("Les produits ont été exportés avec succès dans:\n%1\n\nLe fichier peut être ouvert dans Microsoft Excel.").arg(fileName));
-    
-    // Optionally open the file
-    QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-}
-
-void MainWindow::loadProducts()
-{
-    QSqlDatabase db = QSqlDatabase::database();
-    if (!db.isValid() || !db.isOpen()) {
-        qDebug() << "❌ Database not connected in loadProducts()";
-        qDebug() << "   Is Valid:" << db.isValid();
-        qDebug() << "   Is Open:" << db.isOpen();
-        qDebug() << "   Database Name:" << db.databaseName();
-        
-        // Try to reconnect
-        Connection c;
-        if (c.createconnect()) {
-            qDebug() << "✅ Reconnected to database";
-            db = QSqlDatabase::database();
-        } else {
-            QMessageBox::warning(this, "Erreur", "Impossible de se connecter à la base de données!\nVérifiez votre connexion.");
-            return;
-        }
-    }
-    
-    qDebug() << "🔄 Loading products from database...";
-    
-    // Use afficher which directly fills the table
-    Produit p;
-    p.afficher(ui);
-    
-    int rowCount = ui->tableWidget->rowCount();
-    qDebug() << "✅ Products loaded:" << rowCount;
-    
-    if (rowCount == 0) {
-        qDebug() << "⚠️ No products found in database. Table might be empty.";
-    }
-}
-
-void MainWindow::clearForm()
-{
-    ui->lineEdit_2->clear();  // Designation (Nom)
-    ui->lineEdit_3->clear();  // Référence - user can type it manually
-    ui->lineEdit_3->setReadOnly(false);  // Make editable - user can type
-    ui->lineEdit_3->setStyleSheet("background-color: rgb(170, 255, 255); color: rgb(0, 0, 0);");  // Normal background
-    ui->lineEdit_3->setPlaceholderText("");  // No placeholder - empty like other fields
-    currentProductRef = "";  // Clear current ref to indicate new product mode
-    generatedRef = "";  // Clear generated reference
-    ui->lineEdit_7->clear();  // Marque
-    ui->lineEdit_9->clear();  // Quantité
-    ui->lineEdit_8->clear();  // Couleur
-    ui->lineEdit_36->clear();  // Prix
-    ui->dateEdit->setDate(QDate::currentDate());
-    ui->radioButton->setChecked(true);  // Male
-}
-
-void MainWindow::fillForm(const QString &reference)
-{
-    QSqlDatabase db = QSqlDatabase::database();
-    if (!db.isValid() || !db.isOpen()) {
-        return;
-    }
-    
-    QSqlQuery query(db);
-    // Try uppercase first (Oracle default)
-    query.prepare("SELECT REFERENCE, DESIGNATION, QUANTITE, PRIX, CATEGORIE, COULEUR, GENRE, MARQUE, DATEEXPIRATION FROM PRODUIT WHERE REFERENCE = :ref");
-    query.bindValue(":ref", reference);
-    
-    if (!query.exec() || !query.next()) {
-        // Try lowercase if uppercase fails
-        query.clear();
-        query.prepare("SELECT reference, designation, quantite, prix, categorie, couleur, genre, marque, date_expiration FROM produit WHERE reference = :ref");
-        query.bindValue(":ref", reference);
-        if (!query.exec() || !query.next()) {
-            qDebug() << "Product not found with reference:" << reference;
-            return;
-        }
-    }
-    
-    currentProductRef = reference;  // Set current ref to indicate edit mode
-    ui->lineEdit_3->setText(query.value(0).toString());  // Référence
-    ui->lineEdit_3->setReadOnly(false);  // Make editable when modifying existing product
-    ui->lineEdit_3->setStyleSheet("background-color: rgb(170, 255, 255); color: rgb(0, 0, 0);");  // Normal background
-    ui->lineEdit_2->setText(query.value(1).toString());  // Designation (Nom)
-    ui->lineEdit_9->setText(query.value(2).toString());  // Quantité
-    // Set price in lineEdit_36
-    double prix = query.value(3).toDouble();
-    ui->lineEdit_36->setText(QString::number(prix, 'f', 2));  // Prix
-    ui->comboBox_2->setCurrentText(query.value(4).toString());  // Catégorie (use comboBox_2)
-    ui->lineEdit_8->setText(query.value(5).toString());  // Couleur
-    QString genre = query.value(6).toString();
-    if (genre.compare("Femme", Qt::CaseInsensitive) == 0 || genre.compare("Female", Qt::CaseInsensitive) == 0) {
-        ui->radioButton_2->setChecked(true);
-    } else {
-        ui->radioButton->setChecked(true);
-    }
-    ui->lineEdit_7->setText(query.value(7).toString());  // Marque
-    ui->dateEdit->setDate(query.value(8).toDate());
-}
-
-void MainWindow::on_pushButton_2_clicked()  // Valider - Add/Modify
-{
-    // Validate required fields
-    if (ui->lineEdit_2->text().trimmed().isEmpty()) {
-        QMessageBox::warning(this, "Erreur", "Le nom du produit (designation) est requis!");
-        return;
-    }
-    
-    QString refText = ui->lineEdit_3->text().trimmed();
-    
-    // User types the reference manually - validate it's not empty
-    if (refText.isEmpty()) {
-        QMessageBox::warning(this, "Erreur", "Veuillez entrer une référence pour le produit!");
-        return;
-    }
-    
-    qDebug() << "🔍 Processing product with reference (user-entered):" << refText;
-    
-    // Reference can be any string (alphanumeric like "C12", "REF47", etc.)
-    // No numeric validation needed - accept any string
-    qDebug() << "🔍 Processing product with reference (string):" << refText;
-    
-    // Validate price
-    bool prixOk = false;
-    double prix = ui->lineEdit_36->text().toDouble(&prixOk);
-    if (!prixOk || prix < 0) {
-        QMessageBox::warning(this, "Erreur", "Le prix doit être un nombre valide et positif!");
-        return;
-    }
-    
-    Produit p;
-    p.setRef(refText);  // Set reference first
-    p.setDesignation(ui->lineEdit_2->text().trimmed());
-    p.setQuantite(ui->lineEdit_9->text().toInt());
-    p.setPrix(prix);  // Use lineEdit_36 for price
-    p.setCategorie(ui->comboBox_2->currentText());
-    p.setCouleur(ui->lineEdit_8->text().trimmed());
-    p.setgenre(ui);  // setgenre takes UI pointer
-    p.setMarque(ui->lineEdit_7->text().trimmed());
-    p.setDateExpiration(ui->dateEdit->date());
-    
-    bool success = false;
-    
-    // Check if product exists
-    Produit checkProd;
-    if (checkProd.existe(refText)) {
-        // Product exists, modify it
-        success = p.modifier();
-        if (success) {
-            loadProducts();
-            clearForm();
-            QMessageBox::information(this, "Succès", "Produit modifié avec succès!");
-            scrollToProduct(refText);
-        } else {
-            QMessageBox::critical(this, "Erreur", "Erreur lors de la modification du produit!");
-        }
-    } else {
-        // Product doesn't exist, add new
-        success = p.ajouter();
-        if (success) {
-            // Refresh table immediately before showing message
-            loadProducts();
-            
-            // Highlight the newly added product in the table (yellow zone)
-            highlightProductInTable(refText);
-            
-            // Clear form FIRST to generate next REF reference
-            clearForm();  // This will generate REF8, REF9, etc. for next product
-            
-            QMessageBox::information(this, "Succès", QString("Produit ajouté avec succès!\nRéférence: %1").arg(refText));
-            
-            // Scroll to the newly added product (use the old refText before clearForm)
-            scrollToProduct(refText);
-        } else {
-            QMessageBox::critical(this, "Erreur", "Erreur lors de l'ajout du produit!");
+        else if (c == '#') {
+            ui->lineEdit_29->clear();
         }
     }
 }
 
-void MainWindow::on_pushButton_5_clicked()  // Delete
-{
-    QString reference = "";
-    
-    // First, try to get reference from lineEdit_6 (bottom interface input)
-    QString refFromInput = ui->lineEdit_6->text().trimmed();
-    if (!refFromInput.isEmpty()) {
-        reference = refFromInput;
-    } else {
-        // If no input, try to get from selected row in table
-        int currentRow = ui->tableWidget->currentRow();
-        if (currentRow >= 0) {
-            // Column 0 is Référence according to the table structure
-            QTableWidgetItem* refItem = ui->tableWidget->item(currentRow, 0);
-            if (refItem) {
-                reference = refItem->text().trimmed();
-            }
-        }
-    }
-    
-    if (reference.isEmpty()) {
-        QMessageBox::warning(this, "Attention", "Veuillez sélectionner un produit dans le tableau ou entrer une référence dans le champ de suppression!");
-        return;
-    }
-    
-    // Verify product exists
-    Produit checkProd;
-    if (!checkProd.existe(reference)) {
-        QMessageBox::warning(this, "Erreur", QString("Le produit avec la référence '%1' n'existe pas!").arg(reference));
-        return;
-    }
-    
-    int ret = QMessageBox::question(this, "Confirmation", 
-                                     QString("Êtes-vous sûr de vouloir supprimer le produit (Réf: %1)?").arg(reference),
-                                     QMessageBox::Yes | QMessageBox::No);
-    
-    if (ret == QMessageBox::Yes) {
-        Produit p;
-        if (p.supprimer(reference)) {
-            QMessageBox::information(this, "Succès", "Produit supprimé avec succès!");
-            loadProducts();
-            clearForm();
-            ui->lineEdit_6->clear();  // Clear the delete input field
-        } else {
-            QMessageBox::critical(this, "Erreur", "Erreur lors de la suppression du produit!");
-        }
-    }
-}
-
-void MainWindow::on_pushButton_9_clicked()  // Filter
-{
-    QString searchText = ui->lineEdit_5->text().trimmed();
-    if (searchText.isEmpty()) {
-        loadProducts();
-        return;
-    }
-    
-    Produit p;
-    // Use rech method which takes UI pointer
-    if (!p.rech(searchText, ui)) {
-        QMessageBox::information(this, "Recherche", "Aucun produit trouvé.");
-    }
-    // rech already displays results in the table
-}
-
-void MainWindow::on_tableWidget_cellDoubleClicked(int row, int column)
-{
-    Q_UNUSED(column);
-    // Column 0 is Référence according to the table structure
-    QTableWidgetItem* refItem = ui->tableWidget->item(row, 0);
-    if (refItem) {
-        QString reference = refItem->text().trimmed();
-        if (!reference.isEmpty()) {
-            fillForm(reference);
-        }
-    }
-}
-
-void MainWindow::scrollToProduct(const QString &reference)
-{
-    // Find the product in the table and scroll to it
-    // Column 0 is Référence
-    for (int row = 0; row < ui->tableWidget->rowCount(); ++row) {
-        QTableWidgetItem* refItem = ui->tableWidget->item(row, 0);  // Référence column
-        if (refItem && refItem->text().trimmed() == reference) {
-            ui->tableWidget->scrollToItem(refItem, QAbstractItemView::EnsureVisible);
-            ui->tableWidget->selectRow(row);
-            ui->tableWidget->setCurrentCell(row, 0);
-            break;
-        }
-    }
-}
-
-void MainWindow::highlightProductInTable(const QString &reference)
-{
-    // Find the product in the table and highlight it in yellow
-    // Column 0 is Référence
-    for (int row = 0; row < ui->tableWidget->rowCount(); ++row) {
-        QTableWidgetItem* refItem = ui->tableWidget->item(row, 0);  // Référence column
-        if (refItem && refItem->text().trimmed() == reference) {
-            // Highlight the entire row in yellow
-            for (int col = 0; col < ui->tableWidget->columnCount(); ++col) {
-                QTableWidgetItem* item = ui->tableWidget->item(row, col);
-                if (item) {
-                    item->setBackground(QBrush(QColor(255, 255, 0)));  // Yellow background
-                } else {
-                    // Create item if it doesn't exist
-                    QTableWidgetItem* newItem = new QTableWidgetItem();
-                    newItem->setBackground(QBrush(QColor(255, 255, 0)));  // Yellow background
-                    ui->tableWidget->setItem(row, col, newItem);
-                }
-            }
-            // Scroll to the highlighted product
-            ui->tableWidget->scrollToItem(refItem, QAbstractItemView::EnsureVisible);
-            ui->tableWidget->selectRow(row);
-            break;
-        }
-    }
-}
-
-QString MainWindow::generateNextReference(const QString &prefix)
-{
-    QSqlDatabase db = QSqlDatabase::database();
-    if (!db.isValid() || !db.isOpen()) {
-        // If database not available, return default
-        qDebug() << "⚠️ Database not available, returning default reference";
-        return prefix + "1";
-    }
-    
-    QSqlQuery query(db);
-    int maxNumber = 0;
-    
-    // For "REF" prefix, ONLY search for "REF" pattern (not numeric-only references)
-    QString pattern;
-    if (prefix.toUpper() == "REF") {
-        // Only match references that start with "REF" followed by digits
-        pattern = "REF%";  // Will match "REF1", "REF2", "REF47", etc.
-    } else {
-        pattern = prefix + "%";
-    }
-    
-    // Try uppercase table name first (Oracle default)
-    // Simple query - we'll filter in C++ to only get REF references
-    QString sqlQuery = QString("SELECT REFERENCE FROM PRODUIT WHERE UPPER(REFERENCE) LIKE :pattern ORDER BY REFERENCE DESC");
-    query.prepare(sqlQuery);
-    query.bindValue(":pattern", pattern.toUpper());
-    
-    if (!query.exec()) {
-        // Try lowercase table name
-        query.clear();
-        sqlQuery = QString("SELECT reference FROM produit WHERE UPPER(reference) LIKE :pattern ORDER BY reference DESC");
-        query.prepare(sqlQuery);
-        query.bindValue(":pattern", pattern.toUpper());
-        if (!query.exec()) {
-            qDebug() << "❌ Error generating reference:" << query.lastError().text();
-            return prefix + "1";
-        }
-    }
-    
-    // Find the highest number for the given prefix
-    // Handle both "REF" and "REFF" prefixes (normalize "REFF" to "REF")
-    if (prefix.toUpper() == "REF") {
-        // Check for both "REF" and "REFF" patterns, but ONLY if they start with REF
-        while (query.next()) {
-            QString ref = query.value(0).toString().trimmed();
-            QString upperRef = ref.toUpper();
-            // ONLY process if it starts with "REF" (not pure numbers)
-            if (upperRef.startsWith("REF") && upperRef.length() > 3) {
-                // Normalize "REFF" to "REF" for number extraction
-                QString numberPart;
-                if (upperRef.startsWith("REFF")) {
-                    numberPart = ref.mid(4);  // Skip "REFF"
-                } else if (upperRef.startsWith("REF")) {
-                    numberPart = ref.mid(3);  // Skip "REF"
-                }
-                // Only process if there's a number part
-                if (!numberPart.isEmpty()) {
-                    bool ok;
-                    int num = numberPart.toInt(&ok);
-                    if (ok && num > maxNumber) {
-                        maxNumber = num;
-                        qDebug() << "Found REF reference:" << ref << "-> number:" << num;
-                    }
-                }
-            }
-        }
-    } else {
-        // For other prefixes like "C"
-        while (query.next()) {
-            QString ref = query.value(0).toString();
-            // Extract number part after prefix (e.g., "C33" -> 33)
-            if (ref.toUpper().startsWith(prefix.toUpper())) {
-                QString numberPart = ref.mid(prefix.length());
-                bool ok;
-                int num = numberPart.toInt(&ok);
-                if (ok && num > maxNumber) {
-                    maxNumber = num;
-                }
-            }
-        }
-    }
-    
-    // Generate next reference - always use "REF" (not "REFF") if prefix is "REF"
-    QString finalPrefix = (prefix.toUpper() == "REF") ? "REF" : prefix;
-    int nextNumber = maxNumber + 1;
-    QString newRef = finalPrefix + QString::number(nextNumber);
-    
-    qDebug() << "🔧 Generated next reference:" << newRef << "(max found:" << maxNumber << ", prefix:" << prefix << ")";
-    return newRef;
-}
-
-QString MainWindow::detectBestPrefix()
-{
-    QSqlDatabase db = QSqlDatabase::database();
-    if (!db.isValid() || !db.isOpen()) {
-        return "REF";  // Default to "REF" instead of "C"
-    }
-    
-    QSqlQuery query(db);
-    int refCount = 0;
-    int cCount = 0;
-    
-    // Count references starting with "REF" (case insensitive) - includes "REFF" variations
-    QString sqlQuery = "SELECT COUNT(*) FROM PRODUIT WHERE (UPPER(REFERENCE) LIKE 'REF%' OR UPPER(REFERENCE) LIKE 'REFF%')";
-    query.prepare(sqlQuery);
-    
-    if (!query.exec()) {
-        // Try lowercase table name
-        query.clear();
-        sqlQuery = "SELECT COUNT(*) FROM produit WHERE (UPPER(reference) LIKE 'REF%' OR UPPER(reference) LIKE 'REFF%')";
-        query.prepare(sqlQuery);
-        if (!query.exec()) {
-            return "REF";  // Default to "REF" if query fails
-        }
-    }
-    
-    if (query.next()) {
-        refCount = query.value(0).toInt();
-    }
-    
-    // Count references starting with "C" (case insensitive, but not "REF" or "REFF")
-    query.clear();
-    sqlQuery = "SELECT COUNT(*) FROM PRODUIT WHERE UPPER(REFERENCE) LIKE 'C%' AND UPPER(REFERENCE) NOT LIKE 'REF%' AND UPPER(REFERENCE) NOT LIKE 'REFF%'";
-    query.prepare(sqlQuery);
-    
-    if (!query.exec()) {
-        // Try lowercase table name
-        query.clear();
-        sqlQuery = "SELECT COUNT(*) FROM produit WHERE UPPER(reference) LIKE 'C%' AND UPPER(reference) NOT LIKE 'REF%' AND UPPER(reference) NOT LIKE 'REFF%'";
-        query.prepare(sqlQuery);
-        if (!query.exec()) {
-            return "REF";  // Default to "REF" if query fails
-        }
-    }
-    
-    if (query.next()) {
-        cCount = query.value(0).toInt();
-    }
-    
-    // Always use "REF" (not "REFF") - normalize any "REFF" to "REF"
-    // Use "REF" if there are more REF/REFF references, otherwise use "C"
-    QString prefix = (refCount > cCount) ? "REF" : "C";
-    qDebug() << "🔍 Detected prefix:" << prefix << "(REF/REFF count:" << refCount << ", C count:" << cCount << ")";
-    return prefix;
-}

@@ -35,6 +35,7 @@ private slots:
     void on_pushButton_7_clicked();  // Produit
     void on_pushButton_11_clicked(); // Fournisseur
     void on_logoClicked();  // Logo click -> Dashboard
+    void on_logoutButton_clicked(); // Logout
 
     // CRUD Operations
     void on_pushButton_13_clicked(); // Ajouter/Valider
@@ -53,7 +54,7 @@ private slots:
     // Table action buttons
     void handleModifyFromTable();
     void handleDeleteFromTable();
-    
+
     // PDF Export
     void exportEmployeesToPdf();
 

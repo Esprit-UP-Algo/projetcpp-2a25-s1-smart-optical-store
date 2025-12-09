@@ -10,7 +10,7 @@
 
 class Produit {
 private:
-    QString ref;
+    QString reference;
     QString designation;
     int quantite;
     double prix;
@@ -19,14 +19,17 @@ private:
     QString genre;
     QString marque;
     QDate dateExpiration;
+    int id_four;
+
+    void checkLowQuantity();
+    QString getEmployeeEmail();
 
 public:
     Produit(Ui::MainWindow *ui);
     Produit(){};
     ~Produit();
 
-    // Setters
-    void setRef(const QString &r) { ref = r; }
+    void setReference(const QString &r) { reference = r; }
     void setDesignation(const QString &d) { designation = d; }
     void setQuantite(int q) { quantite = q; }
     void setPrix(double p) { prix = p; }
@@ -36,8 +39,8 @@ public:
     void setMarque(const QString &m) { marque = m; }
     void setDateExpiration(const QDate &de) { dateExpiration = de; }
 
-    // Getters
-    QString getRef() const { return ref; }
+
+    QString getReference() const { return reference; }
     QString getDesignation() const { return designation; }
     int getQuantite() const { return quantite; }
     double getPrix() const { return prix; }
@@ -51,10 +54,9 @@ public:
     bool ajouter();
     bool modifier();
     void afficher(Ui::MainWindow *ui);
-    bool supprimer(QString ref);
-    bool existe(QString ref);
+    bool supprimer(QString reference);
+    bool existe(QString reference);
     bool rech(QString recherche, Ui::MainWindow *ui);
-    void afficherRestock(Ui::MainWindow *ui, int seuil = 10);
 
 };
 

@@ -112,6 +112,9 @@ FournisseurWindow::FournisseurWindow(QWidget *parent)
             });
         }
     }
+    
+    // Load statistics charts automatically
+    loadStatisticsCharts();
 }
 
 FournisseurWindow::~FournisseurWindow()
@@ -334,6 +337,7 @@ void FournisseurWindow::on_pushButton_ajouter_clicked()
     if (F.ajouter()) {
         QMessageBox::information(this, "Succès", "Fournisseur ajouté.");
         afficherFournisseurs();
+        loadStatisticsCharts(); // Refresh statistics with new data
         ecrireHistorique("AJOUT", id, nom_ent);
     } else {
         QMessageBox::critical(this, "Erreur", "Ajout échoué.");
@@ -428,6 +432,7 @@ void FournisseurWindow::on_pushButton_modifier_clicked()
     if (F.modifier(selectedId)) {
         QMessageBox::information(this, "Succès", "Fournisseur modifié.");
         afficherFournisseurs();
+        loadStatisticsCharts(); // Refresh statistics with updated data
         ecrireHistorique("MODIFICATION", selectedId, nom_ent);
     } else {
         QMessageBox::critical(this, "Erreur", "Modification échouée.");
@@ -458,6 +463,7 @@ void FournisseurWindow::on_pushButton_delete_clicked()
         if (f.supprimer(selectedId)) {
             QMessageBox::information(this, "Succès", "Fournisseur supprimé avec succès !");
             afficherFournisseurs();
+            loadStatisticsCharts(); // Refresh statistics after deletion
             ecrireHistorique("SUPPRESSION", selectedId, nom_ent_avant);
 
             selectedId = -1;
@@ -1045,6 +1051,24 @@ void FournisseurWindow::on_pushButton_modifier_3_clicked()
     // On réinitialise la sélection / suppression
     selectedId = -1;
     ui->pushButton_delete->setEnabled(false);
+}
+
+// =======================
+// Load Statistics Charts on Startup
+// =======================
+
+void FournisseurWindow::loadStatisticsCharts()
+{
+    // This function will populate any statistics widgets found in the UI
+    // It automatically calls the existing statistics functions
+    
+    qDebug() << "Loading statistics charts...";
+    
+    // Call the statistics list function (pushButton_8 functionality)
+    // This will populate any listWidget if it exists
+    on_pushButton_8_clicked();
+    
+    qDebug() << "Statistics charts loaded successfully";
 }
 
 // =======================
