@@ -68,7 +68,7 @@ void login::on_pushButton_2_clicked()
             SalesWindow::getInstance(role);
         } else if (role == "client") {
             // Client manager - show client management
-            Gclient1::getInstance(role);
+            Gclient1::getInstance();
         } else if (role == "fournisseur") {
             // Supplier manager - show supplier management
             FournisseurWindow::getInstance(role);

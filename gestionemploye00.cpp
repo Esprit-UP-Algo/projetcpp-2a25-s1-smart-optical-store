@@ -7,6 +7,7 @@
 #include "gclient1.h"
 #include "fournisseurwindow.h"
 #include "dashboardwindow.h"
+#include "login.h"
 #include "employe.h"
 #include "Connection.h"
 #include "employeeditdialog.h"
@@ -43,6 +44,7 @@
 #include <QSqlQuery>
 #include <QSqlQueryModel>
 #include <QVariant>
+#include <QFontMetrics>
 
 // Initialize static instance pointer
 gestionemploye00* gestionemploye00::instance = nullptr;
@@ -67,18 +69,18 @@ gestionemploye00::gestionemploye00(const QString &role, QWidget *parent)
     , ui(new Ui::gestionemploye00)
 {
     ui->setupUi(this);
-    
+
     // Use WindowManager to setup common window features
     WindowManager::setupWindow(this, "Gestion des Employés", 1200, 800);
-    
+
     // ID field is auto-generated (read-only)
     ui->lineEdit->setReadOnly(true);
     ui->lineEdit->setPlaceholderText(tr("Auto"));
-    
+
     // Setup input validators
     // Email validator - must contain "@"
     // (No placeholder text)
-    
+
     // Telephone validator - exactly 8 digits
     if (ui->lineEdit_6) {
         QRegularExpressionValidator *telValidator = new QRegularExpressionValidator(
@@ -86,31 +88,31 @@ gestionemploye00::gestionemploye00(const QString &role, QWidget *parent)
         ui->lineEdit_6->setValidator(telValidator);
         ui->lineEdit_6->setMaxLength(8);
     }
-    
+
     // Initialize database connection
     Connection c;
     if (!c.createconnect()) {
         QMessageBox::critical(this, "Erreur", "Impossible de se connecter à la base de données!");
         return; // Don't continue if connection fails
     }
-    
+
     // Verify connection is active
     QSqlDatabase db = QSqlDatabase::database();
     if (!db.isValid() || !db.isOpen()) {
         QMessageBox::critical(this, "Erreur", "La connexion à la base de données n'est pas active!");
         return;
     }
-    
+
     // Configure table widget - 13 columns including action buttons
     ui->tableWidget->setColumnCount(13);
-    QStringList headers = {"ID", "Nom", "Prenom", "Email", "Telephone", "Date Naissance", 
+    QStringList headers = {"ID", "Nom", "Prenom", "Email", "Telephone", "Date Naissance",
                            "Adresse", "Poste", "Salaire", "Nb Enfants", "Disponibilite", "Modifier", "Supprimer"};
     ui->tableWidget->setHorizontalHeaderLabels(headers);
     ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    
+
     // Configure tri combo box - use findChild to access it safely
     QComboBox* comboBox_tri = this->findChild<QComboBox*>("comboBox_tri");
     if (comboBox_tri) {
@@ -121,7 +123,7 @@ gestionemploye00::gestionemploye00(const QString &role, QWidget *parent)
     } else {
         qDebug() << "comboBox_tri not found in UI, sorting will use default";
     }
-    
+
     // Configure disponibilite combo box - ensure it always has O and N options
     QComboBox* comboBox_disponibilite = this->findChild<QComboBox*>("comboBox_disponibilite");
     if (comboBox_disponibilite) {
@@ -138,14 +140,14 @@ gestionemploye00::gestionemploye00(const QString &role, QWidget *parent)
             lineEdit_11->setPlaceholderText("O ou N");
         }
     }
-    
+
     // Make logo clickable
     if (ui->logoLabel) {
         ui->logoLabel->setCursor(Qt::PointingHandCursor);
         ui->logoLabel->installEventFilter(this);
         ui->logoLabel->setAttribute(Qt::WA_TransparentForMouseEvents, false);
     }
-    
+
     // Role-based access control for navigation buttons
     QPushButton *stockButton = this->findChild<QPushButton*>("pushButton_14");
     if (stockButton) {
@@ -153,45 +155,45 @@ gestionemploye00::gestionemploye00(const QString &role, QWidget *parent)
             stockButton->setEnabled(false);
         }
     }
-    
+
     QPushButton *ventesButton = this->findChild<QPushButton*>("pushButton_8");
     if (ventesButton) {
         if (role != "admin" && role != "vente") {
             ventesButton->setEnabled(false);
         }
     }
-    
+
     QPushButton *clientsButton = this->findChild<QPushButton*>("pushButton_9");
     if (clientsButton) {
         if (role != "admin" && role != "client") {
             clientsButton->setEnabled(false);
         }
     }
-    
+
     QPushButton *produitButton = this->findChild<QPushButton*>("pushButton_7");
     if (produitButton) {
         if (role != "admin" && role != "stock") {
             produitButton->setEnabled(false);
         }
     }
-    
+
     QPushButton *fournisseurButton = this->findChild<QPushButton*>("pushButton_11");
     if (fournisseurButton) {
         if (role != "admin" && role != "fournisseur") {
             fournisseurButton->setEnabled(false);
         }
     }
-    
+
     // Load data on startup
     afficherTableau();
-    
+
     // Connect table selection signal
-    connect(ui->tableWidget, &QTableWidget::itemSelectionChanged, 
+    connect(ui->tableWidget, &QTableWidget::itemSelectionChanged,
             this, &gestionemploye00::on_tableWidget_itemSelectionChanged);
-    
+
     // Connect search signal
     if (ui->lineEdit_12) {
-        connect(ui->lineEdit_12, &QLineEdit::textChanged, 
+        connect(ui->lineEdit_12, &QLineEdit::textChanged,
                 this, &gestionemploye00::on_lineEdit_12_textChanged);
     }
 }
@@ -255,6 +257,16 @@ void gestionemploye00::on_logoClicked()
     this->close();
 }
 
+void gestionemploye00::on_logoutButton_clicked()
+{
+    // Close the employe window
+    this->close();
+
+    // Show the login window
+    login *loginWindow = new login();
+    loginWindow->show();
+}
+
 bool gestionemploye00::eventFilter(QObject *obj, QEvent *event)
 {
     if (obj == ui->logoLabel && event->type() == QEvent::MouseButtonPress) {
@@ -282,7 +294,7 @@ void gestionemploye00::on_pushButton_13_clicked()
     QString nombre_enfants_str = ui->lineEdit_8->text().trimmed();
     QString poste = ui->lineEdit_9->text().trimmed();
     QString salaire_str = ui->lineEdit_10->text().trimmed();
-    
+
     // Get disponibilite from comboBox - must be O or N
     QString disponibilite = "O"; // Default
     QComboBox* comboBox_disponibilite = this->findChild<QComboBox*>("comboBox_disponibilite");
@@ -305,13 +317,13 @@ void gestionemploye00::on_pushButton_13_clicked()
             }
         }
     }
-    
+
     // Validate required fields
     if (nom.isEmpty() || prenom.isEmpty() || email.isEmpty()) {
         QMessageBox::warning(this, "Erreur", "Veuillez remplir tous les champs obligatoires (Nom, Prénom, Email)!");
         return;
     }
-    
+
     // Validation email - must contain "@"
     if (!email.isEmpty() && !email.contains('@')) {
         QMessageBox::warning(this, "Validation", "L'adresse e-mail doit contenir le caractère '@'.");
@@ -321,7 +333,7 @@ void gestionemploye00::on_pushButton_13_clicked()
         }
         return;
     }
-    
+
     // Validation telephone - must be exactly 8 digits
     if (!telephone.isEmpty()) {
         QRegularExpression regexTel("^\\d{8}$");
@@ -334,13 +346,13 @@ void gestionemploye00::on_pushButton_13_clicked()
             return;
         }
     }
-    
+
     // Validate disponibilite
     if (disponibilite != "O" && disponibilite != "N") {
         QMessageBox::warning(this, "Erreur", "Disponibilité doit être 'O' (Oui) ou 'N' (Non)!");
         return;
     }
-    
+
     // Convert and validate numeric fields
     bool ok;
     int nombre_enfants = nombre_enfants_str.toInt(&ok);
@@ -349,14 +361,14 @@ void gestionemploye00::on_pushButton_13_clicked()
         return;
     }
     if (nombre_enfants < 0) nombre_enfants = 0;
-    
+
     double salaire = salaire_str.toDouble(&ok);
     if (!ok && !salaire_str.isEmpty()) {
         QMessageBox::warning(this, "Erreur", "Salaire doit être un nombre valide!");
         return;
     }
     if (salaire < 0) salaire = 0.0;
-    
+
     Employe e;
     e.setNom(nom);
     e.setPrenom(prenom);
@@ -368,11 +380,11 @@ void gestionemploye00::on_pushButton_13_clicked()
     e.setPoste(poste);
     e.setSalaire(salaire);
     e.setDisponibilite(disponibilite);
-    
+
     // Check if editing (ID field filled) or adding new
     QString idText = ui->lineEdit->text().trimmed();
     bool isEditing = !idText.isEmpty();
-    
+
     if (isEditing) {
         e.setId(idText.toInt());
         if (e.modifier()) {
@@ -395,7 +407,7 @@ void gestionemploye00::on_pushButton_13_clicked()
         qDebug() << "  Prenom:" << prenom;
         qDebug() << "  Email:" << email;
         qDebug() << "  Disponibilite:" << disponibilite;
-        
+
         if (e.ajouter()) {
             int newId = e.getId();
             QString successMsg = QString("Employé ajouté avec succès!");
@@ -413,18 +425,18 @@ void gestionemploye00::on_pushButton_13_clicked()
             QSqlDatabase db = QSqlDatabase::database();
             QSqlError error = db.lastError();
             QString errorMsg = error.text();
-            
+
             if (errorMsg.isEmpty() || error.type() == QSqlError::NoError) {
                 errorMsg = "Erreur inconnue lors de l'ajout de l'employé.\n\n"
-                          "Veuillez vérifier:\n"
-                          "1. Que tous les champs obligatoires sont remplis\n"
-                          "2. Que la disponibilité est 'O' ou 'N'\n"
-                          "3. Que la connexion à la base de données est active\n"
-                          "4. Consultez les logs de l'application pour plus de détails";
+                           "Veuillez vérifier:\n"
+                           "1. Que tous les champs obligatoires sont remplis\n"
+                           "2. Que la disponibilité est 'O' ou 'N'\n"
+                           "3. Que la connexion à la base de données est active\n"
+                           "4. Consultez les logs de l'application pour plus de détails";
             }
-            
+
             QString fullError = QString("Erreur lors de l'ajout de l'employé!\n\n")
-                              + QString("Message: %1").arg(errorMsg);
+                                + QString("Message: %1").arg(errorMsg);
             QString nativeErrorCode = error.nativeErrorCode();
             if (!nativeErrorCode.isEmpty()) {
                 fullError += QString("\nCode d'erreur: %1").arg(nativeErrorCode);
@@ -433,7 +445,7 @@ void gestionemploye00::on_pushButton_13_clicked()
             if (!databaseText.isEmpty() && databaseText != errorMsg) {
                 fullError += QString("\nDétails base de données: %1").arg(databaseText);
             }
-            
+
             QMessageBox::critical(this, "Erreur", fullError);
             qDebug() << "❌ === ERREUR DANS L'UI ===";
             qDebug() << "Database error:" << error.text();
@@ -458,7 +470,7 @@ void gestionemploye00::on_pushButton_12_clicked()
     ui->lineEdit_8->clear();
     ui->lineEdit_9->clear();
     ui->lineEdit_10->clear();
-    
+
     // Reset disponibilite to default "O"
     QComboBox* comboBox_disponibilite = this->findChild<QComboBox*>("comboBox_disponibilite");
     if (comboBox_disponibilite) {
@@ -476,7 +488,7 @@ void gestionemploye00::on_pushButton_12_clicked()
             lineEdit_11->setPlaceholderText("O ou N");
         }
     }
-    
+
     ui->tableWidget->clearSelection();
 }
 
@@ -533,11 +545,11 @@ void gestionemploye00::on_pushButton_5_clicked()
     Employe e;
     QComboBox* comboBox_tri = this->findChild<QComboBox*>("comboBox_tri");
     QString key = "nom_asc"; // Default
-    
+
     if (comboBox_tri) {
         key = comboBox_tri->currentData().toString();
     }
-    
+
     QSqlQueryModel* model = nullptr;
 
     if (key == "salaire_desc") {
@@ -563,25 +575,25 @@ void gestionemploye00::afficherTableau()
         }
         db = QSqlDatabase::database(); // Get the new connection
     }
-    
+
     qDebug() << "🔄 Loading employees from database...";
     Employe e;
     QSqlQueryModel* model = e.afficher();
-    
+
     if (model) {
         int rowCount = model->rowCount();
         qDebug() << "📊 Model created with" << rowCount << "rows";
-        
+
         // Check for query errors
         if (model->lastError().isValid()) {
             qDebug() << "❌ Query error:" << model->lastError().text();
-            QMessageBox::warning(this, "Erreur", 
-                QString("Erreur lors du chargement des employés:\n%1").arg(model->lastError().text()));
+            QMessageBox::warning(this, "Erreur",
+                                 QString("Erreur lors du chargement des employés:\n%1").arg(model->lastError().text()));
         }
-        
+
         populateTable(model);
         qDebug() << "✅ Tableau des employés chargé avec" << rowCount << "lignes";
-        
+
         if (rowCount == 0) {
             qDebug() << "ℹ️ Aucun employé trouvé dans la base de données";
         }
@@ -618,7 +630,7 @@ void gestionemploye00::remplirFormulaire(int id)
         ui->lineEdit_8->setText(QString::number(e.getNombreEnfants()));
         ui->lineEdit_9->setText(e.getPoste());
         ui->lineEdit_10->setText(QString::number(e.getSalaire()));
-        
+
         const QString disp = e.getDisponibilite().toUpper();
         QComboBox* comboBox_disponibilite = this->findChild<QComboBox*>("comboBox_disponibilite");
         if (comboBox_disponibilite) {
@@ -774,7 +786,7 @@ void gestionemploye00::populateTable(QSqlQueryModel *model)
         for (int col = 0; col < 11; ++col) {
             QModelIndex index = model->index(row, col);
             QString value = model->data(index).toString();
-            
+
             // Handle date formatting for column 5 (Date Naissance)
             if (col == 5 && !value.isEmpty()) {
                 QDate date = model->data(index).toDate();
@@ -782,7 +794,7 @@ void gestionemploye00::populateTable(QSqlQueryModel *model)
                     value = date.toString("dd/MM/yyyy");
                 }
             }
-            
+
             QTableWidgetItem *item = new QTableWidgetItem(value);
             if (col == 0 || col == 8 || col == 9 || col == 10) {
                 item->setTextAlignment(Qt::AlignCenter);
@@ -819,33 +831,33 @@ void gestionemploye00::exportEmployeesToPdf()
         QMessageBox::critical(this, "Erreur", "La connexion à la base de données n'est pas active!");
         return;
     }
-    
+
     // Get all employees from database
     Employe e;
     QSqlQueryModel* model = e.afficher();
-    
+
     if (!model || model->rowCount() == 0) {
         QMessageBox::warning(this, "Avertissement", "Aucun employé à exporter.");
         if (model) delete model;
         return;
     }
-    
+
     // Get file path for saving PDF
-    QString fileName = QFileDialog::getSaveFileName(this, 
-        "Exporter les employés en PDF", 
-        QString("employes_%1.pdf").arg(QDate::currentDate().toString("yyyy-MM-dd")),
-        "PDF Files (*.pdf)");
-    
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    "Exporter les employés en PDF",
+                                                    QString("employes_%1.pdf").arg(QDate::currentDate().toString("yyyy-MM-dd")),
+                                                    "PDF Files (*.pdf)");
+
     if (fileName.isEmpty()) {
         delete model;
         return;
     }
-    
+
     // Ensure .pdf extension
     if (!fileName.endsWith(".pdf", Qt::CaseInsensitive)) {
         fileName += ".pdf";
     }
-    
+
     // Check if file exists and can be written
     QFileInfo fileInfo(fileName);
     if (fileInfo.exists() && !fileInfo.isWritable()) {
@@ -853,168 +865,190 @@ void gestionemploye00::exportEmployeesToPdf()
         delete model;
         return;
     }
-    
+
     // Create PDF writer
     QPdfWriter pdfWriter(fileName);
     pdfWriter.setPageSize(QPageSize::A4);
-    pdfWriter.setPageMargins(QMarginsF(15, 15, 15, 15), QPageLayout::Millimeter);
-    
+    pdfWriter.setPageMargins(QMarginsF(10, 10, 10, 10), QPageLayout::Millimeter);
+    pdfWriter.setResolution(300); // Set resolution to 300 DPI for manageable coordinates
+
     // Create painter
     QPainter painter(&pdfWriter);
     painter.setRenderHint(QPainter::Antialiasing);
-    
+    painter.setRenderHint(QPainter::TextAntialiasing);
+
     // Check if PDF writer is valid
     if (!painter.isActive()) {
         QMessageBox::critical(this, "Erreur", "Impossible de créer le fichier PDF.\nVérifiez que le fichier n'est pas ouvert dans une autre application.");
         delete model;
         return;
     }
-    
+
     // Company information
     QString companyName = "Smart Optical Store";
     QString companyAddress = "123 Rue Principale, Tunis, Tunisie";
     QString companyPhone = "+216 12 345 678";
     QString companyEmail = "contact@smartopticalstore.com";
-    
-    // Page dimensions (in pixels)
+
+    // Page dimensions (in pixels at 300 DPI)
     int pageWidth = pdfWriter.width();
     int pageHeight = pdfWriter.height();
-    int margin = 60;
-    int yPos = margin;
-    int lineHeight = 20;
-    int tableStartY = 0;
-    
+
+    // Calculate dynamic column widths
+    // Total columns: 11
+    // Weights: ID(1), Nom(2), Prenom(2), Email(4), Tel(2), Date(2), Adr(3), Poste(2), Sal(2), Enf(1), Disp(1)
+    int margin = 50;
+    int availableWidth = pageWidth - 2 * margin;
+
+    // Define relative weights
+    int weights[] = {1, 2, 2, 4, 2, 2, 3, 2, 2, 1, 1};
+    int totalWeight = 0;
+    for (int w : weights) totalWeight += w;
+
+    int colWidths[11];
+    for (int i = 0; i < 11; ++i) {
+        colWidths[i] = (availableWidth * weights[i]) / totalWeight;
+    }
+
     // Setup fonts
-    QFont titleFont("Arial", 24, QFont::Bold);
-    QFont headerFont("Arial", 11, QFont::Bold);
-    QFont normalFont("Arial", 9);
+    QFont titleFont("Arial", 22, QFont::Bold);
+    QFont headerFont("Arial", 12, QFont::Bold);
+    QFont normalFont("Arial", 10);
     QFont smallFont("Arial", 8);
     QFont tableHeaderFont("Arial", 9, QFont::Bold);
-    QFont tableFont("Arial", 8);
-    
+    QFont tableFont("Arial", 9);
+
+    // Calculate row height based on font
+    QFontMetrics fm(tableFont);
+    int rowHeight = fm.height() + 20; // Add padding
+    int headerHeight = rowHeight + 10;
+
+    int yPos = margin;
+
     // Draw header on first page
     painter.setFont(titleFont);
     painter.setPen(QPen(Qt::black));
-    painter.drawText(QRect(0, yPos, pageWidth, 40), Qt::AlignCenter, companyName);
-    yPos += 50;
-    
+    painter.drawText(QRect(0, yPos, pageWidth, 50), Qt::AlignCenter, companyName);
+    yPos += 60;
+
     painter.setFont(headerFont);
-    painter.drawText(QRect(0, yPos, pageWidth, 20), Qt::AlignCenter, "Liste des Employés");
-    yPos += 30;
-    
+    painter.drawText(QRect(0, yPos, pageWidth, 30), Qt::AlignCenter, "Liste des Employés");
+    yPos += 40;
+
     painter.setFont(smallFont);
-    painter.drawText(QRect(0, yPos, pageWidth, 15), Qt::AlignCenter, 
+    painter.drawText(QRect(0, yPos, pageWidth, 20), Qt::AlignCenter,
                      QString("Généré le: %1").arg(QDate::currentDate().toString("dd/MM/yyyy")));
-    yPos += 25;
-    
+    yPos += 30;
+
     // Draw company info
     painter.setFont(smallFont);
-    painter.drawText(QRect(margin, yPos, pageWidth - 2*margin, 15), 
+    painter.drawText(QRect(margin, yPos, pageWidth - 2*margin, 20), Qt::AlignCenter,
                      QString("Adresse: %1 | Tél: %2 | Email: %3").arg(companyAddress).arg(companyPhone).arg(companyEmail));
-    yPos += 30;
-    
+    yPos += 40;
+
     // Table header
-    tableStartY = yPos;
     painter.setFont(tableHeaderFont);
-    painter.setPen(QPen(Qt::black, 1));
-    painter.setBrush(QBrush(QColor(200, 200, 200)));
-    
-    // Column widths (proportional to page width)
-    int colWidths[] = {60, 100, 100, 120, 80, 80, 100, 100, 80, 60, 80};
+    painter.setPen(QPen(Qt::black, 2));
+    painter.setBrush(QBrush(QColor(220, 220, 220)));
+
     int xPos = margin;
-    QStringList headers = {"ID", "Nom", "Prénom", "Email", "Téléphone", "Date Naiss.", 
-                          "Adresse", "Poste", "Salaire", "Enfants", "Disponibilité"};
-    
+    QStringList headers = {"ID", "Nom", "Prénom", "Email", "Tél", "Date Naiss.",
+                           "Adresse", "Poste", "Salaire", "Enf.", "Disp."};
+
     // Draw table header
     for (int col = 0; col < headers.size() && col < 11; ++col) {
-        painter.drawRect(xPos, yPos, colWidths[col], lineHeight + 5);
-        painter.drawText(QRect(xPos + 2, yPos + 2, colWidths[col] - 4, lineHeight + 1), 
-                        Qt::AlignLeft | Qt::AlignVCenter, headers[col]);
+        painter.drawRect(xPos, yPos, colWidths[col], headerHeight);
+        painter.drawText(QRect(xPos + 5, yPos, colWidths[col] - 10, headerHeight),
+                         Qt::AlignLeft | Qt::AlignVCenter, headers[col]);
         xPos += colWidths[col];
     }
-    yPos += lineHeight + 7;
-    
+    yPos += headerHeight;
+
     // Draw table rows
     painter.setFont(tableFont);
     painter.setBrush(QBrush(Qt::white));
-    int rowHeight = lineHeight + 3;
-    int maxRowsPerPage = (pageHeight - yPos - margin) / rowHeight;
-    int currentRow = 0;
+
     int pageNum = 1;
-    
+
     for (int row = 0; row < model->rowCount(); ++row) {
         // Check if we need a new page
-        if (currentRow >= maxRowsPerPage) {
+        if (yPos + rowHeight > pageHeight - margin - 30) {
+            // Draw footer for current page
+            painter.setFont(smallFont);
+            painter.setPen(QPen(Qt::gray));
+            painter.drawText(QRect(0, pageHeight - 30, pageWidth, 20), Qt::AlignCenter,
+                             QString("Page %1").arg(pageNum));
+
             pdfWriter.newPage();
             yPos = margin;
-            currentRow = 0;
             pageNum++;
-            
+
             // Redraw header on new page
             painter.setFont(smallFont);
-            painter.drawText(QRect(0, yPos, pageWidth, 15), Qt::AlignCenter, 
-                           QString("Page %1 - %2").arg(pageNum).arg(companyName));
-            yPos += 20;
-            
+            painter.setPen(QPen(Qt::black));
+            painter.drawText(QRect(0, yPos, pageWidth, 20), Qt::AlignCenter,
+                             QString("Page %1 - %2").arg(pageNum).arg(companyName));
+            yPos += 30;
+
             // Redraw table header
             painter.setFont(tableHeaderFont);
-            painter.setBrush(QBrush(QColor(200, 200, 200)));
+            painter.setBrush(QBrush(QColor(220, 220, 220)));
+            painter.setPen(QPen(Qt::black, 2));
             xPos = margin;
             for (int col = 0; col < headers.size() && col < 11; ++col) {
-                painter.drawRect(xPos, yPos, colWidths[col], lineHeight + 5);
-                painter.drawText(QRect(xPos + 2, yPos + 2, colWidths[col] - 4, lineHeight + 1), 
-                                Qt::AlignLeft | Qt::AlignVCenter, headers[col]);
+                painter.drawRect(xPos, yPos, colWidths[col], headerHeight);
+                painter.drawText(QRect(xPos + 5, yPos, colWidths[col] - 10, headerHeight),
+                                 Qt::AlignLeft | Qt::AlignVCenter, headers[col]);
                 xPos += colWidths[col];
             }
-            yPos += lineHeight + 7;
+            yPos += headerHeight;
             painter.setFont(tableFont);
             painter.setBrush(QBrush(Qt::white));
         }
-        
+
         // Get data from model
         QString id = model->data(model->index(row, 0)).toString();
         QString nom = model->data(model->index(row, 1)).toString();
         QString prenom = model->data(model->index(row, 2)).toString();
         QString email = model->data(model->index(row, 3)).toString();
         QString telephone = model->data(model->index(row, 4)).toString();
-        QString dateNaiss = model->data(model->index(row, 5)).toString();
+        QString dateNaiss = model->data(model->index(row, 5)).toDate().toString("dd/MM/yyyy");
         QString adresse = model->data(model->index(row, 6)).toString();
         QString poste = model->data(model->index(row, 7)).toString();
         QString salaire = model->data(model->index(row, 8)).toString();
         QString nEnfants = model->data(model->index(row, 9)).toString();
         QString disponibilite = model->data(model->index(row, 10)).toString();
-        
-        // Truncate long strings
-        if (email.length() > 15) email = email.left(12) + "...";
-        if (adresse.length() > 12) adresse = adresse.left(10) + "...";
-        
+
         // Draw row
         xPos = margin;
-        QStringList rowData = {id, nom, prenom, email, telephone, dateNaiss, 
-                              adresse, poste, salaire, nEnfants, disponibilite};
-        
+        QStringList rowData = {id, nom, prenom, email, telephone, dateNaiss,
+                               adresse, poste, salaire, nEnfants, disponibilite};
+
         for (int col = 0; col < rowData.size() && col < 11; ++col) {
-            painter.setPen(QPen(Qt::black, 0.5));
+            painter.setPen(QPen(Qt::black, 1));
             painter.drawRect(xPos, yPos, colWidths[col], rowHeight);
-            painter.setPen(QPen(Qt::black));
-            painter.drawText(QRect(xPos + 2, yPos + 2, colWidths[col] - 4, rowHeight - 4), 
-                           Qt::AlignLeft | Qt::AlignVCenter, rowData[col]);
+
+            // Elide text if too long
+            QString text = rowData[col];
+            QString elidedText = painter.fontMetrics().elidedText(text, Qt::ElideRight, colWidths[col] - 10);
+
+            painter.drawText(QRect(xPos + 5, yPos, colWidths[col] - 10, rowHeight),
+                             Qt::AlignLeft | Qt::AlignVCenter, elidedText);
             xPos += colWidths[col];
         }
-        
+
         yPos += rowHeight;
-        currentRow++;
     }
-    
+
     // Draw footer on last page
     painter.setFont(smallFont);
     painter.setPen(QPen(Qt::gray));
-    painter.drawText(QRect(0, pageHeight - 30, pageWidth, 20), Qt::AlignCenter, 
-                    QString("Total: %1 employé(s)").arg(model->rowCount()));
-    
+    painter.drawText(QRect(0, pageHeight - 30, pageWidth, 20), Qt::AlignCenter,
+                     QString("Total: %1 employé(s) - Page %2").arg(model->rowCount()).arg(pageNum));
+
     painter.end();
     delete model;
-    
-    QMessageBox::information(this, "Succès", 
-                            QString("Les employés ont été exportés avec succès dans:\n%1").arg(fileName));
+
+    QMessageBox::information(this, "Succès",
+                             QString("Les employés ont été exportés avec succès dans:\n%1").arg(fileName));
 }

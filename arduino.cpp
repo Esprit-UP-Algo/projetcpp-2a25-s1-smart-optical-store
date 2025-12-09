@@ -6,7 +6,7 @@
 #include <QSqlDatabase>
 #include <QObject>
 #include <QDebug>
-Arduino::Arduino(QObject *parent) : QObject(parent)
+Arduino::Arduino(QObject *parent) : QObject(parent), lastNotifiedLevel(0)
 {
     data="";
     arduino_port_name="";
@@ -14,6 +14,10 @@ Arduino::Arduino(QObject *parent) : QObject(parent)
     serial = new QSerialPort(this);
     qDebug() << "========================================";
     qDebug() << "Arduino object created";
+    qDebug() << "Revenue notification thresholds:";
+    qDebug() << "  Level 1: 3000 DT (1 beep)";
+    qDebug() << "  Level 2: 10000 DT (3 beeps)";
+    qDebug() << "  Level 3: 20000 DT (6 beeps)";
     qDebug() << "========================================";
 }
 
@@ -198,4 +202,109 @@ int Arduino::write_to_arduino(QByteArray d)
         qDebug() << "========================================";
         return -1;
     }
+}
+
+// ============================================
+// REVENUE NOTIFICATION METHODS
+// ============================================
+
+void Arduino::checkRevenueThreshold(double todayRevenue)
+{
+    qDebug() << "========================================";
+    qDebug() << "[ARDUINO] Checking revenue threshold...";
+    qDebug() << "[ARDUINO] Today's Revenue:" << todayRevenue << "DT";
+    qDebug() << "[ARDUINO] Last notified level:" << lastNotifiedLevel;
+    
+    int newLevel = 0;
+    
+    // Determine which level the revenue has reached
+    if (todayRevenue >= REVENUE_LEVEL3) {
+        newLevel = 3;
+    } else if (todayRevenue >= REVENUE_LEVEL2) {
+        newLevel = 2;
+    } else if (todayRevenue >= REVENUE_LEVEL1) {
+        newLevel = 1;
+    }
+    
+    qDebug() << "[ARDUINO] Current level based on revenue:" << newLevel;
+    
+    // Only trigger if we've reached a new level
+    if (newLevel > lastNotifiedLevel) {
+        qDebug() << "[ARDUINO] 🎉 NEW LEVEL REACHED! Triggering buzzer...";
+        sendRevenueLevel(newLevel);
+        lastNotifiedLevel = newLevel;
+    } else if (newLevel > 0) {
+        qDebug() << "[ARDUINO] Level" << newLevel << "already notified, skipping buzzer";
+    } else {
+        qDebug() << "[ARDUINO] Revenue below first threshold, no notification";
+    }
+    qDebug() << "========================================";
+}
+
+void Arduino::sendRevenueLevel(int level)
+{
+    if (!serial || !serial->isOpen()) {
+        qDebug() << "[ARDUINO] ❌ Cannot send - Arduino not connected";
+        return;
+    }
+    
+    QString command;
+    QString levelDescription;
+    
+    switch (level) {
+        case 1:
+            command = "L1\n";
+            levelDescription = "Level 1 (3000 DT) - 1 beep";
+            break;
+        case 2:
+            command = "L2\n";
+            levelDescription = "Level 2 (10000 DT) - 3 beeps";
+            break;
+        case 3:
+            command = "L3\n";
+            levelDescription = "Level 3 (20000 DT) - 6 beeps";
+            break;
+        default:
+            qDebug() << "[ARDUINO] Invalid level:" << level;
+            return;
+    }
+    
+    qDebug() << "========================================";
+    qDebug() << "[ARDUINO] 🔔 SENDING REVENUE NOTIFICATION";
+    qDebug() << "[ARDUINO]" << levelDescription;
+    qDebug() << "[ARDUINO] Command:" << command.trimmed();
+    
+    write_to_arduino(command.toUtf8());
+    
+    qDebug() << "[ARDUINO] ✅ Notification sent!";
+    qDebug() << "========================================";
+}
+
+void Arduino::testBuzzer()
+{
+    if (!serial || !serial->isOpen()) {
+        qDebug() << "[ARDUINO] ❌ Cannot test - Arduino not connected";
+        return;
+    }
+    
+    qDebug() << "========================================";
+    qDebug() << "[ARDUINO] 🔔 Testing buzzer...";
+    write_to_arduino("TEST\n");
+    qDebug() << "[ARDUINO] ✅ Test command sent!";
+    qDebug() << "========================================";
+}
+
+void Arduino::resetDailyLevels()
+{
+    qDebug() << "========================================";
+    qDebug() << "[ARDUINO] Resetting daily notification levels...";
+    lastNotifiedLevel = 0;
+    
+    if (serial && serial->isOpen()) {
+        write_to_arduino("RESET\n");
+        qDebug() << "[ARDUINO] Reset command sent to Arduino";
+    }
+    
+    qDebug() << "[ARDUINO] ✅ Levels reset for new day";
+    qDebug() << "========================================";
 }

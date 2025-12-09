@@ -9,8 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Sql Charts SerialPort)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Sql Charts SerialPort)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Sql Charts SerialPort Network)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Sql Charts SerialPort Network)
 
 # Define HAVE_SERIALPORT if SerialPort is available
 add_definitions(-DHAVE_SERIALPORT)
@@ -36,6 +36,9 @@ set(PROJECT_SOURCES
         employe.h employe.cpp
         fournisseur.h fournisseur.cpp
         employeeditdialog.h employeeditdialog.cpp
+        employeeregister.h employeeregister.cpp employeeregister.ui
+        forgotpassword.h forgotpassword.cpp forgotpassword.ui
+        smtpclient.h smtpclient.cpp
         resources.qrc
 )
 
@@ -67,7 +70,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(gestionemploye0 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Charts Qt${QT_VERSION_MAJOR}::SerialPort)
+target_link_libraries(gestionemploye0 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Charts Qt${QT_VERSION_MAJOR}::SerialPort Qt${QT_VERSION_MAJOR}::Network)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

@@ -128,18 +128,18 @@
     font-family: Arial, Helvetica, sans-serif;
     font-weight: bold;
     color: white;
-    background-color: #171717;
+    background-color: #357fa3; /* Active state color */
+    border: 2px solid #2d6f91;
     padding: 10px 20px;
-    border: none;
     border-radius: 10px;
 }
 
 #b4:hover {
-    background-color: #0c66ed; /* hover effect */
+    background-color: #2d6f91; /* hover effect */
 }
 
 #b4:pressed {
-    background-color: #094bb0; /* pressed effect */
+    background-color: #24587a; /* pressed effect */
 }</string>
          </property>
          <property name="text">
@@ -319,6 +319,24 @@
            <layout class="QHBoxLayout" name="layoutButtons">
             <item>
              <widget class="QPushButton" name="btnExport">
+              <property name="styleSheet">
+               <string notr="true">#btnExport {
+    background-color: #48b36b;
+    color: white;
+    font-weight: bold;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+}
+
+#btnExport:hover {
+    background-color: #3da25f;
+}
+
+#btnExport:pressed {
+    background-color: #368c52;
+}</string>
+              </property>
               <property name="text">
                <string>📤 Exporter PDF</string>
               </property>
@@ -326,6 +344,29 @@
             </item>
             <item>
              <widget class="QPushButton" name="btnDelete">
+              <property name="styleSheet">
+               <string notr="true">#btnDelete {
+    background-color: #d64545;
+    color: white;
+    font-weight: bold;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+}
+
+#btnDelete:hover {
+    background-color: #b53030;
+}
+
+#btnDelete:pressed {
+    background-color: #9a2b2b;
+}
+
+#btnDelete:disabled {
+    background-color: #cccccc;
+    color: #666666;
+}</string>
+              </property>
               <property name="text">
                <string>🗑️ Supprimer Client</string>
               </property>
@@ -455,23 +496,620 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="tabStats">
+        <widget class="QWidget" name="tabDashboard">
          <attribute name="title">
-          <string>Statistiques</string>
+          <string>Tableau de Bord</string>
          </attribute>
-         <layout class="QVBoxLayout" name="layoutStats">
+         <layout class="QVBoxLayout" name="layoutDashboard">
           <item>
-           <widget class="QLabel" name="labelStatsTitle">
-            <property name="text">
-             <string>📊 Statistiques Clients</string>
+           <layout class="QHBoxLayout" name="layoutStatsCards">
+            <item>
+             <widget class="QFrame" name="frameTotalClients">
+              <property name="styleSheet">
+               <string notr="true">#frameTotalClients {
+    background-color: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 15px;
+}
+
+#lblTotalClientsTitle {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+#lblTotalClientsValue {
+    color: #1e293b;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+#lblTotalClientsSubtitle {
+    color: #64748b;
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+}</string>
+              </property>
+              <layout class="QVBoxLayout" name="totalClientsLayout">
+               <item>
+                <widget class="QLabel" name="lblTotalClientsTitle">
+                 <property name="text">
+                  <string>Total Clients</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblTotalClientsValue">
+                 <property name="text">
+                  <string>0</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblTotalClientsSubtitle">
+                 <property name="text">
+                  <string>Nombre total de clients</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frameGenderDistribution">
+              <property name="styleSheet">
+               <string notr="true">#frameGenderDistribution {
+    background-color: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 15px;
+}
+
+#lblGenderTitle {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+#lblGenderValue {
+    color: #1e293b;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+#lblGenderSubtitle {
+    color: #64748b;
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+}</string>
+              </property>
+              <layout class="QVBoxLayout" name="genderLayout">
+               <item>
+                <widget class="QLabel" name="lblGenderTitle">
+                 <property name="text">
+                  <string>Répartition par Sexe</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblGenderValue">
+                 <property name="text">
+                  <string>0 Hommes, 0 Femmes</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblGenderSubtitle">
+                 <property name="text">
+                  <string>Distribution par genre</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="layoutCharts">
+            <item>
+             <widget class="QFrame" name="frameGenderChart">
+              <property name="styleSheet">
+               <string notr="true">#frameGenderChart {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 15px;
+}</string>
+              </property>
+              <layout class="QVBoxLayout" name="genderChartLayout">
+               <item>
+                <widget class="QLabel" name="lblGenderChartTitle">
+                 <property name="styleSheet">
+                  <string notr="true">font-weight: 600; font-size: 14px; color: #1e293b; margin-bottom: 10px;</string>
+                 </property>
+                 <property name="text">
+                  <string>Répartition par Sexe</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="genderChartContainer" native="true">
+                 <property name="minimumSize">
+                  <size>
+                   <width>300</width>
+                   <height>200</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frameAgeChart">
+              <property name="styleSheet">
+               <string notr="true">#frameAgeChart {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 15px;
+}</string>
+              </property>
+              <layout class="QVBoxLayout" name="ageChartLayout">
+               <item>
+                <widget class="QLabel" name="lblAgeChartTitle">
+                 <property name="styleSheet">
+                  <string notr="true">font-weight: 600; font-size: 14px; color: #1e293b; margin-bottom: 10px;</string>
+                 </property>
+                 <property name="text">
+                  <string>Répartition par Tranche d'Âge</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="ageChartContainer" native="true">
+                 <property name="minimumSize">
+                  <size>
+                   <width>300</width>
+                   <height>200</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="layoutBottom">
+            <item>
+             <widget class="QFrame" name="frameAddressChart">
+              <property name="styleSheet">
+               <string notr="true">#frameAddressChart {
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 15px;
+    width: 100%;
+}</string>
+              </property>
+              <layout class="QVBoxLayout" name="addressChartLayout">
+               <item>
+                <widget class="QLabel" name="lblAddressChartTitle">
+                 <property name="styleSheet">
+                  <string notr="true">font-weight: 600; font-size: 14px; color: #1e293b; margin-bottom: 10px;</string>
+                 </property>
+                 <property name="text">
+                  <string>Répartition par Adresse</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="addressChartContainer" native="true">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>200</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabControles">
+         <attribute name="title">
+          <string>Contrôles à venir</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_controles">
+          <item>
+           <widget class="QTableWidget" name="tableControles">
+            <property name="styleSheet">
+             <string notr="true">QTableWidget {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    gridline-color: #e2e8f0;
+    font-size: 12px;
+}
+
+QHeaderView::section {
+    background-color: #f8fafc;
+    color: #334155;
+    font-weight: 600;
+    padding: 8px 12px;
+    border: none;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+QTableWidget::item {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+QTableWidget::item:selected {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+QTableWidget::item[data-status="overdue"] {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+QTableWidget::item[data-status="soon"] {
+    background-color: #fef3c7;
+    color: #b45309;
+}
+
+QTableWidget::item[data-status="ok"] {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+QScrollBar:vertical {
+    border: none;
+    background: #f8fafc;
+    width: 8px;
+    margin: 0px;
+}
+
+QScrollBar::handle:vertical {
+    background: #cbd5e1;
+    min-height: 20px;
+    border-radius: 4px;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
+}</string>
             </property>
+            <column>
+             <property name="text">
+              <string>Client</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Téléphone</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Prochain contrôle</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Jours restants</string>
+             </property>
+            </column>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="labelStatsContent">
-            <property name="text">
-             <string>Graphiques et données statistiques ici...</string>
+           <spacer name="verticalSpacer_controles">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
             </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>10</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabStatistics">
+         <attribute name="title">
+          <string>Statistiques</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="spacing">
+           <number>15</number>
+          </property>
+          <property name="leftMargin">
+           <number>15</number>
+          </property>
+          <property name="topMargin">
+           <number>15</number>
+          </property>
+          <property name="rightMargin">
+           <number>15</number>
+          </property>
+          <property name="bottomMargin">
+           <number>15</number>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="statsTopLayout">
+            <property name="spacing">
+             <number>15</number>
+            </property>
+            <item>
+             <widget class="QFrame" name="frameTotalClients2">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>120</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>250</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QFrame#frameTotalClients {
+    background-color: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    padding: 15px;
+}
+
+QLabel#lblTotalClientsTitle2 {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+QLabel#lblTotalClients {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-top: 5px;
+}
+
+QLabel#lblTotalClientsChange {
+    font-size: 12px;
+    color: #10b981;
+    font-weight: 500;
+    margin-top: 5px;
+}
+
+QLabel#lblTotalClientsChange[change="down"] {
+    color: #ef4444;
+}</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_3">
+               <item>
+                <widget class="QLabel" name="lblTotalClientsTitle">
+                 <property name="text">
+                  <string>Total Clients</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblTotalClients">
+                 <property name="text">
+                  <string>0</string>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="lblTotalClientsChange">
+                 <property name="text">
+                  <string>+12% vs last month</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frameInactiveClients">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>120</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>250</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QFrame#frameInactiveClients {
+    background-color: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    padding: 15px;
+}
+
+QLabel#lblInactiveClientsTitle {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+QLabel#lblInactiveClients {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-top: 5px;
+}
+
+QLabel#lblInactiveClientsChange {
+    font-size: 12px;
+    color: #ef4444;
+    font-weight: 500;
+    margin-top: 5px;
+}
+
+QLabel#lblInactiveClientsChange[change="up"] {
+    color: #10b981;
+}</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_4">
+               <item>
+                <widget class="QLabel" name="lblInactiveClientsTitle">
+                 <property name="text">
+                  <string>Clients Inactifs</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblInactiveClients">
+                 <property name="text">
+                  <string>0</string>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="lblInactiveClientsChange">
+                 <property name="text">
+                  <string>+5% vs last month</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QTabWidget" name="tabWidgetCharts">
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <property name="documentMode">
+             <bool>false</bool>
+            </property>
+            <property name="tabPosition">
+             <enum>QTabWidget::South</enum>
+            </property>
+            <property name="tabShape">
+             <enum>QTabWidget::Triangular</enum>
+            </property>
+            <widget class="QWidget" name="tabGender">
+             <attribute name="title">
+              <string>Répartition par Genre</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_5">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QChartView" name="genderChartView" native="true">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>300</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QChartView {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+}</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="tabMonthlyRegistrations">
+             <attribute name="title">
+              <string>Inscriptions par Mois</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_6">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QChartView" name="monthlyRegistrationsChartView" native="true">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>300</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QChartView {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+}</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
            </widget>
           </item>
          </layout>

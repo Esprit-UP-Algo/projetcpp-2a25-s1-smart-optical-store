@@ -276,6 +276,12 @@ void SalesWindow::setupModels()
         statisticsButton->setStyleSheet("background-color: rgb(41, 102, 148); color: white; font-weight: bold;");
         buttonsLayout->addWidget(statisticsButton);
         
+        // Create export invoice button
+        QPushButton *exportInvoiceButton = new QPushButton("Exporter Facture PDF", salesTabContent);
+        exportInvoiceButton->setObjectName("exportInvoiceButton");
+        exportInvoiceButton->setStyleSheet("background-color: #00d4ff; color: black; font-weight: bold;");
+        buttonsLayout->addWidget(exportInvoiceButton);
+        
         // Add the buttons layout after the table view
         salesTabLayout->insertLayout(salesTabLayout->count() - 1, buttonsLayout);
         
@@ -283,6 +289,7 @@ void SalesWindow::setupModels()
         connect(modifyButton, &QPushButton::clicked, this, &SalesWindow::on_modifySaleButton_clicked);
         connect(deleteButton, &QPushButton::clicked, this, &SalesWindow::on_deleteSaleButton_clicked);
         connect(statisticsButton, &QPushButton::clicked, this, &SalesWindow::on_statisticsButton_clicked);
+        connect(exportInvoiceButton, &QPushButton::clicked, this, &SalesWindow::on_exportInvoiceButton_clicked);
     }
     
     // Populate product selection combo box
@@ -789,16 +796,19 @@ void SalesWindow::on_pushButton_6_clicked()
     promoManager->setModal(true);
     
     // Connect to finished signal to reset flag after delay
-    QObject::connect(promoManager, &QDialog::finished, this, [this](int result) {
-        Q_UNUSED(result);
-        QTimer::singleShot(300, this, [this]() {
-            promoManagerOpen = false;
-            qDebug() << "PromoManager flag reset after dialog finished";
-        });
-    });
+    QObject::connect(promoManager, &QDialog::finished, this, &SalesWindow::onPromoManagerFinished);
     
     promoManager->exec();
     // Dialog will be auto-deleted due to WA_DeleteOnClose
+}
+
+void SalesWindow::onPromoManagerFinished(int result)
+{
+    Q_UNUSED(result);
+    QTimer::singleShot(300, this, [this]() {
+        promoManagerOpen = false;
+        qDebug() << "PromoManager flag reset after dialog finished";
+    });
 }
 
 void SalesWindow::on_applyPromoButton_clicked()
@@ -983,9 +993,8 @@ void SalesWindow::on_productComboBox_currentIndexChanged(int index)
 
 void SalesWindow::on_saveSaleButton_clicked()
 {
-    savingAsDraft = true;
+    savingAsDraft = false;  // Not a draft - this is a completed sale
     if (validateSale()) {
-        // Save as draft (brouillon)
         QString paymentMethod = ui->paymentMethodComboBox->currentText();
         
         // Calculate prices
@@ -1013,28 +1022,67 @@ void SalesWindow::on_saveSaleButton_clicked()
         venteObj.setPrixTtc(prixTtc);
         venteObj.setRemise(discount);
         venteObj.setModePaiement(paymentMethod);
-        venteObj.setStatutVente("brouillon");
+        venteObj.setStatutVente("Complétée");  // Mark as completed instead of draft
         
         if (venteObj.ajouter()) {
             int saleId = fetchLatestSaleId();
             if (saleId <= 0) {
                 QMessageBox::warning(this, "Avertissement", "Vente enregistrée mais impossible de déterminer l'ID généré.");
             } else {
-                if (!persistSaleItems(saleId, false)) {
-                    qDebug() << "Certaines lignes de la vente n'ont pas pu être enregistrées.";
+                // Pass true to reduce stock from database (like Enregistrer button)
+                if (!persistSaleItems(saleId, true)) {
+                    qDebug() << "❌ Certaines lignes de la vente n'ont pas pu être enregistrées.";
+                    QMessageBox::warning(this, "Avertissement", 
+                        "La vente a été créée mais le stock n'a pas pu être mis à jour correctement.\n"
+                        "Veuillez vérifier le stock manuellement dans la base de données.");
+                } else {
+                    qDebug() << "✅ Tous les produits et stocks ont été mis à jour avec succès";
                 }
             }
             
-            // Commit the draft sale to database
+            // Update client's total purchases (TOTAL_ACHATS) after successful sale
+            if (currentClientId > 0) {
+                QSqlQuery updateClientQuery;
+                // Try uppercase first
+                updateClientQuery.prepare("UPDATE CLIENTS SET TOTAL_ACHATS = TOTAL_ACHATS + :montant WHERE ID_CLIENT = :id");
+                updateClientQuery.bindValue(":montant", prixTtc);
+                updateClientQuery.bindValue(":id", currentClientId);
+                
+                if (!updateClientQuery.exec()) {
+                    // Try lowercase if uppercase fails
+                    updateClientQuery.clear();
+                    updateClientQuery.prepare("UPDATE clients SET total_achats = total_achats + :montant WHERE id_client = :id");
+                    updateClientQuery.bindValue(":montant", prixTtc);
+                    updateClientQuery.bindValue(":id", currentClientId);
+                    updateClientQuery.exec();
+                }
+                
+                // Recalculate loyalty level after updating total purchases
+                calculateLoyaltyDiscount(currentClientId);
+            }
+            
+            // CRITICAL: Commit all database changes to persist them
+            // Oracle requires explicit COMMIT for ODBC connections
             QSqlDatabase db = QSqlDatabase::database();
             QSqlQuery commitQuery;
             if (!commitQuery.exec("COMMIT")) {
+                // Try alternative commit method
                 if (!db.commit()) {
-                    qDebug() << "Warning: Could not commit draft sale:" << db.lastError().text();
+                    qDebug() << "Warning: Could not commit transaction:" << db.lastError().text();
+                    QMessageBox::warning(this, "Avertissement", 
+                        "Les modifications ont été effectuées mais la sauvegarde pourrait être incomplète.\n"
+                        "Veuillez vérifier manuellement dans la base de données.");
+                } else {
+                    qDebug() << "Transaction committed successfully using db.commit()";
                 }
+            } else {
+                qDebug() << "Transaction committed successfully using SQL COMMIT";
             }
             
-            QMessageBox::information(this, "Succès", "Vente enregistrée comme brouillon!");
+            // Refresh product combo box to show updated stock quantities
+            populateProductComboBox();
+            
+            QMessageBox::information(this, "Succès", "Vente validée et complétée avec succès!");
             clearSaleForm();
             refreshSalesTable();
         } else {
@@ -1074,7 +1122,7 @@ void SalesWindow::on_registerSaleButton_clicked()
         venteObj.setPrixTtc(prixTtc);
         venteObj.setRemise(discount);
         venteObj.setModePaiement(paymentMethod);
-        venteObj.setStatutVente("validée");
+        venteObj.setStatutVente("En attente");
         
         if (venteObj.ajouter()) {
             int saleId = fetchLatestSaleId();
@@ -1082,7 +1130,12 @@ void SalesWindow::on_registerSaleButton_clicked()
                 QMessageBox::warning(this, "Avertissement", "Vente enregistrée mais impossible de déterminer l'ID généré.");
             } else {
                 if (!persistSaleItems(saleId, true)) {
-                    qDebug() << "Certaines lignes de la vente n'ont pas pu être enregistrées.";
+                    qDebug() << "❌ Certaines lignes de la vente n'ont pas pu être enregistrées.";
+                    QMessageBox::warning(this, "Avertissement", 
+                        "La vente a été créée mais le stock n'a pas pu être mis à jour correctement.\n"
+                        "Veuillez vérifier le stock manuellement dans la base de données.");
+                } else {
+                    qDebug() << "✅ Tous les produits et stocks ont été mis à jour avec succès";
                 }
             }
             
@@ -1107,15 +1160,8 @@ void SalesWindow::on_registerSaleButton_clicked()
                 calculateLoyaltyDiscount(currentClientId);
             }
             
-            // CRITICAL: Update stock from CONTENIR table to ensure consistency
-            // This ensures stock is reduced based on what's actually in contenir
-            if (saleId > 0) {
-                if (!updateStockFromContenir(saleId)) {
-                    qDebug() << "⚠️ Warning: Stock update from contenir failed, but sale was saved";
-                } else {
-                    qDebug() << "✅ Stock updated successfully from contenir table";
-                }
-            }
+            // NOTE: Stock is already updated in ajouterProduitVente() called from persistSaleItems()
+            // Do NOT call updateStockFromContenir() here to avoid double-decrement of stock
             
             // CRITICAL: Commit all database changes to persist them
             // Oracle requires explicit COMMIT for ODBC connections
@@ -1583,62 +1629,154 @@ void SalesWindow::exportSalesToPdf()
     writer.setPageMargins(QMarginsF(20, 20, 20, 20), QPageLayout::Millimeter);
     
     QPainter painter(&writer);
+    painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(Qt::black);
     
+    // Get resolution (DPI) to calculate sizes in pixels
+    int dpi = writer.resolution();
+    
+    // Helper to convert mm to pixels
+    auto mmToPx = [dpi](double mm) { return static_cast<int>(mm * dpi / 25.4); };
+    
+    int pageWidth = writer.width();
+    int pageHeight = writer.height();
+    
+    // Margins (in pixels) - QPdfWriter coordinate system starts at 0,0 of the page
+    int leftMargin = mmToPx(20);
+    int topMargin = mmToPx(20);
+    int rightMargin = mmToPx(20);
+    int bottomMargin = mmToPx(20);
+    int contentWidth = pageWidth - leftMargin - rightMargin;
+    
+    // Fonts
     QFont titleFont("Arial", 16, QFont::Bold);
     QFont headerFont("Arial", 10, QFont::Bold);
     QFont normalFont("Arial", 9);
     
-    int yPos = 50;
+    int yPos = topMargin;
     
-    // Title
+    // --- Draw Header / Title ---
     painter.setFont(titleFont);
-    painter.drawText(0, yPos, "Rapport des Ventes");
-    yPos += 40;
+    QRect titleRect(leftMargin, yPos, contentWidth, mmToPx(15));
+    painter.drawText(titleRect, Qt::AlignCenter, "Rapport des Ventes");
+    yPos += mmToPx(15);
     
-    // Date range if filtered
+    // Draw Date Range if filtered
     if (ui->dateFilterCheckBox->isChecked()) {
         painter.setFont(normalFont);
-        painter.drawText(0, yPos, QString("Période: %1 - %2")
-                        .arg(ui->startDateEdit->date().toString("dd/MM/yyyy"))
-                        .arg(ui->endDateEdit->date().toString("dd/MM/yyyy")));
-        yPos += 30;
+        QString dateRange = QString("Période: %1 - %2")
+                            .arg(ui->startDateEdit->date().toString("dd/MM/yyyy"))
+                            .arg(ui->endDateEdit->date().toString("dd/MM/yyyy"));
+        QRect dateRect(leftMargin, yPos, contentWidth, mmToPx(8));
+        painter.drawText(dateRect, Qt::AlignCenter, dateRange);
+        yPos += mmToPx(10);
+    } else {
+        yPos += mmToPx(5);
     }
     
-    // Headers
-    painter.setFont(headerFont);
-    int xPos = 0;
-    painter.drawText(xPos, yPos, "ID");
-    xPos += 50;
-    painter.drawText(xPos, yPos, "Date");
-    xPos += 100;
-    painter.drawText(xPos, yPos, "Client");
-    xPos += 150;
-    painter.drawText(xPos, yPos, "Montant");
-    xPos += 100;
-    painter.drawText(xPos, yPos, "Paiement");
-    yPos += 20;
+    // --- Table Setup ---
+    int headerHeight = mmToPx(10);
+    int lineHeight = mmToPx(8);
     
-    // Data
+    // Column widths (Total = contentWidth)
+    // ID: 10%, Date: 20%, Client: 25%, Montant: 20%, Paiement: 25%
+    int col1 = contentWidth * 0.10; // ID
+    int col2 = contentWidth * 0.20; // Date
+    int col3 = contentWidth * 0.25; // Client
+    int col4 = contentWidth * 0.20; // Montant
+    int col5 = contentWidth * 0.25; // Paiement
+    
+    // Helper to draw a cell
+    auto drawCell = [&](int x, int y, int w, int h, const QString &text, bool isHeader = false) {
+        painter.drawRect(x, y, w, h); // Draw border
+        
+        // Add padding for text
+        QRect textRect(x + mmToPx(2), y, w - mmToPx(4), h);
+        
+        // Draw text
+        if (isHeader) {
+            painter.drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft, text);
+        } else {
+            painter.drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft, text);
+        }
+    };
+    
+    // --- Draw Table Header ---
+    painter.setFont(headerFont);
+    painter.setBrush(QColor(230, 230, 230)); // Light gray background for header
+    painter.setPen(Qt::black);
+    
+    // Draw header background
+    painter.drawRect(leftMargin, yPos, contentWidth, headerHeight);
+    painter.fillRect(QRect(leftMargin, yPos, contentWidth, headerHeight), QColor(230, 230, 230));
+    
+    int xPos = leftMargin;
+    drawCell(xPos, yPos, col1, headerHeight, "ID", true); xPos += col1;
+    drawCell(xPos, yPos, col2, headerHeight, "Date", true); xPos += col2;
+    drawCell(xPos, yPos, col3, headerHeight, "Client", true); xPos += col3;
+    drawCell(xPos, yPos, col4, headerHeight, "Montant", true); xPos += col4;
+    drawCell(xPos, yPos, col5, headerHeight, "Paiement", true); xPos += col5;
+    
+    yPos += headerHeight;
+    
+    // --- Draw Table Data ---
     painter.setFont(normalFont);
+    painter.setBrush(Qt::NoBrush); // Reset brush
+    
     for (int row = 0; row < salesModel->rowCount(); ++row) {
-        if (yPos > writer.height() - 50) {
+        // Check for new page
+        if (yPos + lineHeight > pageHeight - bottomMargin) {
             writer.newPage();
-            yPos = 50;
+            yPos = topMargin;
+            
+            // Draw Header again
+            painter.setFont(headerFont);
+            painter.setBrush(QColor(230, 230, 230));
+            
+            xPos = leftMargin;
+            drawCell(xPos, yPos, col1, headerHeight, "ID", true); xPos += col1;
+            drawCell(xPos, yPos, col2, headerHeight, "Date", true); xPos += col2;
+            drawCell(xPos, yPos, col3, headerHeight, "Client", true); xPos += col3;
+            drawCell(xPos, yPos, col4, headerHeight, "Montant", true); xPos += col4;
+            drawCell(xPos, yPos, col5, headerHeight, "Paiement", true); xPos += col5;
+            
+            yPos += headerHeight;
+            painter.setFont(normalFont);
+            painter.setBrush(Qt::NoBrush);
         }
         
-        xPos = 0;
-        painter.drawText(xPos, yPos, salesModel->data(salesModel->index(row, 0)).toString());
-        xPos += 50;
-        painter.drawText(xPos, yPos, salesModel->data(salesModel->index(row, 1)).toString());
-        xPos += 100;
-        painter.drawText(xPos, yPos, salesModel->data(salesModel->index(row, 4)).toString());
-        xPos += 150;
-        painter.drawText(xPos, yPos, salesModel->data(salesModel->index(row, 2)).toString() + " DT");
-        xPos += 100;
-        painter.drawText(xPos, yPos, salesModel->data(salesModel->index(row, 3)).toString());
-        yPos += 20;
+        xPos = leftMargin;
+        
+        // Get data from model (Indices based on buildBaseSalesQuery)
+        // 0: ID, 1: Client, 3: Date, 4: Prix TTC, 10: Mode Paiement
+        QString id = salesModel->data(salesModel->index(row, 0)).toString();
+        QString client = salesModel->data(salesModel->index(row, 1)).toString();
+        
+        // Format date
+        QDateTime dateVal = salesModel->data(salesModel->index(row, 3)).toDateTime();
+        QString date = dateVal.isValid() ? dateVal.toString("dd/MM/yyyy HH:mm") : "";
+        
+        // Format price
+        double amountVal = salesModel->data(salesModel->index(row, 4)).toDouble();
+        QString amount = QString("%1 DT").arg(amountVal, 0, 'f', 2);
+        
+        QString payment = salesModel->data(salesModel->index(row, 10)).toString();
+        
+        // Draw row
+        drawCell(xPos, yPos, col1, lineHeight, id); xPos += col1;
+        drawCell(xPos, yPos, col2, lineHeight, date); xPos += col2;
+        drawCell(xPos, yPos, col3, lineHeight, client); xPos += col3;
+        drawCell(xPos, yPos, col4, lineHeight, amount); xPos += col4;
+        drawCell(xPos, yPos, col5, lineHeight, payment); xPos += col5;
+        
+        yPos += lineHeight;
     }
+    
+    // Footer with generation date
+    painter.setFont(QFont("Arial", 8));
+    painter.drawText(QRect(leftMargin, pageHeight - bottomMargin + mmToPx(5), contentWidth, mmToPx(5)), 
+                     Qt::AlignRight, 
+                     "Généré le: " + QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm"));
     
     painter.end();
     QMessageBox::information(this, "Succès", "Rapport exporté avec succès!");
@@ -1836,120 +1974,255 @@ void SalesWindow::loadSaleIntoNewSaleForm(int saleId)
 
 bool SalesWindow::persistSaleItems(int saleId, bool updateStock)
 {
+    qDebug() << "=========================================";
+    qDebug() << "persistSaleItems called with saleId:" << saleId << "updateStock:" << updateStock;
+    qDebug() << "Number of items in cart:" << cartItems.size();
+    
+    if (cartItems.isEmpty()) {
+        qDebug() << "⚠️ WARNING: cartItems is EMPTY! Nothing to persist.";
+        return false;
+    }
+    
+    // Get database connection
+    QSqlDatabase db = QSqlDatabase::database();
+    if (!db.isOpen()) {
+        qDebug() << "❌ Database is not open!";
+        return false;
+    }
+    
+    // Print connection info for debugging
+    qDebug() << "Database name:" << db.databaseName();
+    qDebug() << "User name:" << db.userName();
+    qDebug() << "Driver:" << db.driverName();
+    
     bool overallSuccess = true;
     
     for (const auto &item : cartItems) {
         const QString &ref = item.first;
         int qty = item.second;
         double unitPrice = getUnitPriceForReference(ref);
-
-        // Toujours enregistrer le détail de la vente (table DETAIL_VENTE ou équivalent)
-        if (!insertDetailRecord(saleId, ref, qty, unitPrice)) {
-            overallSuccess = false;
+        
+        qDebug() << "=========================================";
+        qDebug() << "Processing cart item: ref=" << ref << "qty=" << qty << "unitPrice=" << unitPrice;
+        
+        // DIAGNOSTIC: Check current stock BEFORE update
+        QString checkSql = QString("SELECT QUANTITE FROM PRODUIT WHERE REFERENCE = '%1'").arg(ref);
+        QSqlQuery checkQuery(db);
+        if (checkQuery.exec(checkSql) && checkQuery.next()) {
+            int currentStock = checkQuery.value(0).toInt();
+            qDebug() << "📊 BEFORE UPDATE - Current stock in DB for" << ref << ":" << currentStock;
+        } else {
+            qDebug() << "⚠️ Could not check current stock:" << checkQuery.lastError().text();
         }
-
-        // Utiliser la logique métier de la classe Vente pour :
-        //  - insérer dans la table CONTENIR
-        //  - mettre à jour le stock PRODUIT en fonction de CONTENIR
-        //
-        // Cette méthode gère déjà :
-        //  - la vérification de l'existence de la vente
-        //  - la vérification de l'existence du produit
-        //  - l'UPDATE du stock dans PRODUIT basé sur la quantité dans CONTENIR
-        if (updateStock) {
-            if (!venteObj.ajouterProduitVente(saleId, ref, qty, unitPrice)) {
-                qDebug() << "Failed to add product to sale via Vente::ajouterProduitVente for ref"
-                         << ref << "- error:" << venteObj.getProductAddError();
-                overallSuccess = false;
+        
+        // Step 1: Insert into CONTENIR table
+        QString insertSql = QString("INSERT INTO CONTENIR (ID_VENTE, REFERENCE, QUANTITE, PRIX_UNITAIRE) "
+                                    "VALUES (%1, '%2', %3, %4)")
+                            .arg(saleId).arg(ref).arg(qty).arg(unitPrice);
+        
+        qDebug() << "SQL INSERT CONTENIR:" << insertSql;
+        
+        QSqlQuery insertQuery(db);
+        if (!insertQuery.exec(insertSql)) {
+            qDebug() << "⚠️ INSERT CONTENIR failed:" << insertQuery.lastError().text();
+            // Try with lowercase
+            insertSql = QString("INSERT INTO contenir (id_vente, reference, quantite, prix_unitaire) "
+                               "VALUES (%1, '%2', %3, %4)")
+                       .arg(saleId).arg(ref).arg(qty).arg(unitPrice);
+            QSqlQuery insertQuery2(db);
+            if (!insertQuery2.exec(insertSql)) {
+                qDebug() << "❌ INSERT contenir also failed:" << insertQuery2.lastError().text();
+            } else {
+                qDebug() << "✅ INSERT contenir succeeded (lowercase)";
             }
         } else {
-            // Si on ne souhaite pas toucher au stock (brouillon),
-            // on enregistre uniquement la ligne de vente dans CONTENIR sans mise à jour du stock.
-            if (!insertContenirRecord(saleId, ref, qty, unitPrice)) {
+            qDebug() << "✅ INSERT CONTENIR succeeded";
+        }
+        
+        // Step 2: Update stock if requested
+        if (updateStock) {
+            QString updateSql = QString("UPDATE PRODUIT SET QUANTITE = QUANTITE - %1 WHERE REFERENCE = '%2'")
+                                .arg(qty).arg(ref);
+            
+            qDebug() << "SQL UPDATE PRODUIT:" << updateSql;
+            
+            QSqlQuery updateQuery(db);
+            bool stockUpdated = false;
+            
+            if (updateQuery.exec(updateSql)) {
+                int rowsAffected = updateQuery.numRowsAffected();
+                qDebug() << "UPDATE PRODUIT rows affected:" << rowsAffected;
+                if (rowsAffected > 0) {
+                    stockUpdated = true;
+                    qDebug() << "✅ Stock updated successfully for" << ref;
+                } else {
+                    qDebug() << "⚠️ No rows affected for PRODUIT";
+                }
+            } else {
+                qDebug() << "⚠️ UPDATE PRODUIT failed:" << updateQuery.lastError().text();
+            }
+            
+            // Try lowercase if uppercase didn't work
+            if (!stockUpdated) {
+                QString updateSqlLower = QString("UPDATE produit SET quantite = quantite - %1 WHERE reference = '%2'")
+                                        .arg(qty).arg(ref);
+                qDebug() << "Trying lowercase:" << updateSqlLower;
+                
+                QSqlQuery updateQuery2(db);
+                if (updateQuery2.exec(updateSqlLower)) {
+                    int rowsAffected = updateQuery2.numRowsAffected();
+                    qDebug() << "UPDATE produit rows affected:" << rowsAffected;
+                    if (rowsAffected > 0) {
+                        stockUpdated = true;
+                        qDebug() << "✅ Stock updated successfully (lowercase) for" << ref;
+                    }
+                } else {
+                    qDebug() << "❌ UPDATE produit also failed:" << updateQuery2.lastError().text();
+                }
+            }
+            
+            if (!stockUpdated) {
+                qDebug() << "❌ FAILED to update stock for" << ref;
                 overallSuccess = false;
+            }
+            
+            // COMMIT immediately after each stock update
+            QSqlQuery commitQuery(db);
+            if (commitQuery.exec("COMMIT")) {
+                qDebug() << "✅ COMMIT successful";
+            } else {
+                qDebug() << "⚠️ COMMIT via SQL failed:" << commitQuery.lastError().text();
+                // Try db.commit()
+                if (db.commit()) {
+                    qDebug() << "✅ db.commit() successful";
+                } else {
+                    qDebug() << "❌ db.commit() also failed:" << db.lastError().text();
+                }
+            }
+            
+            // DIAGNOSTIC: Check stock AFTER update and commit
+            QString checkAfterSql = QString("SELECT QUANTITE FROM PRODUIT WHERE REFERENCE = '%1'").arg(ref);
+            QSqlQuery checkAfterQuery(db);
+            if (checkAfterQuery.exec(checkAfterSql) && checkAfterQuery.next()) {
+                int afterStock = checkAfterQuery.value(0).toInt();
+                qDebug() << "📊 AFTER UPDATE - Stock in DB for" << ref << ":" << afterStock;
+            } else {
+                qDebug() << "⚠️ Could not check stock after update:" << checkAfterQuery.lastError().text();
             }
         }
     }
+    
+    // Final COMMIT to make sure everything is saved
+    QSqlQuery finalCommit(db);
+    finalCommit.exec("COMMIT");
+    qDebug() << "Final COMMIT executed";
+    
+    qDebug() << "=========================================";
+    qDebug() << "persistSaleItems result:" << (overallSuccess ? "✅ SUCCESS" : "❌ FAILED");
+    qDebug() << "=========================================";
     
     return overallSuccess;
 }
 
 bool SalesWindow::insertDetailRecord(int saleId, const QString &reference, int quantity, double unitPrice)
 {
-    const QList<QString> queries = {
+    // Get a fresh database connection
+    QSqlDatabase db = QSqlDatabase::database();
+    if (!db.isOpen()) {
+        qDebug() << "⚠️ Database not open for insertDetailRecord";
+        return false;
+    }
+    
+    // Try different SQL statements for different table schemas
+    const QStringList queries = {
         QStringLiteral("INSERT INTO DETAIL_VENTE (ID_VENTE, REFERENCE_PRODUIT, QUANTITE, PRIX_UNITAIRE) "
-                       "VALUES (:vente, :ref, :qty, :price)"),
+                       "VALUES (%1, '%2', %3, %4)").arg(saleId).arg(reference).arg(quantity).arg(unitPrice),
         QStringLiteral("INSERT INTO detail_vente (id_vente, reference_produit, quantite, prix_unitaire) "
-                       "VALUES (:vente, :ref, :qty, :price)"),
-        QStringLiteral("INSERT INTO DETAIL_VENTE (ID_VENTE, ID_PRODUIT, QUANTITE, PRIX_UNITAIRE) "
-                       "VALUES (:vente, (SELECT ID_PRODUIT FROM PRODUIT WHERE REFERENCE = :ref), :qty, :price)"),
-        QStringLiteral("INSERT INTO detail_vente (id_vente, id_produit, quantite, prix_unitaire) "
-                       "VALUES (:vente, (SELECT id_produit FROM produit WHERE reference = :ref), :qty, :price)")
+                       "VALUES (%1, '%2', %3, %4)").arg(saleId).arg(reference).arg(quantity).arg(unitPrice)
     };
     
     for (const QString &sql : queries) {
-        QSqlQuery query;
-        query.prepare(sql);
-        query.bindValue(":vente", saleId);
-        query.bindValue(":ref", reference);
-        query.bindValue(":qty", quantity);
-        query.bindValue(":price", unitPrice);
-        
-        if (query.exec()) {
+        QSqlQuery query(db);
+        if (query.exec(sql)) {
+            qDebug() << "✅ insertDetailRecord succeeded for" << reference;
             return true;
+        } else {
+            qDebug() << "⚠️ insertDetailRecord attempt failed:" << query.lastError().text();
         }
+        query.clear();
     }
     
-    qDebug() << "Failed to insert detail_vente for" << reference << ":" << queries.last();
-    return false;
+    // DETAIL_VENTE table might not exist - this is often optional
+    // Don't fail the entire operation if this table doesn't exist
+    qDebug() << "⚠️ Could not insert into detail_vente for" << reference << "- table may not exist (this is optional)";
+    return true;  // Return true to not block the sale - CONTENIR is the main table
 }
 
 bool SalesWindow::insertContenirRecord(int saleId, const QString &reference, int quantity, double unitPrice)
 {
-    const QList<QString> queries = {
+    // Get a fresh database connection
+    QSqlDatabase db = QSqlDatabase::database();
+    if (!db.isOpen()) {
+        qDebug() << "⚠️ Database not open for insertContenirRecord";
+        return false;
+    }
+    
+    // Use direct SQL without prepared statements to avoid ODBC issues
+    const QStringList queries = {
         QStringLiteral("INSERT INTO CONTENIR (ID_VENTE, REFERENCE, QUANTITE, PRIX_UNITAIRE) "
-                       "VALUES (:vente, :ref, :qty, :price)"),
+                       "VALUES (%1, '%2', %3, %4)").arg(saleId).arg(reference).arg(quantity).arg(unitPrice),
         QStringLiteral("INSERT INTO contenir (id_vente, reference, quantite, prix_unitaire) "
-                       "VALUES (:vente, :ref, :qty, :price)")
+                       "VALUES (%1, '%2', %3, %4)").arg(saleId).arg(reference).arg(quantity).arg(unitPrice)
     };
     
     for (const QString &sql : queries) {
-        QSqlQuery query;
-        query.prepare(sql);
-        query.bindValue(":vente", saleId);
-        query.bindValue(":ref", reference);
-        query.bindValue(":qty", quantity);
-        query.bindValue(":price", unitPrice);
-        
-        if (query.exec()) {
+        QSqlQuery query(db);
+        if (query.exec(sql)) {
+            qDebug() << "✅ insertContenirRecord succeeded for" << reference;
             return true;
+        } else {
+            qDebug() << "⚠️ insertContenirRecord attempt failed:" << query.lastError().text();
         }
+        query.clear();
     }
     
-    qDebug() << "Failed to insert into contenir for" << reference << ":" << queries.last();
+    qDebug() << "❌ Failed to insert into contenir for" << reference;
     return false;
 }
 
 bool SalesWindow::updateProductStock(const QString &reference, int quantity)
 {
-    const QList<QString> queries = {
-        QStringLiteral("UPDATE PRODUIT SET QUANTITE = QUANTITE - :qty WHERE REFERENCE = :ref"),
-        QStringLiteral("UPDATE produit SET quantite = quantite - :qty WHERE reference = :ref")
+    // Get a fresh database connection
+    QSqlDatabase db = QSqlDatabase::database();
+    if (!db.isOpen()) {
+        qDebug() << "⚠️ Database not open for updateProductStock";
+        return false;
+    }
+    
+    // Use direct SQL without prepared statements
+    const QStringList queries = {
+        QStringLiteral("UPDATE PRODUIT SET QUANTITE = QUANTITE - %1 WHERE REFERENCE = '%2'").arg(quantity).arg(reference),
+        QStringLiteral("UPDATE produit SET quantite = quantite - %1 WHERE reference = '%2'").arg(quantity).arg(reference)
     };
     
     for (const QString &sql : queries) {
-        QSqlQuery query;
-        query.prepare(sql);
-        query.bindValue(":qty", quantity);
-        query.bindValue(":ref", reference);
-        if (query.exec()) {
+        QSqlQuery query(db);
+        if (query.exec(sql)) {
             if (query.numRowsAffected() > 0) {
                 qDebug() << "✅ Stock updated for" << reference << "- reduced by" << quantity;
+                
+                // Commit immediately for Oracle ODBC
+                QSqlQuery commitQuery(db);
+                commitQuery.exec("COMMIT");
+                
                 return true;
             } else {
                 qDebug() << "⚠️ No rows affected for" << reference << "- product may not exist";
             }
+        } else {
+            qDebug() << "⚠️ updateProductStock query failed:" << query.lastError().text();
         }
+        query.clear();
     }
     
     qDebug() << "❌ Failed to update stock for" << reference;
@@ -2086,4 +2359,321 @@ double SalesWindow::getUnitPriceForReference(const QString &reference) const
         }
     }
     return 0.0;
+}
+
+void SalesWindow::on_exportInvoiceButton_clicked()
+{
+    if (!ui->salesTableView->selectionModel() || 
+        !ui->salesTableView->selectionModel()->hasSelection()) {
+        QMessageBox::warning(this, "Avertissement", "Veuillez sélectionner une vente à exporter!");
+        return;
+    }
+    
+    int row = ui->salesTableView->selectionModel()->selectedRows().first().row();
+    int saleId = salesModel->data(salesModel->index(row, 0)).toInt();
+    
+    exportInvoiceToPdf(saleId);
+}
+
+void SalesWindow::exportInvoiceToPdf(int saleId)
+{
+    // Fetch sale details
+    QSqlQuery saleQuery;
+    saleQuery.prepare("SELECT v.date_vente, c.nom, c.prenom, c.id_client, "
+                      "v.prix_ht, v.remise, v.tva, v.prix_ttc, v.mode_paiement, "
+                      "e.nom, e.prenom "
+                      "FROM vente v "
+                      "LEFT JOIN clients c ON v.id_client = c.id_client "
+                      "LEFT JOIN employe e ON v.id_employe = e.id_employe "
+                      "WHERE v.id_vente = :id");
+    saleQuery.bindValue(":id", saleId);
+    
+    if (!saleQuery.exec() || !saleQuery.next()) {
+        QMessageBox::warning(this, "Erreur", "Impossible de récupérer les détails de la vente.");
+        return;
+    }
+    
+    QDateTime dateVente = saleQuery.value(0).toDateTime();
+    QString clientName = saleQuery.value(1).toString() + " " + saleQuery.value(2).toString();
+    QString clientId = saleQuery.value(3).toString();
+    double prixHt = saleQuery.value(4).toDouble();
+    double remise = saleQuery.value(5).toDouble();
+    double tva = saleQuery.value(6).toDouble();
+    double prixTtc = saleQuery.value(7).toDouble();
+    QString modePaiement = saleQuery.value(8).toString();
+    QString employeName = saleQuery.value(9).toString() + " " + saleQuery.value(10).toString();
+    
+    // Fetch items
+    struct LineItem {
+        QString ref;
+        QString designation;
+        int qty;
+        double price;
+        double total;
+    };
+    QList<LineItem> items;
+    
+    // Use the same robust query logic as loadSaleIntoNewSaleForm
+    const QList<QString> itemQueries = {
+        QStringLiteral("SELECT p.REFERENCE, p.DESIGNATION, dv.QUANTITE, p.PRIX "
+                       "FROM DETAIL_VENTE dv "
+                       "JOIN PRODUIT p ON dv.REFERENCE_PRODUIT = p.REFERENCE "
+                       "WHERE dv.ID_VENTE = :id"),
+        QStringLiteral("SELECT p.reference, p.designation, dv.quantite, p.prix "
+                       "FROM detail_vente dv "
+                       "JOIN produit p ON dv.reference_produit = p.reference "
+                       "WHERE dv.id_vente = :id"),
+        QStringLiteral("SELECT p.REFERENCE, p.DESIGNATION, c.QUANTITE, p.PRIX "
+                       "FROM CONTENIR c "
+                       "JOIN PRODUIT p ON c.REFERENCE = p.REFERENCE "
+                       "WHERE c.ID_VENTE = :id"),
+        QStringLiteral("SELECT p.reference, p.designation, c.quantite, p.prix "
+                       "FROM contenir c "
+                       "JOIN produit p ON c.reference = p.reference "
+                       "WHERE c.id_vente = :id")
+    };
+    
+    bool itemsLoaded = false;
+    QSqlQuery itemsQuery;
+    for (const QString &sql : itemQueries) {
+        itemsQuery.clear();
+        itemsQuery.prepare(sql);
+        itemsQuery.bindValue(":id", saleId);
+        if (itemsQuery.exec()) {
+            while (itemsQuery.next()) {
+                LineItem item;
+                item.ref = itemsQuery.value(0).toString();
+                item.designation = itemsQuery.value(1).toString();
+                item.qty = itemsQuery.value(2).toInt();
+                item.price = itemsQuery.value(3).toDouble();
+                item.total = item.qty * item.price;
+                items.append(item);
+            }
+            if (!items.isEmpty()) {
+                itemsLoaded = true;
+                break;
+            }
+        }
+    }
+    
+    if (!itemsLoaded) {
+        QMessageBox::warning(this, "Avertissement", "Aucun article trouvé pour cette vente.");
+        return;
+    }
+    
+    // PDF Generation
+    QString fileName = QFileDialog::getSaveFileName(this, "Exporter Facture", 
+                                                    QString("Facture_%1.pdf").arg(saleId), 
+                                                    "PDF Files (*.pdf)");
+    if (fileName.isEmpty()) return;
+    
+    QPdfWriter writer(fileName);
+    writer.setPageSize(QPageSize::A4);
+    writer.setPageMargins(QMarginsF(15, 15, 15, 15), QPageLayout::Millimeter);
+    
+    QPainter painter(&writer);
+    painter.setRenderHint(QPainter::Antialiasing);
+    
+    int dpi = writer.resolution();
+    auto mmToPx = [dpi](double mm) { return static_cast<int>(mm * dpi / 25.4); };
+    
+    int pageWidth = writer.width();
+    int pageHeight = writer.height();
+    int leftMargin = mmToPx(15);
+    int rightMargin = mmToPx(15);
+    int contentWidth = pageWidth - leftMargin - rightMargin;
+    int yPos = mmToPx(15);
+    
+    // Fonts
+    QFont titleFont("Segoe UI", 24, QFont::Bold);
+    QFont headerFont("Segoe UI", 12, QFont::Bold);
+    QFont normalFont("Segoe UI", 10);
+    QFont smallFont("Segoe UI", 8);
+    QFont boldFont("Segoe UI", 10, QFont::Bold);
+    
+    // --- Header Section ---
+    
+    // Logo (Left)
+    QPixmap logo(":/images/logof.jpg");
+    if (!logo.isNull()) {
+        int logoWidth = mmToPx(30);
+        int logoHeight = mmToPx(30);
+        painter.drawPixmap(leftMargin, yPos, logoWidth, logoHeight, logo);
+    }
+    
+    // Company Info (Right)
+    painter.setFont(boldFont);
+    QString companyName = "SightIQ Optical Store";
+    QString companyInfo = "123 Avenue de la Vision\nTunis, Tunisie\nTél: +216 71 000 000\nEmail: contact@sightiq.tn";
+    
+    QRect companyRect(leftMargin + contentWidth/2, yPos, contentWidth/2, mmToPx(30));
+    painter.drawText(companyRect, Qt::AlignRight | Qt::AlignTop, companyName);
+    
+    painter.setFont(normalFont);
+    QRect infoRect(leftMargin + contentWidth/2, yPos + mmToPx(6), contentWidth/2, mmToPx(24));
+    painter.drawText(infoRect, Qt::AlignRight | Qt::AlignTop, companyInfo);
+    
+    yPos += mmToPx(40);
+    
+    // --- Invoice Title & Details ---
+    
+    // Title "FACTURE"
+    painter.setPen(QColor(0, 212, 255)); // Cyan color
+    painter.setFont(titleFont);
+    painter.drawText(leftMargin, yPos, "FACTURE");
+    painter.setPen(Qt::black);
+    
+    yPos += mmToPx(15);
+    
+    // Invoice Details Box (Left)
+    painter.setFont(boldFont);
+    painter.drawText(leftMargin, yPos, "Facture N°:");
+    painter.setFont(normalFont);
+    painter.drawText(leftMargin + mmToPx(25), yPos, QString::number(saleId));
+    
+    yPos += mmToPx(6);
+    painter.setFont(boldFont);
+    painter.drawText(leftMargin, yPos, "Date:");
+    painter.setFont(normalFont);
+    painter.drawText(leftMargin + mmToPx(25), yPos, dateVente.toString("dd/MM/yyyy HH:mm"));
+    
+    yPos += mmToPx(6);
+    painter.setFont(boldFont);
+    painter.drawText(leftMargin, yPos, "Vendeur:");
+    painter.setFont(normalFont);
+    painter.drawText(leftMargin + mmToPx(25), yPos, employeName);
+    
+    // Client Details Box (Right)
+    int clientBoxY = yPos - mmToPx(12);
+    int clientBoxX = leftMargin + contentWidth * 0.6;
+    int clientBoxW = contentWidth * 0.4;
+    int clientBoxH = mmToPx(25);
+    
+    painter.setPen(QColor(200, 200, 200));
+    painter.drawRect(clientBoxX, clientBoxY, clientBoxW, clientBoxH);
+    painter.setPen(Qt::black);
+    
+    painter.setFont(boldFont);
+    painter.drawText(clientBoxX + mmToPx(3), clientBoxY + mmToPx(5), "Facturé à:");
+    painter.setFont(normalFont);
+    painter.drawText(clientBoxX + mmToPx(3), clientBoxY + mmToPx(12), clientName);
+    painter.drawText(clientBoxX + mmToPx(3), clientBoxY + mmToPx(18), "ID Client: " + clientId);
+    
+    yPos += mmToPx(25);
+    
+    // --- Items Table ---
+    
+    int headerHeight = mmToPx(10);
+    int lineHeight = mmToPx(8);
+    
+    // Columns: Ref (20%), Designation (40%), Qty (10%), Price (15%), Total (15%)
+    int col1 = contentWidth * 0.20;
+    int col2 = contentWidth * 0.40;
+    int col3 = contentWidth * 0.10;
+    int col4 = contentWidth * 0.15;
+    int col5 = contentWidth * 0.15;
+    
+    // Header Background
+    painter.fillRect(leftMargin, yPos, contentWidth, headerHeight, QColor(41, 102, 148)); // Blue
+    painter.setPen(Qt::white);
+    painter.setFont(boldFont);
+    
+    int xPos = leftMargin;
+    auto drawHeaderCell = [&](int w, QString text) {
+        painter.drawText(QRect(xPos, yPos, w, headerHeight), Qt::AlignVCenter | Qt::AlignLeft | Qt::TextWordWrap, "  " + text);
+        xPos += w;
+    };
+    
+    drawHeaderCell(col1, "Référence");
+    drawHeaderCell(col2, "Désignation");
+    drawHeaderCell(col3, "Qté");
+    drawHeaderCell(col4, "Prix Unit.");
+    drawHeaderCell(col5, "Total");
+    
+    yPos += headerHeight;
+    painter.setPen(Qt::black);
+    painter.setFont(normalFont);
+    
+    // Items
+    for (int i = 0; i < items.size(); ++i) {
+        const auto &item = items[i];
+        
+        if (yPos + lineHeight > pageHeight - mmToPx(40)) {
+            writer.newPage();
+            yPos = mmToPx(15);
+            // Re-draw header if needed (simplified here)
+        }
+        
+        xPos = leftMargin;
+        
+        // Alternating row colors
+        if (i % 2 == 1) {
+            painter.fillRect(leftMargin, yPos, contentWidth, lineHeight, QColor(245, 245, 245));
+        }
+        
+        painter.drawText(QRect(xPos, yPos, col1, lineHeight), Qt::AlignVCenter | Qt::AlignLeft, "  " + item.ref); xPos += col1;
+        painter.drawText(QRect(xPos, yPos, col2, lineHeight), Qt::AlignVCenter | Qt::AlignLeft, "  " + item.designation); xPos += col2;
+        painter.drawText(QRect(xPos, yPos, col3, lineHeight), Qt::AlignVCenter | Qt::AlignLeft, "  " + QString::number(item.qty)); xPos += col3;
+        painter.drawText(QRect(xPos, yPos, col4, lineHeight), Qt::AlignVCenter | Qt::AlignLeft, "  " + QString::number(item.price, 'f', 2)); xPos += col4;
+        painter.drawText(QRect(xPos, yPos, col5, lineHeight), Qt::AlignVCenter | Qt::AlignLeft, "  " + QString::number(item.total, 'f', 2)); xPos += col5;
+        
+        // Bottom border
+        painter.setPen(QColor(230, 230, 230));
+        painter.drawLine(leftMargin, yPos + lineHeight, leftMargin + contentWidth, yPos + lineHeight);
+        painter.setPen(Qt::black);
+        
+        yPos += lineHeight;
+    }
+    
+    yPos += mmToPx(5);
+    
+    // --- Totals Section ---
+    
+    int totalsWidth = contentWidth * 0.4;
+    int totalsX = leftMargin + contentWidth - totalsWidth;
+    
+    auto drawTotalLine = [&](QString label, double value, bool isBold = false) {
+        if (isBold) painter.setFont(boldFont);
+        else painter.setFont(normalFont);
+        
+        painter.drawText(QRect(totalsX, yPos, totalsWidth/2, lineHeight), Qt::AlignVCenter | Qt::AlignLeft, label);
+        painter.drawText(QRect(totalsX + totalsWidth/2, yPos, totalsWidth/2, lineHeight), Qt::AlignVCenter | Qt::AlignRight, QString::number(value, 'f', 2) + " DT");
+        yPos += lineHeight;
+    };
+    
+    drawTotalLine("Total HT:", prixHt);
+    if (remise > 0) {
+        painter.setPen(Qt::red);
+        drawTotalLine("Remise:", -remise);
+        painter.setPen(Qt::black);
+    }
+    drawTotalLine("TVA (19%):", tva);
+    
+    // Divider
+    painter.setPen(Qt::black);
+    painter.drawLine(totalsX, yPos, totalsX + totalsWidth, yPos);
+    yPos += mmToPx(2);
+    
+    // Grand Total
+    painter.setFont(titleFont); // Re-use title font for big total but smaller size
+    QFont totalFont("Segoe UI", 14, QFont::Bold);
+    painter.setFont(totalFont);
+    painter.setPen(QColor(41, 102, 148));
+    
+    painter.drawText(QRect(totalsX, yPos, totalsWidth/2, mmToPx(10)), Qt::AlignVCenter | Qt::AlignLeft, "Total TTC:");
+    painter.drawText(QRect(totalsX + totalsWidth/2, yPos, totalsWidth/2, mmToPx(10)), Qt::AlignVCenter | Qt::AlignRight, QString::number(prixTtc, 'f', 2) + " DT");
+    
+    // --- Footer ---
+    
+    yPos = pageHeight - mmToPx(15);
+    painter.setPen(QColor(100, 100, 100));
+    painter.setFont(smallFont);
+    painter.drawLine(leftMargin, yPos, leftMargin + contentWidth, yPos);
+    yPos += mmToPx(2);
+    
+    QString footerText = "Merci de votre confiance ! | SightIQ Optical Store | RC: 123456789 | MF: 0000000/A/M/000";
+    painter.drawText(QRect(leftMargin, yPos, contentWidth, mmToPx(5)), Qt::AlignCenter, footerText);
+    
+    painter.end();
+    QMessageBox::information(this, "Succès", "Facture exportée avec succès!");
 }

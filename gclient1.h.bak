@@ -1,0 +1,517 @@
+#ifndef GCLIENT1_H
+#define GCLIENT1_H
+
+#include <QMainWindow>
+#include <QEvent>
+#include <QtCharts/QChartView>
+#include <QtCharts/QPieSeries>
+#include <QtCharts/QBarSeries>
+#include <QtCharts/QBarSet>
+#include <QtCharts/QValueAxis>
+#include <QtCharts/QLegend>
+#include <QSqlQuery>
+#include <QtCharts/QBarCategoryAxis>
+
+QT_BEGIN_NAMESPACE
+namespace Ui {
+class GestionClients;
+}
+QT_END_NAMESPACE
+
+class Gclient1 : public QMainWindow00:31:42: Exécution des étapes pour le projet projectqtttt…
+00:31:42: Débute : « C:\Qt\6.7.3\mingw_64\bin\qmake.exe » "C:\Users\pinwi\Desktop\pty - Copy\Project full crud\projectqtttt.pro" -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug"
+00:32:00: La commande « C:\Qt\6.7.3\mingw_64\bin\qmake.exe "C:\Users\pinwi\Desktop\pty - Copy\Project full crud\projectqtttt.pro" -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" » s’est terminée avec succès.
+00:32:01: Débute : « C:\Qt\Tools\mingw1120_64\bin\mingw32-make.exe » -f "C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/Makefile" qmake_all
+mingw32-make: Nothing to be done for 'qmake_all'.
+00:32:01: La commande « C:\Qt\Tools\mingw1120_64\bin\mingw32-make.exe -f "C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/Makefile" qmake_all » s’est terminée avec succès.
+00:32:01: Débute : « C:\Qt\Tools\mingw1120_64\bin\mingw32-make.exe » -j12
+C:/Qt/Tools/mingw1120_64/bin/mingw32-make -f Makefile.Debug
+mingw32-make[1]: Entering directory 'C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug'
+C:\Qt\6.7.3\mingw_64\bin\uic.exe "..\..\..\..\pty - Copy\Project full crud\login.ui" -o ui_login.h
+C:\Qt\6.7.3\mingw_64\bin\uic.exe "..\..\..\..\pty - Copy\Project full crud\tab.ui" -o ui_tab.h
+C:\Qt\6.7.3\mingw_64\bin\uic.exe "..\..\..\..\pty - Copy\Project full crud\gestionemploye00.ui" -o ui_gestionemploye00.h
+C:\Qt\6.7.3\mingw_64\bin\uic.exe "..\..\..\..\pty - Copy\Project full crud\statistique.ui" -o ui_statistique.h
+C:\Qt\6.7.3\mingw_64\bin\uic.exe "..\..\..\..\pty - Copy\Project full crud\salesstatistique.ui" -o ui_salesstatistique.h
+C:\Qt\6.7.3\mingw_64\bin\uic.exe "..\..\..\..\pty - Copy\Project full crud\exporter.ui" -o ui_exporter.h
+C:\Qt\6.7.3\mingw_64\bin\uic.exe "..\..\..\..\pty - Copy\Project full crud\mainwindow.ui" -o ui_mainwindow.h
+C:\Qt\6.7.3\mingw_64\bin\uic.exe "..\..\..\..\pty - Copy\Project full crud\saleswindow.ui" -o ui_saleswindow.h
+C:\Qt\6.7.3\mingw_64\bin\uic.exe "..\..\..\..\pty - Copy\Project full crud\gclient1.ui" -o ui_gclient1.h
+C:\Qt\6.7.3\mingw_64\bin\uic.exe "..\..\..\..\pty - Copy\Project full crud\dashboardwindow.ui" -o ui_dashboardwindow.h
+C:\Qt\6.7.3\mingw_64\bin\uic.exe "..\..\..\..\pty - Copy\Project full crud\fournisseurwindow.ui" -o ui_fournisseurwindow.h
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\Connection.o "..\..\..\..\pty - Copy\Project full crud\Connection.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\WindowManager.o "..\..\..\..\pty - Copy\Project full crud\WindowManager.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\arduino.o "..\..\..\..\pty - Copy\Project full crud\arduino.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\main.o "..\..\..\..\pty - Copy\Project full crud\main.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\login.o "..\..\..\..\pty - Copy\Project full crud\login.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\tab.o "..\..\..\..\pty - Copy\Project full crud\tab.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\gestionemploye00.o "..\..\..\..\pty - Copy\Project full crud\gestionemploye00.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\statistique.o "..\..\..\..\pty - Copy\Project full crud\statistique.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\salesstatistique.o "..\..\..\..\pty - Copy\Project full crud\salesstatistique.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\exporter.o "..\..\..\..\pty - Copy\Project full crud\exporter.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\mainwindow.o "..\..\..\..\pty - Copy\Project full crud\mainwindow.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\saleswindow.o "..\..\..\..\pty - Copy\Project full crud\saleswindow.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\gclient1.o "..\..\..\..\pty - Copy\Project full crud\gclient1.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\dashboardwindow.o "..\..\..\..\pty - Copy\Project full crud\dashboardwindow.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\fournisseurwindow.o "..\..\..\..\pty - Copy\Project full crud\fournisseurwindow.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\client.o "..\..\..\..\pty - Copy\Project full crud\client.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\produit.o "..\..\..\..\pty - Copy\Project full crud\produit.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\vente.o "..\..\..\..\pty - Copy\Project full crud\vente.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\employe.o "..\..\..\..\pty - Copy\Project full crud\employe.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\fournisseur.o "..\..\..\..\pty - Copy\Project full crud\fournisseur.cpp"
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\employeeditdialog.o "..\..\..\..\pty - Copy\Project full crud\employeeditdialog.cpp"
+C:\Qt\6.7.3\mingw_64\bin\rcc.exe -name resources --no-zstd "..\..\..\..\pty - Copy\Project full crud\resources.qrc" -o debug\qrc_resources.cpp
+g++ -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -dM -E -o debug\moc_predefs.h C:\Qt\6.7.3\mingw_64\mkspecs\features\data\dummy.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\qrc_resources.o debug\qrc_resources.cpp
+C:\Qt\6.7.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include "C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/debug/moc_predefs.h" -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++ -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include "..\..\..\..\pty - Copy\Project full crud\arduino.h" -o debug\moc_arduino.cpp
+C:\Qt\6.7.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include "C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/debug/moc_predefs.h" -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++ -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include "..\..\..\..\pty - Copy\Project full crud\login.h" -o debug\moc_login.cpp
+C:\Qt\6.7.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include "C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/debug/moc_predefs.h" -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++ -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include "..\..\..\..\pty - Copy\Project full crud\tab.h" -o debug\moc_tab.cpp
+..\..\..\..\pty - Copy\Project full crud\employe.cpp: In member function 'bool Employe::ajouter()':
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:77:82: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+   77 |     query.bindValue(":telephone", telephone.isEmpty() ? QVariant(QVariant::String) : QVariant(telephone));
+      |                                                                                  ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:79:78: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+   79 |     query.bindValue(":adresse", adresse.isEmpty() ? QVariant(QVariant::String) : QVariant(adresse));
+      |                                                                              ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:80:74: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+   80 |     query.bindValue(":poste", poste.isEmpty() ? QVariant(QVariant::String) : QVariant(poste));
+      |                                                                          ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+C:\Qt\6.7.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include "C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/debug/moc_predefs.h" -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++ -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include "..\..\..\..\pty - Copy\Project full crud\gestionemploye00.h" -o debug\moc_gestionemploye00.cpp
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:133:90: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  133 |             query.bindValue(":telephone", telephone.isEmpty() ? QVariant(QVariant::String) : QVariant(telephone));
+      |                                                                                          ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:135:86: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  135 |             query.bindValue(":adresse", adresse.isEmpty() ? QVariant(QVariant::String) : QVariant(adresse));
+      |                                                                                      ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:136:82: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  136 |             query.bindValue(":poste", poste.isEmpty() ? QVariant(QVariant::String) : QVariant(poste));
+      |                                                                                  ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:150:94: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  150 |                 query.bindValue(":telephone", telephone.isEmpty() ? QVariant(QVariant::String) : QVariant(telephone));
+      |                                                                                              ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:152:90: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  152 |                 query.bindValue(":adresse", adresse.isEmpty() ? QVariant(QVariant::String) : QVariant(adresse));
+      |                                                                                          ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:153:86: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  153 |                 query.bindValue(":poste", poste.isEmpty() ? QVariant(QVariant::String) : QVariant(poste));
+      |                                                                                      ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:180:94: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  180 |                 query.bindValue(":telephone", telephone.isEmpty() ? QVariant(QVariant::String) : QVariant(telephone));
+      |                                                                                              ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:182:90: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  182 |                 query.bindValue(":adresse", adresse.isEmpty() ? QVariant(QVariant::String) : QVariant(adresse));
+      |                                                                                          ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:183:86: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  183 |                 query.bindValue(":poste", poste.isEmpty() ? QVariant(QVariant::String) : QVariant(poste));
+      |                                                                                      ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp: In member function 'bool Employe::modifier()':
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:280:82: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  280 |     query.bindValue(":telephone", telephone.isEmpty() ? QVariant(QVariant::String) : QVariant(telephone));
+      |                                                                                  ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:282:78: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  282 |     query.bindValue(":adresse", adresse.isEmpty() ? QVariant(QVariant::String) : QVariant(adresse));
+      |                                                                              ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:283:74: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  283 |     query.bindValue(":poste", poste.isEmpty() ? QVariant(QVariant::String) : QVariant(poste));
+      |                                                                          ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:308:90: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  308 |             query.bindValue(":telephone", telephone.isEmpty() ? QVariant(QVariant::String) : QVariant(telephone));
+      |                                                                                          ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:310:86: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  310 |             query.bindValue(":adresse", adresse.isEmpty() ? QVariant(QVariant::String) : QVariant(adresse));
+      |                                                                                      ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:311:82: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  311 |             query.bindValue(":poste", poste.isEmpty() ? QVariant(QVariant::String) : QVariant(poste));
+      |                                                                                  ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:338:94: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  338 |                 query.bindValue(":telephone", telephone.isEmpty() ? QVariant(QVariant::String) : QVariant(telephone));
+      |                                                                                              ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:340:90: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  340 |                 query.bindValue(":adresse", adresse.isEmpty() ? QVariant(QVariant::String) : QVariant(adresse));
+      |                                                                                          ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:341:86: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  341 |                 query.bindValue(":poste", poste.isEmpty() ? QVariant(QVariant::String) : QVariant(poste));
+      |                                                                                      ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp: In member function 'QSqlQueryModel* Employe::afficher()':
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:494:20: warning: 'void QSqlQueryModel::setQuery(const QSqlQuery&)' is deprecated: QSqlQuery is not meant to be copied. Pass it by move instead. [-Wdeprecated-declarations]
+  494 |     model->setQuery(query);
+      |     ~~~~~~~~~~~~~~~^~~~~~~
+In file included from C:/Qt/6.7.3/mingw_64/include/QtSql/QSqlQueryModel:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:8,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtSql/qsqlquerymodel.h:45:10: note: declared here
+   45 |     void setQuery(const QSqlQuery &query);
+      |          ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp: In member function 'QSqlQueryModel* Employe::rechercher(const QString&)':
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:551:20: warning: 'void QSqlQueryModel::setQuery(const QSqlQuery&)' is deprecated: QSqlQuery is not meant to be copied. Pass it by move instead. [-Wdeprecated-declarations]
+  551 |     model->setQuery(query);
+      |     ~~~~~~~~~~~~~~~^~~~~~~
+In file included from C:/Qt/6.7.3/mingw_64/include/QtSql/QSqlQueryModel:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:8,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtSql/qsqlquerymodel.h:45:10: note: declared here
+   45 |     void setQuery(const QSqlQuery &query);
+      |          ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp: In member function 'QSqlQueryModel* Employe::rechercherParNom(const QString&)':
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:621:20: warning: 'void QSqlQueryModel::setQuery(const QSqlQuery&)' is deprecated: QSqlQuery is not meant to be copied. Pass it by move instead. [-Wdeprecated-declarations]
+  621 |     model->setQuery(query);
+      |     ~~~~~~~~~~~~~~~^~~~~~~
+In file included from C:/Qt/6.7.3/mingw_64/include/QtSql/QSqlQueryModel:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:8,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtSql/qsqlquerymodel.h:45:10: note: declared here
+   45 |     void setQuery(const QSqlQuery &query);
+      |          ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\employe.cpp: In member function 'QSqlQueryModel* Employe::afficherVentesParEmploye(int)':
+..\..\..\..\pty - Copy\Project full crud\employe.cpp:723:20: warning: 'void QSqlQueryModel::setQuery(const QSqlQuery&)' is deprecated: QSqlQuery is not meant to be copied. Pass it by move instead. [-Wdeprecated-declarations]
+  723 |     model->setQuery(query);
+      |     ~~~~~~~~~~~~~~~^~~~~~~
+In file included from C:/Qt/6.7.3/mingw_64/include/QtSql/QSqlQueryModel:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.h:8,
+                 from ..\..\..\..\pty - Copy\Project full crud\employe.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtSql/qsqlquerymodel.h:45:10: note: declared here
+   45 |     void setQuery(const QSqlQuery &query);
+      |          ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\vente.cpp: In member function 'bool Vente::ajouter()':
+..\..\..\..\pty - Copy\Project full crud\vente.cpp:179:62: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  179 |         query.bindValue(":id_employe", QVariant(QVariant::Int));  // NULL for Oracle
+      |                                                              ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\vente.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\vente.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+C:\Qt\6.7.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include "C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/debug/moc_predefs.h" -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++ -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include "..\..\..\..\pty - Copy\Project full crud\statistique.h" -o debug\moc_statistique.cpp
+In file included from ..\..\..\..\pty - Copy\Project full crud\gclient1.cpp:2:
+./ui_gclient1.h: In member function 'void Ui_GestionClients::retranslateUi(QMainWindow*)':
+./ui_gclient1.h:703:46: error: no matching function for call to 'QLabel::setProperty(QString)'
+  703 |         lblInactiveClientsChange->setProperty(QCoreApplication::translate("GestionClients", "down", nullptr));
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from C:/Qt/6.7.3/mingw_64/include/QtWidgets/qwidget.h:9,
+                 from C:/Qt/6.7.3/mingw_64/include/QtWidgets/qmainwindow.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtWidgets/QMainWindow:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\gclient1.h:4,
+                 from ..\..\..\..\pty - Copy\Project full crud\gclient1.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qobject.h:401:6: note: candidate: 'bool QObject::setProperty(const char*, const QVariant&)'
+  401 | bool QObject::setProperty(const char *name, const QVariant &value)
+      |      ^~~~~~~
+C:/Qt/6.7.3/mingw_64/include/QtCore/qobject.h:401:6: note:   candidate expects 2 arguments, 1 provided
+C:/Qt/6.7.3/mingw_64/include/QtCore/qobject.h:406:6: note: candidate: 'bool QObject::setProperty(const char*, QVariant&&)'
+  406 | bool QObject::setProperty(const char *name, QVariant &&value)
+      |      ^~~~~~~
+C:/Qt/6.7.3/mingw_64/include/QtCore/qobject.h:406:6: note:   candidate expects 2 arguments, 1 provided
+..\..\..\..\pty - Copy\Project full crud\vente.cpp:241:66: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  241 |             query.bindValue(":id_employe", QVariant(QVariant::Int));  // NULL for Oracle
+      |                                                                  ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\vente.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\vente.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\vente.cpp:267:70: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  267 |                 query.bindValue(":id_employe", QVariant(QVariant::Int));
+      |                                                                      ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\vente.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\vente.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+..\..\..\..\pty - Copy\Project full crud\vente.cpp:317:74: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  317 |                     query.bindValue(":id_employe", QVariant(QVariant::Int));
+      |                                                                          ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\vente.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\vente.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+C:\Qt\6.7.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include "C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/debug/moc_predefs.h" -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++ -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include "..\..\..\..\pty - Copy\Project full crud\salesstatistique.h" -o debug\moc_salesstatistique.cpp
+..\..\..\..\pty - Copy\Project full crud\vente.cpp: In member function 'bool Vente::modifier()':
+..\..\..\..\pty - Copy\Project full crud\vente.cpp:540:62: warning: 'QVariant::QVariant(QVariant::Type)' is deprecated: Use the constructor taking a QMetaType instead. [-Wdeprecated-declarations]
+  540 |         query.bindValue(":id_employe", QVariant(QVariant::Int));
+      |                                                              ^
+In file included from C:/Qt/6.7.3/mingw_64/include/QtCore/qlocale.h:7,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qcalendar.h:10,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/qdatetime.h:8,
+                 from C:/Qt/6.7.3/mingw_64/include/QtCore/QDate:1,
+                 from ..\..\..\..\pty - Copy\Project full crud\vente.h:5,
+                 from ..\..\..\..\pty - Copy\Project full crud\vente.cpp:1:
+C:/Qt/6.7.3/mingw_64/include/QtCore/qvariant.h:428:14: note: declared here
+  428 |     explicit QVariant(Type type)
+      |              ^~~~~~~~
+C:\Qt\6.7.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include "C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/debug/moc_predefs.h" -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++ -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include "..\..\..\..\pty - Copy\Project full crud\exporter.h" -o debug\moc_exporter.cpp
+C:\Qt\6.7.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include "C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/debug/moc_predefs.h" -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++ -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include "..\..\..\..\pty - Copy\Project full crud\mainwindow.h" -o debug\moc_mainwindow.cpp
+C:\Qt\6.7.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include "C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/debug/moc_predefs.h" -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++ -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include "..\..\..\..\pty - Copy\Project full crud\saleswindow.h" -o debug\moc_saleswindow.cpp
+C:\Qt\6.7.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include "C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/debug/moc_predefs.h" -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++ -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include "..\..\..\..\pty - Copy\Project full crud\gclient1.h" -o debug\moc_gclient1.cpp
+C:\Qt\6.7.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include "C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/debug/moc_predefs.h" -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++ -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include "..\..\..\..\pty - Copy\Project full crud\dashboardwindow.h" -o debug\moc_dashboardwindow.cpp
+C:\Qt\6.7.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include "C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/debug/moc_predefs.h" -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++ -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include "..\..\..\..\pty - Copy\Project full crud\fournisseurwindow.h" -o debug\moc_fournisseurwindow.cpp
+C:\Qt\6.7.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include "C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug/debug/moc_predefs.h" -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++ -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -I"C:/Users/pinwi/Desktop/pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include "..\..\..\..\pty - Copy\Project full crud\employeeditdialog.h" -o debug\moc_employeeditdialog.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\moc_arduino.o debug\moc_arduino.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\moc_login.o debug\moc_login.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\moc_tab.o debug\moc_tab.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\moc_gestionemploye00.o debug\moc_gestionemploye00.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\moc_statistique.o debug\moc_statistique.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\moc_salesstatistique.o debug\moc_salesstatistique.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_QML_DEBUG -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I"../../../../pty - Copy/Project full crud" -I. -I"../../../../pty - Copy/Project full crud" -IC:/Qt/6.7.3/mingw_64/include -IC:/Qt/6.7.3/mingw_64/include/QtCharts -IC:/Qt/6.7.3/mingw_64/include/QtOpenGLWidgets -IC:/Qt/6.7.3/mingw_64/include/QtPrintSupport -IC:/Qt/6.7.3/mingw_64/include/QtWidgets -IC:/Qt/6.7.3/mingw_64/include/QtOpenGL -IC:/Qt/6.7.3/mingw_64/include/QtGui -IC:/Qt/6.7.3/mingw_64/include/QtSql -IC:/Qt/6.7.3/mingw_64/include/QtSerialPort -IC:/Qt/6.7.3/mingw_64/include/QtCore -Idebug -I. -I/include -IC:/Qt/6.7.3/mingw_64/mkspecs/win32-g++  -o debug\moc_exporter.o debug\moc_exporter.cpp
+mingw32-make[1]: *** [Makefile.Debug:6042: debug/gclient1.o] Error 1
+mingw32-make[1]: *** Waiting for unfinished jobs....
+mingw32-make[1]: Leaving directory 'C:/Users/pinwi/Desktop/pty/Project full crud/build/Desktop_Qt_6_7_3_MinGW_64_bit-Debug'
+mingw32-make: *** [Makefile:45: debug] Error 2
+00:32:20: La commande « C:\Qt\Tools\mingw1120_64\bin\mingw32-make.exe -j12 » s’est terminée avec le code de sortie 2.
+00:32:20: Erreur lors de la compilation/déploiement du projet projectqtttt (kit : Desktop Qt 6.7.3 MinGW 64-bit)
+00:32:20: Lors de l’exécution de l’étape « Make »
+00:32:20: Temps écoulé : 00:38.
+
+{
+    Q_OBJECT
+
+public:
+    explicit Gclient1(QWidget *parent = nullptr);
+    ~Gclient1();
+    void loadClients();  // Méthode publique pour charger les clients
+    
+    // Singleton pattern
+    static Gclient1* getInstance(QWidget *parent = nullptr);
+    static Gclient1* instance;
+
+private slots:
+    void on_btnSave_clicked();
+    void on_btnCancel_clicked();
+    void on_btnDelete_clicked();
+    void on_btnExport_clicked();
+    void on_tableWidgetClients_cellDoubleClicked(int row, int column);
+    void on_lineEditSearch_textChanged(const QString &text);
+    void on_comboBoxTri_currentIndexChanged(int index);
+    void on_tabWidgetMain_currentChanged(int index);
+    
+    // Navigation buttons
+    void on_b1_clicked(); // Stock
+    void on_b2_clicked(); // Ventes
+    void on_b3_clicked(); // Employes
+    void on_b4_clicked(); // Clients (self)
+    void on_b5_clicked(); // Fournisseur
+
+private:
+    Ui::GestionClients *ui;
+    bool isEditing;
+    int currentClientId;
+    
+    // Statistics methods
+    void updateStatistics();
+    void updateTotalClients();
+    void updateGenderDistribution();
+    void updateMonthlyRegistrations();
+    int getClientCount();
+    int getInactiveClientCount();
+    QMap<QString, int> getGenderDistribution();
+    QMap<QString, int> getMonthlyRegistrations();
+    bool eventFilter(QObject *obj, QEvent *event) override;
+    void clearForm();
+    void fillForm(int row);
+    void refreshTable(const QString &searchText = "", int sortIndex = -1);
+};
+
+#endif // GCLIENT1_H

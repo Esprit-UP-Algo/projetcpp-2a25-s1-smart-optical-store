@@ -48,7 +48,8 @@ DashboardWindow::DashboardWindow(const QString &role, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::DashboardWindow),
     currentUserRole(role),
-    promoManagerOpen(false)
+    promoManagerOpen(false),
+    todayRevenue(0.0)
 {
     ui->setupUi(this);
     
@@ -368,16 +369,22 @@ void DashboardWindow::loadDashboardData()
         query.prepare(sql);
         query.bindValue(":today", todayStr);
         if (query.exec() && query.next()) {
-            double revenue = query.value(0).toDouble();
-            ui->todaySalesLabel->setText(QString("%1 DT").arg(revenue, 0, 'f', 2));
-            qDebug() << "✅ Today's Revenue:" << revenue;
+            todayRevenue = query.value(0).toDouble();  // Store in member variable
+            ui->todaySalesLabel->setText(QString("%1 DT").arg(todayRevenue, 0, 'f', 2));
+            qDebug() << "✅ Today's Revenue:" << todayRevenue;
             todayRevenueLoaded = true;
+            
+            // Check revenue threshold and notify Arduino if connected
+            if (arduino && arduino->is_available()) {
+                arduino->checkRevenueThreshold(todayRevenue);
+            }
             break;
         }
     }
     if (!todayRevenueLoaded) {
         qDebug() << "⚠️ Failed to load today's revenue";
         ui->todaySalesLabel->setText("0.00 DT");
+        todayRevenue = 0.0;
     }
     
     // This Week Revenue

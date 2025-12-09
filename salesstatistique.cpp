@@ -20,6 +20,7 @@
 #include <QtCharts/QPieSeries>
 #include <QtCharts/QPieSlice>
 #include <QtCharts/QBarSeries>
+#include <QtCharts/QHorizontalBarSeries>
 #include <QtCharts/QBarSet>
 #include <QtCharts/QBarCategoryAxis>
 #include <QtCharts/QValueAxis>
@@ -557,45 +558,43 @@ void SalesStatistique::loadSalesStatistics()
             qDebug() << "Sorted client:" << pair.second << "Total:" << pair.first;
         }
         
-        // Create pyramid/bar chart for top clients with gradient colors
-        // Use vertical bars with proper spacing for pyramid effect
-        QBarSeries *clientBarSeries = new QBarSeries();
-        clientBarSeries->setBarWidth(0.8); // Make bars slightly narrower for better visibility
-        
-        QList<QColor> pyramidColors = {
-            QColor(255, 215, 0),   // Gold for #1 (most valuable)
-            QColor(255, 165, 0),   // Orange for #2
-            QColor(255, 140, 0),   // Dark orange for #3
-            QColor(255, 100, 0),   // Red-orange for #4
-            QColor(200, 40, 0)     // Dark red for #5
-        };
-        
-        // Create a bar set for each client with individual colors
-        // Keep order: highest first (pyramid base at bottom)
-        for (int i = 0; i < sortedTotals.size(); ++i) {
-            QBarSet *barSet = new QBarSet(sortedNames[i]);
-            *barSet << sortedTotals[i];
-            if (i < pyramidColors.size()) {
-                QColor barColor = pyramidColors[i];
-                barSet->setColor(barColor);
+        // Truncate long client names for better display
+        QStringList displayNames;
+        for (const QString &name : sortedNames) {
+            if (name.length() > 12) {
+                displayNames.append(name.left(10) + "...");
             } else {
-                barSet->setColor(QColor(255, 140, 0)); // Default orange
+                displayNames.append(name);
             }
-            clientBarSeries->append(barSet);
-            qDebug() << "Added bar set #" << (i+1) << ":" << sortedNames[i] << "Value:" << sortedTotals[i];
         }
+        
+        // Create a SINGLE bar set with all client values - this gives proper spacing!
+        QBarSet *clientBarSet = new QBarSet("Chiffre d'affaires");
+        for (int i = 0; i < sortedTotals.size(); ++i) {
+            *clientBarSet << sortedTotals[i];
+        }
+        clientBarSet->setColor(QColor(255, 165, 0)); // Orange color
+        
+        // Use regular QBarSeries with ONE bar set (not multiple)
+        QBarSeries *clientBarSeries = new QBarSeries();
+        clientBarSeries->setBarWidth(0.6); // Good bar width with spacing
+        clientBarSeries->append(clientBarSet);
         
         QChart *clientChart = new QChart();
         clientChart->addSeries(clientBarSeries);
         clientChart->setTitle("Top 5 Clients - Pyramide");
         clientChart->setAnimationOptions(QChart::SeriesAnimations);
         
-        // Use vertical bars (categories on X-axis, values on Y-axis)
+        // Add generous margins for labels
+        clientChart->setMargins(QMargins(10, 10, 10, 40)); // Extra bottom margin for rotated labels
+        
+        // X-axis: Client names (categories)
         QBarCategoryAxis *clientAxisX = new QBarCategoryAxis();
-        clientAxisX->append(sortedNames);
+        clientAxisX->append(displayNames);
         clientChart->addAxis(clientAxisX, Qt::AlignBottom);
         clientBarSeries->attachAxis(clientAxisX);
         
+        // Y-axis: Values (revenue)
         QValueAxis *clientAxisY = new QValueAxis();
         double maxTotal = *std::max_element(sortedTotals.begin(), sortedTotals.end());
         clientAxisY->setRange(0, maxTotal > 0 ? maxTotal * 1.15 : 100);
@@ -656,7 +655,7 @@ void SalesStatistique::loadSalesStatistics()
         clientChartView->update();
         clientChartView->repaint();
         
-        qDebug() << "✓ Pyramid chart created and added with" << sortedTotals.size() << "clients";
+        qDebug() << "✓ Vertical bar chart created with" << sortedTotals.size() << "clients";
         qDebug() << "Chart view size:" << clientChartView->size();
         qDebug() << "Widget size:" << ui->clientsChartWidget->size();
         qDebug() << "Widget visible:" << ui->clientsChartWidget->isVisible();

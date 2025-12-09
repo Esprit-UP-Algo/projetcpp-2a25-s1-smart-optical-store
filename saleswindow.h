@@ -44,9 +44,11 @@ private slots:
     void on_statisticsButton_clicked();
     void on_productComboBox_currentIndexChanged(int index);
     void on_exportPdfButton_clicked();
+    void on_exportInvoiceButton_clicked(); // Export single invoice
     void on_logoClicked();  // Logo click -> Dashboard
     void on_applyPromoButton_clicked();  // Apply promo code
     void on_pushButton_6_clicked();  // Codes Promo button
+    void onPromoManagerFinished(int result); // Slot to handle promo manager close
 
     // Tableau de bord navigation
     void on_pushButton_clicked();      // Stock -> MainWindow
@@ -88,6 +90,7 @@ private:
     void searchSales(const QString &searchText);
     void populateProductComboBox();
     void exportSalesToPdf();
+    void exportInvoiceToPdf(int saleId); // Export specific sale as invoice
     void loadSaleIntoNewSaleForm(int saleId);  // Load sale data into new sale form
     bool eventFilter(QObject *obj, QEvent *event) override;
     void showEvent(QShowEvent *event) override;  // Refresh products when window is shown

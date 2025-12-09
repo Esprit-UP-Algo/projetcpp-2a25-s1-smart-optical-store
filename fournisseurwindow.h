@@ -44,6 +44,7 @@ private:
     void afficherFournisseurs();
     void ecrireHistorique(const QString &action, int id, const QString &nomEntreprise);
     void configureRoleBasedAccess();           // Configure l'accès basé sur le rôle
+    void loadStatisticsCharts();               // Load statistics charts on startup
 
     // ==== Fonction SMS fournisseur (Twilio) ====
     bool envoyerSmsFournisseur(const QString &numero, const QString &message);

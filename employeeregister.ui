@@ -6,39 +6,42 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1249</width>
-    <height>821</height>
+    <width>950</width>
+    <height>850</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Employee Registration</string>
+   <string>SightIQ - Inscription Employé</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(184, 226, 242);</string>
+   <string notr="true">
+/* Main Dialog Background - Modern Gradient */
+QDialog#EmployeeRegister {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 #0f2027,
+                                stop:0.5 #203a43,
+                                stop:1 #2c5364);
+}
+   </string>
   </property>
   <widget class="QLabel" name="logoLabel">
    <property name="geometry">
     <rect>
-     <x>1120</x>
-     <y>20</y>
+     <x>825</x>
+     <y>30</y>
      <width>100</width>
      <height>100</height>
     </rect>
    </property>
-   <property name="minimumSize">
-    <size>
-     <width>60</width>
-     <height>60</height>
-    </size>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>100</width>
-     <height>100</height>
-    </size>
-   </property>
-   <property name="text">
-    <string/>
+   <property name="styleSheet">
+    <string notr="true">
+QLabel {
+    background: rgba(255, 255, 255, 0.1);
+    border: 3px solid rgba(0, 212, 255, 0.5);
+    border-radius: 50px;
+    padding: 10px;
+}
+    </string>
    </property>
    <property name="pixmap">
     <pixmap resource="resources.qrc">:/images/logof.jpg</pixmap>
@@ -47,184 +50,382 @@
     <bool>true</bool>
    </property>
    <property name="alignment">
-    <set>Qt::AlignCenter</set>
+    <set>Qt::AlignmentFlag::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QGroupBox" name="groupBox">
+  <widget class="QLabel" name="label_title">
    <property name="geometry">
     <rect>
-     <x>200</x>
-     <y>100</y>
-     <width>850</width>
+     <x>250</x>
+     <y>50</y>
+     <width>450</width>
+     <height>60</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">
+QLabel {
+    background: transparent;
+    color: white;
+    font-family: 'Segoe UI', Arial;
+    font-size: 38px;
+    font-weight: bold;
+    text-align: center;
+}
+    </string>
+   </property>
+   <property name="text">
+    <string>✨ Inscription Employé</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignmentFlag::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_subtitle">
+   <property name="geometry">
+    <rect>
+     <x>250</x>
+     <y>110</y>
+     <width>450</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">
+QLabel {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    font-family: 'Segoe UI', Arial;
+    font-size: 15px;
+    text-align: center;
+}
+    </string>
+   </property>
+   <property name="text">
+    <string>Créez un nouveau compte employé pour SightIQ</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignmentFlag::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QFrame" name="frame_main">
+   <property name="geometry">
+    <rect>
+     <x>75</x>
+     <y>160</y>
+     <width>800</width>
      <height>650</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">QGroupBox {
-    background-color: rgb(41, 102, 148);   /* blue background */
-    border: 2px solid black;               /* black border, 2px wide */
-    border-radius: 8px;                    /* rounded corners */
-    margin-top: 20px;                      /* space for the title */
-    color: white;                          /* title text color */
-    font-weight: bold;
-    font-size: 14px;
+    <string notr="true">
+QFrame#frame_main {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
 }
-
-QGroupBox::title {
- border: 2px solid black;               /* black border, 2px wide */
-    border-radius: 8px;     
-background-color: rgb(41, 102, 148);
-    subcontrol-origin: margin;
-    subcontrol-position: top center;       /* title centered */
-    padding: 2px 10px;
-}</string>
-   </property>
-   <property name="title">
-    <string>Employee Registration</string>
+    </string>
    </property>
    <widget class="QLabel" name="label_nom">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>60</y>
-      <width>81</width>
-      <height>20</height>
+      <x>50</x>
+      <y>40</y>
+      <width>340</width>
+      <height>25</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(41, 102, 148);</string>
+     <string notr="true">
+QLabel {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Segoe UI', Arial;
+    font-size: 13px;
+    font-weight: 600;
+}
+     </string>
     </property>
     <property name="text">
-     <string>Nom :</string>
+     <string> Nom</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_nom">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>90</y>
-      <width>291</width>
-      <height>41</height>
+      <x>50</x>
+      <y>70</y>
+      <width>340</width>
+      <height>45</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(0, 0, 0);</string>
+     <string notr="true">
+QLineEdit {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 0 15px;
+    color: white;
+    font-family: 'Segoe UI', Arial;
+    font-size: 14px;
+}
+
+QLineEdit:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #00d4ff;
+}
+
+QLineEdit::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+     </string>
+    </property>
+    <property name="placeholderText">
+     <string>Nom de famille</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_prenom">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>60</y>
-      <width>81</width>
-      <height>20</height>
+      <x>410</x>
+      <y>40</y>
+      <width>340</width>
+      <height>25</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(41, 102, 148);</string>
+     <string notr="true">
+QLabel {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Segoe UI', Arial;
+    font-size: 13px;
+    font-weight: 600;
+}
+     </string>
     </property>
     <property name="text">
-     <string>Prénom :</string>
+     <string> Prénom</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_prenom">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>90</y>
-      <width>291</width>
-      <height>41</height>
+      <x>410</x>
+      <y>70</y>
+      <width>340</width>
+      <height>45</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(0, 0, 0);</string>
+     <string notr="true">
+QLineEdit {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 0 15px;
+    color: white;
+    font-family: 'Segoe UI', Arial;
+    font-size: 14px;
+}
+
+QLineEdit:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #00d4ff;
+}
+
+QLineEdit::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+     </string>
+    </property>
+    <property name="placeholderText">
+     <string>Prénom</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_email">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>150</y>
-      <width>81</width>
-      <height>20</height>
+      <x>50</x>
+      <y>135</y>
+      <width>340</width>
+      <height>25</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(41, 102, 148);</string>
+     <string notr="true">
+QLabel {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Segoe UI', Arial;
+    font-size: 13px;
+    font-weight: 600;
+}
+     </string>
     </property>
     <property name="text">
-     <string>Email :</string>
+     <string> Email</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_email">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>180</y>
-      <width>291</width>
-      <height>41</height>
+      <x>50</x>
+      <y>165</y>
+      <width>340</width>
+      <height>45</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(0, 0, 0);</string>
+     <string notr="true">
+QLineEdit {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 0 15px;
+    color: white;
+    font-family: 'Segoe UI', Arial;
+    font-size: 14px;
+}
+
+QLineEdit:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #00d4ff;
+}
+
+QLineEdit::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+     </string>
+    </property>
+    <property name="placeholderText">
+     <string>exemple@email.com</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_telephone">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>150</y>
-      <width>81</width>
-      <height>20</height>
+      <x>410</x>
+      <y>135</y>
+      <width>340</width>
+      <height>25</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(41, 102, 148);</string>
+     <string notr="true">
+QLabel {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Segoe UI', Arial;
+    font-size: 13px;
+    font-weight: 600;
+}
+     </string>
     </property>
     <property name="text">
-     <string>Téléphone :</string>
+     <string> Téléphone</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_telephone">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>180</y>
-      <width>291</width>
-      <height>41</height>
+      <x>410</x>
+      <y>165</y>
+      <width>340</width>
+      <height>45</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(0, 0, 0);</string>
+     <string notr="true">
+QLineEdit {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 0 15px;
+    color: white;
+    font-family: 'Segoe UI', Arial;
+    font-size: 14px;
+}
+
+QLineEdit:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #00d4ff;
+}
+
+QLineEdit::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+     </string>
+    </property>
+    <property name="placeholderText">
+     <string>+216 XX XXX XXX</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_date_naissance">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>240</y>
-      <width>121</width>
-      <height>20</height>
+      <x>50</x>
+      <y>230</y>
+      <width>340</width>
+      <height>25</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(41, 102, 148);</string>
+     <string notr="true">
+QLabel {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Segoe UI', Arial;
+    font-size: 13px;
+    font-weight: 600;
+}
+     </string>
     </property>
     <property name="text">
-     <string>Date de naissance :</string>
+     <string> Date de naissance</string>
     </property>
    </widget>
    <widget class="QDateEdit" name="dateEdit_naissance">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>270</y>
-      <width>291</width>
-      <height>41</height>
+      <x>50</x>
+      <y>260</y>
+      <width>340</width>
+      <height>45</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(0, 0, 0);</string>
+     <string notr="true">
+QDateEdit {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 0 15px;
+    color: white;
+    font-family: 'Segoe UI', Arial;
+    font-size: 14px;
+}
+
+QDateEdit:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #00d4ff;
+}
+
+QDateEdit::drop-down {
+    border: none;
+    width: 30px;
+}
+
+QDateEdit::down-arrow {
+    image: none;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 8px solid white;
+    margin-right: 10px;
+}
+     </string>
     </property>
     <property name="displayFormat">
      <string>dd/MM/yyyy</string>
@@ -236,59 +437,134 @@ background-color: rgb(41, 102, 148);
    <widget class="QLabel" name="label_adresse">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>240</y>
-      <width>81</width>
-      <height>20</height>
+      <x>410</x>
+      <y>230</y>
+      <width>340</width>
+      <height>25</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(41, 102, 148);</string>
+     <string notr="true">
+QLabel {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Segoe UI', Arial;
+    font-size: 13px;
+    font-weight: 600;
+}
+     </string>
     </property>
     <property name="text">
-     <string>Adresse :</string>
+     <string> Adresse</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_adresse">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>270</y>
-      <width>291</width>
-      <height>41</height>
+      <x>410</x>
+      <y>260</y>
+      <width>340</width>
+      <height>45</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(0, 0, 0);</string>
+     <string notr="true">
+QLineEdit {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 0 15px;
+    color: white;
+    font-family: 'Segoe UI', Arial;
+    font-size: 14px;
+}
+
+QLineEdit:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #00d4ff;
+}
+
+QLineEdit::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+     </string>
+    </property>
+    <property name="placeholderText">
+     <string>Adresse complète</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_role">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>330</y>
-      <width>81</width>
-      <height>20</height>
+      <x>50</x>
+      <y>325</y>
+      <width>340</width>
+      <height>25</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(41, 102, 148);</string>
+     <string notr="true">
+QLabel {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Segoe UI', Arial;
+    font-size: 13px;
+    font-weight: 600;
+}
+     </string>
     </property>
     <property name="text">
-     <string>Rôle :</string>
+     <string> Rôle</string>
     </property>
    </widget>
    <widget class="QComboBox" name="comboBox_role">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>360</y>
-      <width>291</width>
-      <height>41</height>
+      <x>50</x>
+      <y>355</y>
+      <width>340</width>
+      <height>45</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(0, 0, 0);</string>
+     <string notr="true">
+QComboBox {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 0 15px;
+    color: white;
+    font-family: 'Segoe UI', Arial;
+    font-size: 14px;
+}
+
+QComboBox:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #00d4ff;
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 30px;
+}
+
+QComboBox::down-arrow {
+    image: none;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 8px solid white;
+    margin-right: 10px;
+}
+
+QComboBox QAbstractItemView {
+    background: #1a2a35;
+    color: white;
+    border: 2px solid #00d4ff;
+    border-radius: 8px;
+    selection-background-color: #00d4ff;
+    selection-color: #0f2027;
+}
+     </string>
     </property>
     <item>
      <property name="text">
@@ -324,159 +600,262 @@ background-color: rgb(41, 102, 148);
    <widget class="QLabel" name="label_salaire">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>330</y>
-      <width>81</width>
-      <height>20</height>
+      <x>410</x>
+      <y>325</y>
+      <width>340</width>
+      <height>25</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(41, 102, 148);</string>
+     <string notr="true">
+QLabel {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Segoe UI', Arial;
+    font-size: 13px;
+    font-weight: 600;
+}
+     </string>
     </property>
     <property name="text">
-     <string>Salaire :</string>
+     <string> Salaire</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_salaire">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>360</y>
-      <width>291</width>
-      <height>41</height>
+      <x>410</x>
+      <y>355</y>
+      <width>340</width>
+      <height>45</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(0, 0, 0);</string>
+     <string notr="true">
+QLineEdit {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 0 15px;
+    color: white;
+    font-family: 'Segoe UI', Arial;
+    font-size: 14px;
+}
+
+QLineEdit:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #00d4ff;
+}
+
+QLineEdit::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+     </string>
+    </property>
+    <property name="placeholderText">
+     <string>Montant en TND</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_username">
     <property name="geometry">
      <rect>
-      <x>60</x>
+      <x>50</x>
       <y>420</y>
-      <width>121</width>
-      <height>20</height>
+      <width>340</width>
+      <height>25</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(41, 102, 148);</string>
+     <string notr="true">
+QLabel {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Segoe UI', Arial;
+    font-size: 13px;
+    font-weight: 600;
+}
+     </string>
     </property>
     <property name="text">
-     <string>Nom d'utilisateur :</string>
+     <string> Nom d'utilisateur</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_username">
     <property name="geometry">
      <rect>
-      <x>60</x>
+      <x>50</x>
       <y>450</y>
-      <width>291</width>
-      <height>41</height>
+      <width>340</width>
+      <height>45</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(0, 0, 0);</string>
+     <string notr="true">
+QLineEdit {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 0 15px;
+    color: white;
+    font-family: 'Segoe UI', Arial;
+    font-size: 14px;
+}
+
+QLineEdit:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #00d4ff;
+}
+
+QLineEdit::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+     </string>
+    </property>
+    <property name="placeholderText">
+     <string>Nom d'utilisateur unique</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_password">
     <property name="geometry">
      <rect>
-      <x>480</x>
+      <x>410</x>
       <y>420</y>
-      <width>121</width>
-      <height>20</height>
+      <width>340</width>
+      <height>25</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(41, 102, 148);</string>
+     <string notr="true">
+QLabel {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Segoe UI', Arial;
+    font-size: 13px;
+    font-weight: 600;
+}
+     </string>
     </property>
     <property name="text">
-     <string>Mot de passe :</string>
+     <string> Mot de passe</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_password">
     <property name="geometry">
      <rect>
-      <x>480</x>
+      <x>410</x>
       <y>450</y>
-      <width>291</width>
-      <height>41</height>
+      <width>340</width>
+      <height>45</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(0, 0, 0);</string>
+     <string notr="true">
+QLineEdit {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 0 15px;
+    color: white;
+    font-family: 'Segoe UI', Arial;
+    font-size: 14px;
+}
+
+QLineEdit:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #00d4ff;
+}
+
+QLineEdit::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+     </string>
     </property>
     <property name="echoMode">
-     <enum>QLineEdit::Password</enum>
+     <enum>QLineEdit::EchoMode::Password</enum>
+    </property>
+    <property name="placeholderText">
+     <string>Min. 6 caractères</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_register">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>520</y>
-      <width>291</width>
-      <height>61</height>
+      <x>50</x>
+      <y>540</y>
+      <width>340</width>
+      <height>55</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">#pushButton_register {
-    font-family: Arial, Helvetica, sans-serif;
-    font-weight: bold;
-    color: white;
-    background-color: #171717;
-    padding: 10px 20px;
+     <string notr="true">
+QPushButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 #00ff88,
+                                stop:1 #00d4aa);
+    color: #0f2027;
     border: none;
-    border-radius: 10px;
+    border-radius: 15px;
+    font-family: 'Segoe UI', Arial;
+    font-size: 16px;
+    font-weight: bold;
 }
 
-#pushButton_register:hover {
-    background-color: #0c66ed; /* hover effect */
+QPushButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 #00e67a,
+                                stop:1 #00bb99);
 }
 
-#pushButton_register:pressed {
-    background-color: #094bb0; /* pressed effect */
-}</string>
+QPushButton:pressed {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                stop:0 #00cc6f,
+                                stop:1 #00a888);
+}
+     </string>
     </property>
     <property name="text">
-     <string>S'inscrire</string>
+     <string>✓ S'inscrire</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_cancel">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>520</y>
-      <width>291</width>
-      <height>61</height>
+      <x>410</x>
+      <y>540</y>
+      <width>340</width>
+      <height>55</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">#pushButton_cancel {
-    font-family: Arial, Helvetica, sans-serif;
-    font-weight: bold;
+     <string notr="true">
+QPushButton {
+    background: rgba(255, 255, 255, 0.1);
     color: white;
-    background-color: #808080;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    font-family: 'Segoe UI', Arial;
+    font-size: 16px;
+    font-weight: bold;
 }
 
-#pushButton_cancel:hover {
-    background-color: #606060; /* hover effect */
+QPushButton:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
-#pushButton_cancel:pressed {
-    background-color: #404040; /* pressed effect */
-}</string>
+QPushButton:pressed {
+    background: rgba(255, 255, 255, 0.15);
+}
+     </string>
     </property>
     <property name="text">
-     <string>Annuler</string>
+     <string>✕ Annuler</string>
     </property>
    </widget>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

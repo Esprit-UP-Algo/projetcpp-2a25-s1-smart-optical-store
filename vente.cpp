@@ -813,104 +813,64 @@ bool Vente::ajouterProduitVente(int idVente, const QString &refProduit, int quan
     }
     
     // If product already exists, update quantity instead of inserting
+    // Use direct SQL to avoid ODBC prepared statement issues
+    QSqlDatabase db = QSqlDatabase::database();
+    
     if (productExists) {
         qDebug() << "Mise à jour de la quantité existante au lieu d'insérer un nouveau enregistrement";
-        QString updateSql = "UPDATE contenir SET quantite = quantite + :quantite WHERE id_vente = :id_vente AND reference = :reference";
-        query.prepare(updateSql);
-        query.bindValue(":id_vente", idVente);
-        query.bindValue(":reference", refProduit);
-        query.bindValue(":quantite", quantite);
+        QString updateSql = QString("UPDATE CONTENIR SET QUANTITE = QUANTITE + %1 WHERE ID_VENTE = %2 AND REFERENCE = '%3'")
+                            .arg(quantite).arg(idVente).arg(refProduit);
         
-        if (!query.exec()) {
-            qDebug() << "Erreur lors de la mise à jour, tentative avec CONTENIR en majuscules...";
-            query.clear();
-            updateSql = "UPDATE CONTENIR SET QUANTITE = QUANTITE + :quantite WHERE ID_VENTE = :id_vente AND REFERENCE = :reference";
-            query.prepare(updateSql);
-            query.bindValue(":id_vente", idVente);
-            query.bindValue(":reference", refProduit);
-            query.bindValue(":quantite", quantite);
-            
-            if (!query.exec()) {
-                qDebug() << "❌ Erreur lors de la mise à jour de la quantité:" << query.lastError().text();
+        QSqlQuery updateQuery(db);
+        if (!updateQuery.exec(updateSql)) {
+            // Try lowercase
+            updateSql = QString("UPDATE contenir SET quantite = quantite + %1 WHERE id_vente = %2 AND reference = '%3'")
+                       .arg(quantite).arg(idVente).arg(refProduit);
+            QSqlQuery updateQuery2(db);
+            if (!updateQuery2.exec(updateSql)) {
+                qDebug() << "❌ Erreur lors de la mise à jour de la quantité:" << updateQuery2.lastError().text();
                 return false;
             }
         }
         qDebug() << "✅ Quantité mise à jour avec succès dans contenir";
     } else {
-        // Insert new record
-    QString insertSql = "INSERT INTO contenir (id_vente, reference, quantite, prix_unitaire) "
-                        "VALUES (:id_vente, :reference, :quantite, :prix_unitaire)";
-    query.prepare(insertSql);
-    
-    query.bindValue(":id_vente", idVente);
-    query.bindValue(":reference", refProduit);
-    query.bindValue(":quantite", quantite);
-        // Use explicit QVariant for price to ensure proper precision for Oracle
-        query.bindValue(":prix_unitaire", QVariant(prixUnitaire));
-    
+        // Insert new record using direct SQL
+        QString insertSql = QString("INSERT INTO CONTENIR (ID_VENTE, REFERENCE, QUANTITE, PRIX_UNITAIRE) "
+                                    "VALUES (%1, '%2', %3, %4)")
+                            .arg(idVente).arg(refProduit).arg(quantite).arg(prixUnitaire);
+        
         qDebug() << "Tentative d'ajout du produit à la vente dans la table contenir:";
-    qDebug() << "  ID Vente:" << idVente;
-    qDebug() << "  Référence produit:" << refProduit;
-    qDebug() << "  Quantité:" << quantite;
-    qDebug() << "  Prix unitaire:" << prixUnitaire;
-        qDebug() << "  Total:" << (quantite * prixUnitaire);
-    
-        if (!query.exec()) {
-            QString errorText = query.lastError().text();
-            QString dbError = query.lastError().databaseText();
-            QString driverError = query.lastError().driverText();
-            QString nativeError = query.lastError().nativeErrorCode();
+        qDebug() << "  SQL:" << insertSql;
+        
+        QSqlQuery insertQuery(db);
+        if (!insertQuery.exec(insertSql)) {
+            QString errorText = insertQuery.lastError().text();
+            qDebug() << "⚠️ Erreur INSERT CONTENIR majuscules:" << errorText;
             
-            productAddError = QString("Erreur lors de l'ajout du produit à la vente: %1").arg(errorText);
-            qDebug() << "❌" << productAddError;
-            qDebug() << "  Database error:" << dbError;
-            qDebug() << "  Driver error:" << driverError;
-            qDebug() << "  Native error code:" << nativeError;
-        qDebug() << "Tentative avec CONTENIR en majuscules...";
-        
-        // Try with uppercase table name
-        query.clear();
-        insertSql = "INSERT INTO CONTENIR (ID_VENTE, REFERENCE, QUANTITE, PRIX_UNITAIRE) "
-                    "VALUES (:id_vente, :reference, :quantite, :prix_unitaire)";
-        query.prepare(insertSql);
-        query.bindValue(":id_vente", idVente);
-        query.bindValue(":reference", refProduit);
-        query.bindValue(":quantite", quantite);
-            query.bindValue(":prix_unitaire", QVariant(prixUnitaire));
-        
-        if (!query.exec()) {
-                productAddError = QString("Erreur INSERT CONTENIR: %1 (Code: %2)").arg(query.lastError().text()).arg(query.lastError().nativeErrorCode());
+            // Try lowercase
+            insertSql = QString("INSERT INTO contenir (id_vente, reference, quantite, prix_unitaire) "
+                               "VALUES (%1, '%2', %3, %4)")
+                       .arg(idVente).arg(refProduit).arg(quantite).arg(prixUnitaire);
+            
+            QSqlQuery insertQuery2(db);
+            if (!insertQuery2.exec(insertSql)) {
+                productAddError = QString("Erreur INSERT CONTENIR: %1").arg(insertQuery2.lastError().text());
                 qDebug() << "❌" << productAddError;
-                qDebug() << "  Database error:" << query.lastError().databaseText();
-                qDebug() << "  Driver error:" << query.lastError().driverText();
                 
-                // Check for common Oracle error codes
-                if (nativeError.contains("02290") || errorText.contains("check constraint")) {
-                    qDebug() << "⚠️ Erreur de contrainte CHECK détectée - Vérifiez les contraintes sur QUANTITE ou PRIX_UNITAIRE";
-                } else if (nativeError.contains("01400") || errorText.contains("not null")) {
-                    qDebug() << "⚠️ Erreur NOT NULL détectée - Un champ requis est manquant";
-                } else if (nativeError.contains("01438") || errorText.contains("value larger than")) {
-                    qDebug() << "⚠️ Erreur de taille de valeur - La valeur dépasse la taille du champ";
-                } else if (nativeError.contains("00001") || errorText.contains("unique constraint")) {
-                    qDebug() << "⚠️ Erreur de contrainte UNIQUE - Cette combinaison existe déjà";
+                // Check if it's a unique constraint error - try update instead
+                if (errorText.contains("unique", Qt::CaseInsensitive) || errorText.contains("00001")) {
                     qDebug() << "⚠️ Tentative de mise à jour au lieu d'insertion...";
-                    
-                    // Try to update instead
-                    query.clear();
-                    QString updateSql = "UPDATE CONTENIR SET QUANTITE = QUANTITE + :quantite WHERE ID_VENTE = :id_vente AND REFERENCE = :reference";
-                    query.prepare(updateSql);
-                    query.bindValue(":id_vente", idVente);
-                    query.bindValue(":reference", refProduit);
-                    query.bindValue(":quantite", quantite);
-                    
-                    if (query.exec()) {
+                    QString updateSql = QString("UPDATE CONTENIR SET QUANTITE = QUANTITE + %1 WHERE ID_VENTE = %2 AND REFERENCE = '%3'")
+                                        .arg(quantite).arg(idVente).arg(refProduit);
+                    QSqlQuery updateQuery(db);
+                    if (updateQuery.exec(updateSql)) {
                         qDebug() << "✅ Produit mis à jour avec succès (au lieu d'insérer)";
                     } else {
-                        qDebug() << "❌ Échec de la mise à jour également:" << query.lastError().text();
+                        qDebug() << "❌ Échec de la mise à jour également:" << updateQuery.lastError().text();
                         return false;
                     }
                 } else {
-            return false;
+                    return false;
                 }
             }
         }
@@ -919,40 +879,42 @@ bool Vente::ajouterProduitVente(int idVente, const QString &refProduit, int quan
     qDebug() << "✅ Produit ajouté à la vente avec succès dans la table contenir!";
     
     // Mettre à jour le stock du produit - CRITICAL: This must succeed
-    query.clear();
-    QString updateSql = "UPDATE produit SET quantite = quantite - :quantite WHERE reference = :reference";
-    query.prepare(updateSql);
-    query.bindValue(":reference", refProduit);
-    query.bindValue(":quantite", quantite);
-    
+    // Use direct SQL without prepared statements to avoid ODBC errors
+    // Note: db was already obtained earlier in the function
     bool stockUpdated = false;
-    if (query.exec()) {
-        // Check if any rows were actually updated
-        if (query.numRowsAffected() > 0) {
+    
+    // Try uppercase first (Oracle default)
+    QString updateSql = QString("UPDATE PRODUIT SET QUANTITE = QUANTITE - %1 WHERE REFERENCE = '%2'")
+                        .arg(quantite).arg(refProduit);
+    
+    QSqlQuery updateQuery(db);
+    if (updateQuery.exec(updateSql)) {
+        if (updateQuery.numRowsAffected() > 0) {
             stockUpdated = true;
-            qDebug() << "✅ Stock mis à jour avec succès! (produit en minuscules)";
+            qDebug() << "✅ Stock mis à jour avec succès! (PRODUIT majuscules) - Réduit de" << quantite;
         } else {
-            qDebug() << "⚠️ Aucune ligne mise à jour avec produit en minuscules - produit peut-être inexistant";
+            qDebug() << "⚠️ Aucune ligne mise à jour avec PRODUIT majuscules";
         }
     } else {
-        qDebug() << "⚠️ Erreur lors de la mise à jour du stock:" << query.lastError().text();
-        qDebug() << "Tentative avec PRODUIT en majuscules...";
+        qDebug() << "⚠️ Erreur UPDATE PRODUIT:" << updateQuery.lastError().text();
+    }
+    updateQuery.clear();
+    
+    // Try lowercase if uppercase didn't work
+    if (!stockUpdated) {
+        updateSql = QString("UPDATE produit SET quantite = quantite - %1 WHERE reference = '%2'")
+                    .arg(quantite).arg(refProduit);
         
-        query.clear();
-        updateSql = "UPDATE PRODUIT SET QUANTITE = QUANTITE - :quantite WHERE REFERENCE = :reference";
-        query.prepare(updateSql);
-        query.bindValue(":reference", refProduit);
-        query.bindValue(":quantite", quantite);
-        
-        if (query.exec()) {
-            if (query.numRowsAffected() > 0) {
+        QSqlQuery updateQuery2(db);
+        if (updateQuery2.exec(updateSql)) {
+            if (updateQuery2.numRowsAffected() > 0) {
                 stockUpdated = true;
-                qDebug() << "✅ Stock mis à jour avec succès! (PRODUIT en majuscules)";
+                qDebug() << "✅ Stock mis à jour avec succès! (produit minuscules) - Réduit de" << quantite;
             } else {
-                qDebug() << "⚠️ Aucune ligne mise à jour avec PRODUIT en majuscules";
+                qDebug() << "⚠️ Aucune ligne mise à jour avec produit minuscules";
             }
         } else {
-            qDebug() << "⚠️ Erreur avec PRODUIT en majuscules:" << query.lastError().text();
+            qDebug() << "⚠️ Erreur UPDATE produit:" << updateQuery2.lastError().text();
         }
     }
     
@@ -960,8 +922,21 @@ bool Vente::ajouterProduitVente(int idVente, const QString &refProduit, int quan
         productAddError = QString("Le produit a été ajouté à la vente mais le stock n'a pas pu être mis à jour. "
                                   "Référence: %1, Quantité: %2").arg(refProduit).arg(quantite);
         qDebug() << "❌" << productAddError;
-        // Still return true because the product was added to contenir, but log the error
-        // The stock update will be retried later if needed
+        return false;  // Return false if stock was not updated - this is critical
+    }
+    
+    // CRITICAL: Commit the stock update immediately for Oracle ODBC
+    QSqlQuery commitQuery(db);
+    if (!commitQuery.exec("COMMIT")) {
+        qDebug() << "⚠️ Warning: Could not commit via COMMIT SQL:" << commitQuery.lastError().text();
+        // Try alternative commit
+        if (!db.commit()) {
+            qDebug() << "❌ Failed to commit stock update via db.commit():" << db.lastError().text();
+        } else {
+            qDebug() << "✅ Stock update committed via db.commit()";
+        }
+    } else {
+        qDebug() << "✅ Stock update committed successfully via COMMIT SQL";
     }
     
     return true;

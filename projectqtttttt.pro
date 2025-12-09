@@ -30,7 +30,9 @@ SOURCES += \
     employeeditdialog.cpp \
     employeeregister.cpp \
     forgotpassword.cpp \
-    promomanager.cpp
+    promomanager.cpp \
+    smtpclient.cpp \
+    smtp.cpp
 
 # Headers
 HEADERS += \
@@ -56,7 +58,9 @@ HEADERS += \
     employeeditdialog.h \
     employeeregister.h \
     forgotpassword.h \
-    promomanager.h
+    promomanager.h \
+    smtpclient.h \
+    smtp.h
 
 # Forms (UI)
 FORMS += \

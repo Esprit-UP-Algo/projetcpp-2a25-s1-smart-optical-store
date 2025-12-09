@@ -32,40 +32,107 @@ Statistique::Statistique(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowTitle("Statistiques des employés");
-    resize(1000, 700);
+    resize(1200, 800);
     
-    // Apply dark theme styling
-    QString style = R"(
+    // --- Force Override Stylesheet for the Main Window ---
+    // We use ID selectors to ensure specificity overrides the UI file's styles
+    QString mainStyle = R"(
         QDialog {
-            background-color: #0f172a;
-            color: #e2e8f0;
-        }
-        QGroupBox {
-            background-color: #1e293b;
-            border: 2px solid #38bdf8;
-            border-radius: 12px;
-            padding: 12px;
-            color: #e2e8f0;
+            background-color: #19232D; /* Dark Blue-Grey Background */
+            color: #ffffff;
         }
         QLabel {
-            color: #e2e8f0;
+            color: #ffffff;
+            font-family: 'Segoe UI', sans-serif;
         }
+        QLabel#titleLabel {
+            color: #3daee9; /* Light Blue Title */
+            font-size: 24px;
+            font-weight: bold;
+        }
+        /* GroupBoxes - Dark Background with Blue Border */
+        QGroupBox {
+            background-color: #232629; /* Slightly lighter than main bg */
+            border: 1px solid #3daee9;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #3daee9; /* Title color */
+        }
+        QGroupBox::title {
+            subcontrol-origin: margin;
+            subcontrol-position: top center;
+            padding: 5px 10px;
+            background-color: #232629;
+            border-radius: 5px;
+        }
+        /* Specific Labels inside GroupBoxes */
+        QLabel#totalEmployeesLabel, QLabel#avgSalaryLabel, QLabel#availableLabel, QLabel#unavailableLabel {
+            font-size: 36px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: transparent;
+        }
+        QLabel#totalSubtitleLabel, QLabel#avgSalarySubtitleLabel, QLabel#availableSubtitleLabel, QLabel#unavailableSubtitleLabel {
+            color: #aaaaaa;
+            font-size: 12px;
+            background-color: transparent;
+        }
+        /* TextEdits - Dark with White Text */
         QTextEdit {
-            background-color: #0f172a;
-            color: #e2e8f0;
-            border: 1px solid #334155;
+            background-color: #232629;
+            color: #ffffff;
+            border: 1px solid #3daee9;
+            border-radius: 4px;
         }
+        /* Buttons */
         QPushButton {
-            background-color: #2563eb;
+            background-color: #3daee9;
             color: white;
-            border-radius: 6px;
-            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-weight: bold;
         }
         QPushButton:hover {
-            background-color: #3b82f6;
+            background-color: #50c0ff;
+        }
+        QPushButton:pressed {
+            background-color: #2c9cd0;
+        }
+        /* Chart Widgets Container */
+        QWidget#availabilityChartWidget, QWidget#positionsChartWidget {
+            background-color: transparent; 
+            border: none;
         }
     )";
+    this->setStyleSheet(mainStyle);
     
+    // --- Explicitly clear conflicting stylesheets from UI file ---
+    // The UI file sets specific stylesheets on these widgets which overrides the parent stylesheet.
+    // We must clear them or set them to match our theme.
+    QList<QWidget*> widgetsToFix = {
+        ui->totalGroupBox, ui->avgSalaryGroupBox, ui->availableGroupBox, ui->unavailableGroupBox,
+        ui->availabilityGroupBox, ui->positionsGroupBox,
+        ui->availabilityChartWidget, ui->positionsChartWidget,
+        ui->availabilityText, ui->topPositionsText,
+        ui->refreshButton, ui->exportButton
+    };
+    
+    for (QWidget* w : widgetsToFix) {
+        w->setStyleSheet(""); // Clear specific style so it inherits or uses the global stylesheet
+    }
+    
+    // Re-apply specific styles if clearing them isn't enough (sometimes needed for GroupBoxes)
+    QString boxStyle = "QGroupBox { background-color: #232629; border: 1px solid #3daee9; border-radius: 8px; margin-top: 20px; color: #3daee9; } "
+                       "QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top center; padding: 0px 5px; }";
+    ui->totalGroupBox->setStyleSheet(boxStyle);
+    ui->avgSalaryGroupBox->setStyleSheet(boxStyle);
+    ui->availableGroupBox->setStyleSheet(boxStyle);
+    ui->unavailableGroupBox->setStyleSheet(boxStyle);
+    ui->availabilityGroupBox->setStyleSheet(boxStyle);
+    ui->positionsGroupBox->setStyleSheet(boxStyle);
+
     // Load statistics
     loadEmployeeStatistics();
     
@@ -96,6 +163,7 @@ void Statistique::loadEmployeeStatistics()
         QLayout *layout = container->layout();
         if (!layout) {
             layout = new QVBoxLayout(container);
+            layout->setContentsMargins(0, 0, 0, 0);
             container->setLayout(layout);
         } else {
             QLayoutItem *item = nullptr;
@@ -106,207 +174,195 @@ void Statistique::loadEmployeeStatistics()
         }
         QChartView *chartView = new QChartView(chart);
         chartView->setRenderHint(QPainter::Antialiasing);
+        chartView->setBackgroundBrush(QColor("#232629")); // Match GroupBox background
+        chartView->setStyleSheet("background: transparent;");
         layout->addWidget(chartView);
     };
     
-    // Total employees
+    // --- 1. Total Employees ---
     int totalEmployees = 0;
     QString sql = "SELECT COUNT(*) FROM employe";
     if (!query.exec(sql)) {
-        qDebug() << "Error with lowercase employe:" << query.lastError().text();
-        query.clear();
-        sql = "SELECT COUNT(*) FROM EMPLOYE";
-        if (!query.exec(sql)) {
-            qDebug() << "Error with uppercase EMPLOYE:" << query.lastError().text();
-            query.clear();
-            sql = "SELECT COUNT(*) FROM Employe";
-            if (!query.exec(sql)) {
-                qDebug() << "Error with mixed case Employe:" << query.lastError().text();
-                query.clear();
-                sql = "SELECT COUNT(*) FROM \"Employe\"";
-                query.exec(sql);
-            }
+        // Fallback queries
+        if (!query.exec("SELECT COUNT(*) FROM EMPLOYE") && 
+            !query.exec("SELECT COUNT(*) FROM \"Employe\"")) {
+            qDebug() << "Error counting employees:" << query.lastError().text();
         }
     }
-    if (query.next()) {
-        totalEmployees = query.value(0).toInt();
-        qDebug() << "Total employees found:" << totalEmployees;
-    } else {
-        qDebug() << "No result for total employees query";
-    }
+    if (query.next()) totalEmployees = query.value(0).toInt();
     ui->totalEmployeesLabel->setText(QString::number(totalEmployees));
-    
-    // Average salary
+    ui->totalEmployeesLabel->setStyleSheet("color: #00d4ff; font-size: 42px; font-weight: bold;");
+
+    // --- 2. Average Salary ---
     double avgSalary = 0.0;
-    query.clear();
-    sql = "SELECT AVG(salaire) FROM employe WHERE salaire IS NOT NULL";
-    if (!query.exec(sql)) {
-        query.clear();
-        sql = "SELECT AVG(SALAIRE) FROM EMPLOYE WHERE SALAIRE IS NOT NULL";
-        if (!query.exec(sql)) {
-            query.clear();
-            sql = "SELECT AVG(Salaire) FROM Employe WHERE Salaire IS NOT NULL";
-            if (!query.exec(sql)) {
-                query.clear();
-                sql = "SELECT AVG(\"Salaire\") FROM \"Employe\" WHERE \"Salaire\" IS NOT NULL";
-                query.exec(sql);
-            }
+    if (!query.exec("SELECT AVG(salaire) FROM employe WHERE salaire IS NOT NULL")) {
+        if (!query.exec("SELECT AVG(SALAIRE) FROM EMPLOYE WHERE SALAIRE IS NOT NULL") &&
+            !query.exec("SELECT AVG(\"Salaire\") FROM \"Employe\" WHERE \"Salaire\" IS NOT NULL")) {
+             qDebug() << "Error calculating avg salary:" << query.lastError().text();
         }
     }
-    if (query.next()) {
-        avgSalary = query.value(0).toDouble();
-        qDebug() << "Average salary:" << avgSalary;
-    }
+    if (query.next()) avgSalary = query.value(0).toDouble();
     ui->avgSalaryLabel->setText(QString::number(avgSalary, 'f', 2) + " DT");
-    
-    // Available employees
+    ui->avgSalaryLabel->setStyleSheet("color: #50fa7b; font-size: 42px; font-weight: bold;"); // Green for money
+
+    // --- 3. Availability ---
     int available = 0;
-    query.clear();
-    sql = "SELECT COUNT(*) FROM employe WHERE UPPER(dispo) = 'O'";
-    if (!query.exec(sql)) {
-        query.clear();
-        sql = "SELECT COUNT(*) FROM EMPLOYE WHERE UPPER(DISPO) = 'O'";
-        if (!query.exec(sql)) {
-            query.clear();
-            sql = "SELECT COUNT(*) FROM Employe WHERE UPPER(Dispo) = 'O'";
-            if (!query.exec(sql)) {
-                query.clear();
-                sql = "SELECT COUNT(*) FROM \"Employe\" WHERE UPPER(\"Dispo\") = 'O'";
-                query.exec(sql);
-            }
-        }
-    }
-    if (query.next()) {
-        available = query.value(0).toInt();
-        qDebug() << "Available employees:" << available;
-    }
-    ui->availableLabel->setText(QString::number(available));
-    
-    // Unavailable employees
     int unavailable = 0;
-    query.clear();
-    sql = "SELECT COUNT(*) FROM employe WHERE UPPER(dispo) = 'N'";
-    if (!query.exec(sql)) {
-        query.clear();
-        sql = "SELECT COUNT(*) FROM EMPLOYE WHERE UPPER(DISPO) = 'N'";
-        if (!query.exec(sql)) {
-            query.clear();
-            sql = "SELECT COUNT(*) FROM Employe WHERE UPPER(Dispo) = 'N'";
-            if (!query.exec(sql)) {
-                query.clear();
-                sql = "SELECT COUNT(*) FROM \"Employe\" WHERE UPPER(\"Dispo\") = 'N'";
-                query.exec(sql);
-            }
-        }
-    }
-    if (query.next()) {
-        unavailable = query.value(0).toInt();
-        qDebug() << "Unavailable employees:" << unavailable;
-    }
-    ui->unavailableLabel->setText(QString::number(unavailable));
     
-    // Availability pie chart
-    QPieSeries *availabilitySeries = new QPieSeries();
-    availabilitySeries->append("Disponibles", available);
-    availabilitySeries->append("Indisponibles", unavailable);
-    for (QPieSlice *slice : availabilitySeries->slices()) {
-        slice->setLabelVisible(true);
-        slice->setLabel(QString("%1 (%2)").arg(slice->label()).arg(slice->value()));
+    // Count Available
+    if (!query.exec("SELECT COUNT(*) FROM employe WHERE UPPER(dispo) = 'O'")) {
+        query.exec("SELECT COUNT(*) FROM EMPLOYE WHERE UPPER(DISPO) = 'O'");
     }
+    if (query.next()) available = query.value(0).toInt();
+    
+    // Count Unavailable
+    if (!query.exec("SELECT COUNT(*) FROM employe WHERE UPPER(dispo) = 'N'")) {
+        query.exec("SELECT COUNT(*) FROM EMPLOYE WHERE UPPER(DISPO) = 'N'");
+    }
+    if (query.next()) unavailable = query.value(0).toInt();
+
+    ui->availableLabel->setText(QString::number(available));
+    ui->availableLabel->setStyleSheet("color: #50fa7b; font-size: 42px; font-weight: bold;");
+    
+    ui->unavailableLabel->setText(QString::number(unavailable));
+    ui->unavailableLabel->setStyleSheet("color: #ff5555; font-size: 42px; font-weight: bold;");
+
+    // --- 4. Availability Chart (Donut) ---
+    QPieSeries *availabilitySeries = new QPieSeries();
+    availabilitySeries->setHoleSize(0.4); // Make it a donut
+    
+    QPieSlice *sliceAvail = availabilitySeries->append("Disponibles", available);
+    QPieSlice *sliceUnavail = availabilitySeries->append("Indisponibles", unavailable);
+    
+    sliceAvail->setBrush(QColor("#50fa7b")); // Green
+    sliceAvail->setLabelColor(Qt::white);
+    sliceAvail->setLabelVisible(true);
+    
+    sliceUnavail->setBrush(QColor("#ff5555")); // Red
+    sliceUnavail->setLabelColor(Qt::white);
+    sliceUnavail->setLabelVisible(true);
+    
+    // Explode if unavailable exists to highlight it
+    if (unavailable > 0) {
+        sliceUnavail->setExploded(true);
+        sliceUnavail->setExplodeDistanceFactor(0.1);
+    }
+
     QChart *availabilityChart = new QChart();
     availabilityChart->addSeries(availabilitySeries);
-    availabilityChart->setTitle("Répartition de la disponibilité");
+    availabilityChart->setTitle("Statut de Disponibilité");
+    availabilityChart->setTitleBrush(QBrush(Qt::white));
+    availabilityChart->setTitleFont(QFont("Segoe UI", 12, QFont::Bold));
+    availabilityChart->setBackgroundBrush(QBrush(QColor("#232629")));
     availabilityChart->legend()->setVisible(true);
     availabilityChart->legend()->setAlignment(Qt::AlignBottom);
-    renderChartInWidget(ui->availabilityChartWidget, availabilityChart);
+    availabilityChart->legend()->setLabelBrush(QBrush(Qt::white));
     
-    // Top 5 positions (data collection)
-    query.clear();
-    sql = "SELECT poste, COUNT(*) as count FROM employe GROUP BY poste ORDER BY count DESC LIMIT 5";
-    if (!query.exec(sql)) {
-        qDebug() << "Error with lowercase poste:" << query.lastError().text();
-        query.clear();
-        sql = "SELECT POSTE, COUNT(*) as count FROM EMPLOYE GROUP BY POSTE ORDER BY count DESC FETCH FIRST 5 ROWS ONLY";
-        if (!query.exec(sql)) {
-            query.clear();
-            sql = "SELECT Poste, COUNT(*) as count FROM Employe GROUP BY Poste ORDER BY count DESC LIMIT 5";
-            if (!query.exec(sql)) {
-                query.clear();
-                sql = "SELECT \"Poste\", COUNT(*) as count FROM \"Employe\" GROUP BY \"Poste\" ORDER BY count DESC LIMIT 5";
-                query.exec(sql);
-            }
+    renderChartInWidget(ui->availabilityChartWidget, availabilityChart);
+
+    // --- 5. Top Positions Chart (Donut) ---
+    // Try multiple query formats for compatibility
+    QStringList positionQueries = {
+        "SELECT poste, COUNT(*) as count FROM employe GROUP BY poste ORDER BY count DESC LIMIT 5",
+        "SELECT POSTE, COUNT(*) as count FROM EMPLOYE GROUP BY POSTE ORDER BY count DESC FETCH FIRST 5 ROWS ONLY",
+        "SELECT * FROM (SELECT POSTE, COUNT(*) as count FROM EMPLOYE GROUP BY POSTE ORDER BY count DESC) WHERE ROWNUM <= 5",
+        "SELECT \"Poste\", COUNT(*) as count FROM \"Employe\" GROUP BY \"Poste\" ORDER BY count DESC LIMIT 5"
+    };
+
+    bool querySuccess = false;
+    for (const QString &q : positionQueries) {
+        if (query.exec(q)) {
+            querySuccess = true;
+            break;
         }
     }
-    
+
     QVector<QPair<QString,int>> positionData;
     ui->topPositionsText->clear();
     QString positionsText;
     int rank = 1;
-    while (query.next()) {
-        QString poste = query.value(0).toString();
-        int count = query.value(1).toInt();
-        positionData.append(qMakePair(poste, count));
-        positionsText += QString("%1. %2 (%3 employés)\n").arg(rank).arg(poste).arg(count);
-        rank++;
+    
+    if (querySuccess) {
+        while (query.next()) {
+            QString poste = query.value(0).toString();
+            if (poste.isEmpty()) poste = "Non spécifié";
+            int count = query.value(1).toInt();
+            positionData.append(qMakePair(poste, count));
+            positionsText += QString("%1. %2 (%3)\n").arg(rank).arg(poste).arg(count);
+            rank++;
+        }
+    } else {
+        qDebug() << "All position queries failed. Last error:" << query.lastError().text();
     }
     
     if (!positionData.isEmpty()) {
         ui->topPositionsText->setText(positionsText);
-    } else {
-        ui->topPositionsText->setText("Aucune donnée de poste disponible.");
-    }
-    
-    // Positions bar chart
-    if (!positionData.isEmpty()) {
-        QBarSet *positionsSet = new QBarSet("Employés");
-        QStringList categories;
-        for (const auto &item : positionData) {
-            categories << item.first;
-            *positionsSet << item.second;
-        }
         
-        QBarSeries *positionsSeries = new QBarSeries();
-        positionsSeries->append(positionsSet);
+        // Create Donut Chart for Positions
+        QPieSeries *positionsSeries = new QPieSeries();
+        positionsSeries->setHoleSize(0.35);
+        
+        // Vibrant colors for the chart
+        QList<QColor> colors = {
+            QColor("#00d4ff"), // Cyan
+            QColor("#bd93f9"), // Purple
+            QColor("#ff79c6"), // Pink
+            QColor("#f1fa8c"), // Yellow
+            QColor("#ffb86c")  // Orange
+        };
+        
+        int colorIdx = 0;
+        for (const auto &item : positionData) {
+            QPieSlice *slice = positionsSeries->append(item.first, item.second);
+            slice->setLabelVisible(true);
+            slice->setLabelColor(Qt::white);
+            slice->setBrush(colors[colorIdx % colors.size()]);
+            
+            // Highlight the top position
+            if (colorIdx == 0) {
+                slice->setExploded(true);
+                slice->setExplodeDistanceFactor(0.1);
+            }
+            
+            colorIdx++;
+        }
         
         QChart *positionsChart = new QChart();
         positionsChart->addSeries(positionsSeries);
-        positionsChart->setTitle("Répartition des postes");
-        positionsChart->setAnimationOptions(QChart::SeriesAnimations);
-        
-        QBarCategoryAxis *axisX = new QBarCategoryAxis();
-        axisX->append(categories);
-        positionsChart->addAxis(axisX, Qt::AlignBottom);
-        positionsSeries->attachAxis(axisX);
-        
-        QValueAxis *axisY = new QValueAxis();
-        int maxValue = 0;
-        for (const auto &item : positionData) {
-            maxValue = std::max(maxValue, item.second);
-        }
-        axisY->setRange(0, maxValue > 0 ? maxValue + 1 : 5);
-        positionsChart->addAxis(axisY, Qt::AlignLeft);
-        positionsSeries->attachAxis(axisY);
-        positionsChart->legend()->setVisible(false);
+        positionsChart->setTitle("Top 5 des Postes");
+        positionsChart->setTitleBrush(QBrush(Qt::white));
+        positionsChart->setTitleFont(QFont("Segoe UI", 12, QFont::Bold));
+        positionsChart->setBackgroundBrush(QBrush(QColor("#232629")));
+        positionsChart->legend()->setVisible(true);
+        positionsChart->legend()->setAlignment(Qt::AlignRight);
+        positionsChart->legend()->setLabelBrush(QBrush(Qt::white));
         
         renderChartInWidget(ui->positionsChartWidget, positionsChart);
+        
     } else {
-        // Clear widget if no data
-        renderChartInWidget(ui->positionsChartWidget, new QChart());
+        ui->topPositionsText->setText("Aucune donnée de poste disponible.");
+        
+        // Show an empty placeholder chart
+        QChart *emptyChart = new QChart();
+        emptyChart->setTitle("Aucune donnée");
+        emptyChart->setTitleBrush(QBrush(Qt::white));
+        emptyChart->setBackgroundBrush(QBrush(QColor("#232629")));
+        renderChartInWidget(ui->positionsChartWidget, emptyChart);
     }
-    
-    // Availability text summary (kept for export)
+
+    // Update text summary for export
     if (totalEmployees > 0) {
         double availablePercent = (available * 100.0) / totalEmployees;
         double unavailablePercent = (unavailable * 100.0) / totalEmployees;
-        QString distText = QString("Disponibles: %1% (%2 employés)\n")
+        QString distText = QString("Disponibles: %1% (%2)\n")
                           .arg(availablePercent, 0, 'f', 1)
                           .arg(available);
-        distText += QString("Indisponibles: %1% (%2 employés)")
+        distText += QString("Indisponibles: %1% (%2)")
                    .arg(unavailablePercent, 0, 'f', 1)
                    .arg(unavailable);
         ui->availabilityText->setText(distText);
     } else {
-        ui->availabilityText->setText("Pas encore de données de disponibilité.");
+        ui->availabilityText->setText("Pas de données.");
     }
 }
 
@@ -329,14 +385,21 @@ void Statistique::on_exportButton_clicked()
     }
     
     QTextStream out(&file);
-    out << "STATISTIQUES DES EMPLOYÉS\n";
+    out << "========================================\n";
+    out << "       STATISTIQUES DES EMPLOYÉS        \n";
+    out << "========================================\n";
     out << "Date: " << QDate::currentDate().toString("dd/MM/yyyy") << "\n\n";
     out << "Total employés: " << ui->totalEmployeesLabel->text() << "\n";
     out << "Salaire moyen: " << ui->avgSalaryLabel->text() << "\n";
     out << "Disponibles: " << ui->availableLabel->text() << "\n";
     out << "Indisponibles: " << ui->unavailableLabel->text() << "\n\n";
-    out << "Top 5 des postes:\n" << ui->topPositionsText->toPlainText() << "\n";
-    out << "Répartition de la disponibilité:\n" << ui->availabilityText->toPlainText() << "\n";
+    out << "----------------------------------------\n";
+    out << "TOP 5 DES POSTES:\n";
+    out << ui->topPositionsText->toPlainText() << "\n";
+    out << "----------------------------------------\n";
+    out << "RÉPARTITION DE LA DISPONIBILITÉ:\n";
+    out << ui->availabilityText->toPlainText() << "\n";
+    out << "========================================\n";
     
     file.close();
     QMessageBox::information(this, "Succès", "Statistiques exportées avec succès!");

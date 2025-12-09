@@ -36,6 +36,7 @@ private:
     QString currentUserRole;
     void setRoleBasedAccess(const QString &role);           // Arduino connection object (background only)
     bool promoManagerOpen;  // Guard to prevent multiple opens
+    double todayRevenue;    // Today's revenue for Arduino notification
 };
 
 #endif // DASHBOARDWINDOW_H
